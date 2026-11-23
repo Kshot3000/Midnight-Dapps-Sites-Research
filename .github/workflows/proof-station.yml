@@ -1,0 +1,90 @@
+name: Proof Station
+
+on:
+  push:
+    branches:
+      - sol/midnight-proof-station
+    paths:
+      - 'apps/proof-station/**'
+      - '.github/workflows/proof-station.yml'
+  pull_request:
+    paths:
+      - 'apps/proof-station/**'
+      - '.github/workflows/proof-station.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Package Windows x64
+        shell: pwsh
+        run: |
+          dotnet publish apps/proof-station/MidnightProofStation.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -o publish
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          foreach ($file in @('MidnightProofStation.exe', 'preview.compose.yaml', 'db-tls.compose.yaml', 'gpu-lab.sh', 'README.md')) {
+            if (-not (Test-Path "publish/$file")) { throw "Missing package file $file" }
+          }
+      - name: Render the Windows dashboard
+        shell: pwsh
+        run: |
+          $preview = Join-Path $env:RUNNER_TEMP 'proof-station.png'
+          $app = Start-Process -FilePath (Resolve-Path 'publish/MidnightProofStation.exe') -ArgumentList ('--capture-preview "{0}"' -f $preview) -PassThru
+          if (-not $app.WaitForExit(45000)) {
+            $app.Kill()
+            throw 'The dashboard did not finish rendering.'
+          }
+          if (Test-Path "$preview.error") { Get-Content "$preview.error" }
+          if ($app.ExitCode -ne 0 -or -not (Test-Path $preview)) { throw 'Dashboard preview failed.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: midnight-proof-station-win-x64
+          path: publish/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proof-station-screenshot
+          path: ${{ runner.temp }}/proof-station.png
+          if-no-files-found: error
+
+  proving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/proof-station
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Verify proof output and Compose configuration
+        run: |
+          bash -n gpu-lab.sh
+          bash tests/proof-result.sh
+          docker compose -f preview.compose.yaml config --quiet
+          MIDNIGHT_STATION_DB_CA=/tmp/preview-ca.pem \
+            docker compose -f preview.compose.yaml -f db-tls.compose.yaml config --quiet
+      - name: Exercise the released local wallet prover
+        run: |
+          docker compose -f preview.compose.yaml up -d --no-deps proof-server
+          for attempt in {1..60}; do
+            if curl -fsS --max-time 3 http://127.0.0.1:6300/proof-versions 2>/dev/null | jq -e 'index("V3") != null' >/dev/null; then
+              echo "Ledger 9 proof version V3 verified."
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f preview.compose.yaml logs --tail 30 proof-server
+          exit 1
+      - name: Stop the wallet prover
+        if: always()
+        run: docker compose -f preview.compose.yaml down
