@@ -1,0 +1,81 @@
+name: Hub checks and Pages
+
+on:
+  push:
+    branches:
+      - 'sol/**'
+    paths:
+      - 'sites/hub/**'
+      - 'tests/hub*'
+      - '.github/workflows/hub.yml'
+  pull_request:
+    paths:
+      - 'sites/**'
+      - 'apps/**'
+      - 'council/**'
+      - 'ideas/**'
+      - 'research/**'
+      - 'tests/hub*'
+      - 'README.md'
+      - '.github/workflows/hub.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: node --test tests/hub.test.mjs
+
+  browser:
+    if: github.event_name != 'workflow_dispatch'
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.62.1
+      - run: npx --no-install playwright install --with-deps --only-shell chromium
+      - run: node tests/hub.browser.cjs "${{ runner.temp }}/hub-previews"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hub-desktop-mobile
+          path: ${{ runner.temp }}/hub-previews
+          if-no-files-found: error
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: sites/hub
+      - uses: actions/deploy-pages@v4
+        id: deployment
