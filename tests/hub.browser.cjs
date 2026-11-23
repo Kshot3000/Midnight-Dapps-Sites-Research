@@ -83,15 +83,18 @@ async function verify() {
 
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
+      const expectedImage = width <= 704 ? "eclipse-mobile.webp" : "eclipse.webp";
+      await page.waitForFunction((asset) => {
+        const image = document.querySelector(".hero-art img");
+        return image.complete && image.naturalWidth > 0 && image.currentSrc.endsWith("/" + asset);
+      }, expectedImage);
       const extents = await page.evaluate(() => ({
         inner: window.innerWidth,
         page: document.documentElement.scrollWidth,
         wallet: [...document.querySelectorAll(".wallet code")].map((node) => node.scrollWidth <= node.clientWidth),
-        hero: document.querySelector(".hero-art img").naturalWidth,
       }));
       assert.equal(extents.page, extents.inner, "No horizontal overflow at " + width);
       assert.ok(extents.wallet.every(Boolean), "Wallet addresses must fit at " + width);
-      assert.ok(extents.hero > 0, "Hero asset loads at " + width);
     }
     console.log("Layout: 320, 390, 768, 1024, and 1440px without horizontal overflow or truncated addresses.");
 
