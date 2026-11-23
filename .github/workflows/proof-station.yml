@@ -70,6 +70,7 @@ jobs:
         run: |
           bash -n gpu-lab.sh
           bash tests/proof-result.sh
+          python3 tests/attribution.py
           docker compose -f preview.compose.yaml config --quiet
           MIDNIGHT_STATION_DB_CA=/tmp/preview-ca.pem \
             docker compose -f preview.compose.yaml -f db-tls.compose.yaml config --quiet
