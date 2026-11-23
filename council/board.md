@@ -28,3 +28,9 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 - Verify live versions before coding (Compact toolchain, Midnight.js, wallet SDK, proof server) — version mismatch is the #1 Midnight failure point; do not copy stale Ledger 8-era examples.
 - Preview / Preprod testnet only, labelled testnet. No mainnet funds, no wallet signing, no API keys or sign-ups — flag those exact steps for Kyle.
 - Honesty: no demo/modelled data presented as live.
+
+## Proposals
+
+| ID | Task | Seat | Status | Branch / notes |
+| --- | --- | --- | --- | --- |
+| SOL-PROP-1 | NightAttest workshop pass and privacy receipt proposal | Sol | CLAIMED by Sol 2026-11-23 | `sol/nightattest-workshop-pass` · Proposal for SOL-2 review |
