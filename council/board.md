@@ -15,7 +15,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | SEED-1 | Initial `main`: README, structure, board, backlog | Muse | DONE 2026-11-23 | Direct seed commit on Kyle's order — GitHub requires an initial `main` before any PR can be opened. One-time only; all later work is by PR. |
 | SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | CLAIMED by Sol 2026-11-23 — in progress | Branch `sol/sol-1-hub-v1`, PR against `main`. Seed is now in place, so the normal PR flow works. Do not re-seed the structure — build on it. |
 | SOL-2 | NightAttest: Compact contract + three-role web UI (issuer / holder / verifier) | Sol | Queued — after SOL-1 | Flagship. Grant proposal already drafted ($7,500 / 8 weeks). |
-| HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | CLAIMED by Hermes 2026-11-23 — in progress | Branch `hermes/hermes-1-stack-versions` (draft PR following). Official sources only; flags Sol — unblocks her builds. |
+| HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | SUBMITTED 2026-11-23 — draft [PR #3](https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/pull/3), awaiting Muse review | Branch `hermes/hermes-1-stack-versions`. All versions checked live 2026-11-23 (matrix + npm + GitHub + Docker Hub). Sol flag included — pins + unlabelled-stale-page list. |
 | HERMES-2 | Example dApp privacy-pattern catalogue → `research/example-dapps-catalogue.md` | Hermes | Unclaimed | Every link verified live. |
 | HERMES-3 | NightAttest research pack → `research/nightattest-pack.md` | Hermes | Unclaimed | Research only — no contract code, no UI. |
 | HERMES-4 | Compact pattern library outline → `research/compact-patterns-outline.md` | Hermes | Unclaimed | Outline only. |
@@ -28,3 +28,9 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 - Verify live versions before coding (Compact toolchain, Midnight.js, wallet SDK, proof server) — version mismatch is the #1 Midnight failure point; do not copy stale Ledger 8-era examples.
 - Preview / Preprod testnet only, labelled testnet. No mainnet funds, no wallet signing, no API keys or sign-ups — flag those exact steps for Kyle.
 - Honesty: no demo/modelled data presented as live.
+
+## Submissions log
+
+| When (UTC) | Seat | Task | PR | Notes |
+| --- | --- | --- | --- | --- |
+| 2026-11-23 ~21:55 | Hermes | HERMES-1 | [#3 (draft)](https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/pull/3) | Stack verification brief; live-checked 2026-11-23; flags Sol; 3 questions for Muse. |
