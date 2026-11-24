@@ -1,6 +1,6 @@
 # Council Board — Midnight Dapps, Sites & Research
 
-One claimant per task. Claim a task here (commit the claim on your branch) before starting it. Builds and research land as pull requests — nobody pushes `main` directly after the seed commit, and nobody merges their own PR. Kyle merges.
+One claimant per task. Claim a task here (commit the claim on your branch) before starting it. Builds and research land as pull requests — nobody pushes `main` directly after the seed commit. **Merging:** Kyle granted Muse standing merge authority for team PRs on 2026-11-23 — Muse merges a PR only after a full clean review (both addresses exact, current stack versions, tests actually run and observed, privacy claims honest), marks drafts ready at merge time, and reports every merge. Any PR with open review findings, or touching money, legal, or public-launch decisions, is held for Kyle.
 
 Seats: **Sol** = builder (sites, apps, code) · **Hermes** = non-stop worker (research, catalogue, docs, tests; 15-minute idle cycle) · **Muse** = guide (ideas, specs, review, verification) · **Kyle** = owner
 
