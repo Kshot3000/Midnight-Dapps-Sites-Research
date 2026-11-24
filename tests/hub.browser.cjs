@@ -55,6 +55,35 @@ async function verify() {
     await page.keyboard.press("Enter");
     assert.equal(await page.evaluate(() => document.activeElement.id), "main");
 
+    await page.getByRole("link", { name: "Explore Proof Station" }).click();
+    assert.equal(await page.evaluate(() => location.hash), "#proof-station");
+    const cpu = page.getByRole("button", { name: "CPU", exact: true });
+    const cuda = page.getByRole("button", { name: "NVIDIA CUDA", exact: true });
+    assert.equal(await cpu.getAttribute("aria-pressed"), "true");
+    assert.equal(await page.locator("#proof-preview-cpu").isVisible(), true);
+    assert.equal(await page.locator("#proof-preview-cuda").isVisible(), false);
+    await cuda.focus();
+    await page.keyboard.press("Space");
+    assert.equal(await cuda.getAttribute("aria-pressed"), "true");
+    assert.equal(await cpu.getAttribute("aria-pressed"), "false");
+    assert.equal(await page.locator("#proof-preview-cpu").isVisible(), false);
+    assert.equal(await page.locator("#proof-preview-cuda").isVisible(), true);
+    await page.waitForFunction(() => document.querySelector("#proof-preview-cuda img").naturalWidth === 1028);
+    await page.screenshot({ path: path.join(previews, "proof-station-cuda.png") });
+    await cpu.click();
+    assert.equal(await cpu.getAttribute("aria-pressed"), "true");
+    await page.waitForFunction(() => document.querySelector("#proof-preview-cpu img").naturalWidth === 1028);
+    assert.equal(await page.locator("#proof-preview-cuda").isVisible(), false);
+    await page.screenshot({ path: path.join(previews, "proof-station-cpu.png") });
+    console.log("Proof Station: hero link, CPU and CUDA screenshots, and keyboard switching verified.");
+
+    const auction = page.locator('[data-project="sealed-bid-auction"]');
+    assert.equal(await auction.locator(".primitives").isVisible(), false);
+    await auction.locator("summary").click();
+    assert.equal(await auction.locator(".primitives").isVisible(), true);
+    await auction.locator("summary").click();
+    assert.equal(await auction.locator(".primitives").isVisible(), false);
+
     await page.getByRole("button", { name: "Credentials", exact: true }).click();
     assert.equal(await cards.count(), 3);
     assert.equal(await page.getByRole("button", { name: "Credentials", exact: true }).getAttribute("aria-pressed"), "true");
@@ -133,7 +162,10 @@ async function verify() {
     assert.equal(await staticPage.locator("[data-project]:visible").count(), 10);
     assert.equal(await staticPage.locator(".wallet code:visible").count(), 2);
     assert.equal(await staticPage.locator("#catalogue-filters").isVisible(), false);
-    console.log("Fallbacks: blocked clipboard selects the complete address, and catalogue and both addresses render with JavaScript disabled.");
+    assert.equal(await staticPage.locator("#proof-preview-cpu").isVisible(), true);
+    assert.equal(await staticPage.locator("#proof-modes").isVisible(), false);
+    assert.equal(await staticPage.getByRole("link", { name: "Download Windows x64 ZIP" }).isVisible(), true);
+    console.log("Fallbacks: blocked clipboard selects the complete address. The catalogue, addresses, and CPU preview render without JavaScript.");
   } finally {
     await browser.close();
     server.close();
