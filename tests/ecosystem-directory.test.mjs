@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
@@ -69,7 +69,8 @@ test("markdown links in the ecosystem directory are https, have no credentials, 
     if (target.startsWith("#") || target.startsWith("mailto:")) continue;
     if (!/^[a-z][a-z\d+.-]*:/i.test(target)) {
       const path = target.split("#")[0];
-      assert.ok(existsSync(join(root, path)), target + " does not exist in the repo");
+      // Relative links resolve from the directory file's own folder, the way GitHub renders them.
+      assert.ok(existsSync(join(root, dirname(directoryPath), path)), target + " does not exist next to " + directoryPath);
       continue;
     }
     const url = new URL(target);

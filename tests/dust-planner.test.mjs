@@ -7,6 +7,7 @@ import {
   NIGHT_DUST_RATIO,
   GENERATION_DECAY_RATE,
   TIME_TO_CAP_SECONDS,
+  DUST_GRACE_PERIOD_SECONDS,
   STARS_PER_NIGHT,
   SPECKS_PER_DUST,
   SECONDS_PER_DAY,
@@ -15,6 +16,8 @@ import {
   generationPerSecond,
   generatedSpecks,
   secondsToCapFrom,
+  secondsToZero,
+  decayedSpecks,
   remainingAfterSpend,
   plan,
   parseNight,
@@ -118,6 +121,7 @@ test("official ledger 9 sources are cited in the app and the model", () => {
   assert.equal(NIGHT_DUST_RATIO, 5_000_000_000n);
   assert.equal(GENERATION_DECAY_RATE, 8267n);
   assert.equal(TIME_TO_CAP_SECONDS, 604815n);
+  assert.equal(DUST_GRACE_PERIOD_SECONDS, 10800n);
   assert.equal(STARS_PER_NIGHT, 1_000_000n);
   assert.equal(SPECKS_PER_DUST, 1_000_000_000_000_000n);
 });
@@ -195,6 +199,58 @@ test("planned fee spend and decay follow official linear rules", () => {
   assert.equal(atCap.atCap, true);
   assert.equal(atCap.decaySecondsIfNightSpentNow, TIME_TO_CAP_SECONDS);
   assert.equal(remainingAfterSpend(5n * SPECKS_PER_DUST, 8n * SPECKS_PER_DUST), 0n);
+});
+
+test("the official 3-hour grace period is a transaction validity window, not a decay delay", () => {
+  const model = read("apps/dust-planner/dust-model.js");
+  assert.equal(DUST_GRACE_PERIOD_SECONDS, 10800n);
+  assert.equal(DUST_GRACE_PERIOD_SECONDS, 3n * 3600n);
+
+  const night = 100n * STARS_PER_NIGHT;
+  const cap = capSpecks(night);
+  const rate = generationPerSecond(night);
+  const atCap = plan({
+    nightStars: night,
+    registered: true,
+    secondsElapsed: TIME_TO_CAP_SECONDS,
+    plannedSpendSpecks: 0n,
+  });
+
+  // Official manage-dust decay example: value at spentAt is the cap, at
+  // spentAt+1 is cap minus one second of rate, and at 2*spentAt is zero.
+  // There is no grace-period offset on those times.
+  assert.equal(decayedSpecks(night, cap, 0n), cap);
+  assert.equal(decayedSpecks(night, cap, 1n), cap - rate);
+  assert.equal(decayedSpecks(night, cap, 2n), cap - 2n * rate);
+  assert.equal(decayedSpecks(night, cap, TIME_TO_CAP_SECONDS), 0n);
+  assert.equal(decayedSpecks(night, cap, TIME_TO_CAP_SECONDS * 2n), 0n);
+  assert.equal(decayedSpecks(night, cap, DUST_GRACE_PERIOD_SECONDS), cap - rate * DUST_GRACE_PERIOD_SECONDS);
+  assert.notEqual(decayedSpecks(night, cap, DUST_GRACE_PERIOD_SECONDS), cap);
+
+  assert.equal(atCap.decaySecondsIfNightSpentNow, TIME_TO_CAP_SECONDS);
+  assert.equal(atCap.decaySecondsIfNightSpentNow, secondsToZero(night, cap));
+  assert.notEqual(atCap.decaySecondsIfNightSpentNow, TIME_TO_CAP_SECONDS + DUST_GRACE_PERIOD_SECONDS);
+
+  const mid = plan({
+    nightStars: night,
+    registered: true,
+    secondsElapsed: SECONDS_PER_DAY,
+    plannedSpendSpecks: 0n,
+  });
+  const midDecay = secondsToZero(night, mid.currentSpecks);
+  assert.equal(mid.decaySecondsIfNightSpentNow, midDecay);
+  assert.equal(decayedSpecks(night, mid.currentSpecks, midDecay), 0n);
+  assert.notEqual(mid.decaySecondsIfNightSpentNow, midDecay + DUST_GRACE_PERIOD_SECONDS);
+
+  assert.match(model, /does not add DUST_GRACE_PERIOD_SECONDS to decay/);
+  assert.match(model, /maximum age, measured against the block time/);
+  assert.match(page, /dustGracePeriodSeconds/);
+  assert.match(page, /not a delay before decay/);
+  assert.match(page, /10,800 seconds \(3 hours\)/);
+  assert.match(appReadme, /dustGracePeriodSeconds/);
+  assert.match(appReadme, /Why decay timing does not apply the grace period/);
+  assert.match(appReadme, /transaction timestamp validity window, not a delay before decay/);
+  assert.equal(script.includes("innerHTML"), false);
 });
 
 test("parsers accept official units and reject invalid input", () => {
