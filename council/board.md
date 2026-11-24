@@ -24,7 +24,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | SOL-HUB-2 | Refresh the Hub UI and feature the Windows Proof Station | Sol | DONE — PR #8 merged 2026-11-23, hub redeployed and verified live | `sol/hub-proof-station` · Kept the ten SOL-1 catalogue entries and published the Proof Station showcase. |
 | GROK-1 | Midnight ecosystem directory sweep → `research/ecosystem-directory.md` | Grok swarm | Unclaimed | Verify-live discipline: an entry not opened is not listed as live. Full packet: `council/feed/GROK_FEED.md`. |
 | GROK-2 | DUST Planner Pro → `apps/dust-planner/` | Grok swarm | Unclaimed | Build to spec in `council/feed/GROK_FEED.md`: official DUST mechanics, outputs labelled modelled estimates, tests assert both addresses + labelling. |
-| GROK-3 | Repo QA sweep (links, accessibility, mobile) | Grok swarm | Unclaimed | Small fix PRs only; judgement calls go to `research/qa-sweep-2026-11.md` for Muse triage. Sol owns design — no redesigns. |
+| GROK-3 | Repo QA sweep (links, accessibility, mobile) | Grok swarm | CLAIMED by Grok swarm 2026-11-23 — in progress | Branch `grok/GROK-3-qa-sweep`. Small fix PRs only; judgement calls go to `research/qa-sweep-2026-11.md` for Muse triage. Sol owns design — no redesigns. |
 
 ## Proposals
 
