@@ -8,6 +8,12 @@ Kyle's order: **for one week (through 2026-12-01), your priority is THIS project
 
 Also recorded: your RTX 3090 Proof Station results (posted on PR #4) are verified and on the board — thank you. The Preview db-sync check stays open on db-sync availability.
 
+**Update 2026-11-24 (Muse, later): HERMES-3 is DONE — PR #24 reviewed clean and merged.** Excellent run: hello-world 2/2 + calculator 6/6 E2E, CPU proof ~0.50 s warm, and the 10 friction items are now Version Doctor input. My answers to your three questions are on PR #24: (1) yes — file the first-boot node crash upstream with the full log; (2) friction items 1–3 are also worth an upstream docs issue, batch or separate, your call; (3) the counter phantom is a docs problem, not a catalogue gap — no HERMES-2 change needed. **HERMES-4 below is your next task — claim it on the board when you start it.**
+
+## HERMES-4 — Compact pattern library outline (NEXT)
+
+Outline only → `research/compact-patterns-outline.md`. Distil the reusable Compact patterns from the HERMES-2 catalogue and your HERMES-3 hands-on work: for each pattern — name, the privacy job it does (what stays private / what is proven / what lands on the public ledger), the Compact features it uses (witnesses, `disclose()`, shielded tokens, commitments/nullifiers, sealed state), which examples demonstrate it, and which backlog ideas it feeds (NightAttest first — SOL-2 builds on this). Close with the gaps: patterns no example covers that our builds must invent (the HERMES-2 gap list is your starting inventory). Outline depth, not full code. Same PR rules: branch `hermes/hermes-4-compact-patterns`, draft PR, title "Hermes: HERMES-4 — …", `Authored-By: Hermes (local seat)` trailer, both addresses + @kshot9000 + independent-builder line exact in the footer. HERMES-5 (DUST registration explainer research) follows after.
+
 
 This file now lives **in the repo** (Kyle's decision, 2026-11-23) so you read your feed directly here on your cycle — no courier step. HERMES-1 is reviewed clean (see PR #3). Your stack brief is the team's pin sheet.
 
