@@ -41,6 +41,7 @@ test("the ecosystem directory keeps the required catalogue sections", () => {
     "## Wallets",
     "## dApps and end-user products",
     "## Developer tools and SDKs",
+    "## Community demo sites (opened; on-chain function unverified)",
     "## Dead, retired, or stale",
     "## Gaps — categories with nothing I could verify as live",
     "## What I did not verify",
@@ -86,4 +87,80 @@ test("bare http(s) URLs in the ecosystem directory are https and have no credent
     assert.equal(url.protocol, "https:", raw + " must be https");
     assert.ok(!url.username && !url.password, raw + " contains credentials");
   }
+});
+
+function splitRow(line) {
+  const inner = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  const cells = [];
+  let current = "";
+  for (let index = 0; index < inner.length; index += 1) {
+    const char = inner[index];
+    if (char === "\\" && inner[index + 1] === "|") {
+      current += "|";
+      index += 1;
+      continue;
+    }
+    if (char === "|") {
+      cells.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+function catalogueTables(markdown) {
+  const tables = [];
+  const sectionPattern = /^## (.+)$/gm;
+  const headings = [];
+  let match;
+  while ((match = sectionPattern.exec(markdown))) {
+    headings.push({ title: match[1], start: match.index });
+  }
+  for (let index = 0; index < headings.length; index += 1) {
+    const heading = headings[index];
+    const end = index + 1 < headings.length ? headings[index + 1].start : markdown.length;
+    const body = markdown.slice(heading.start, end);
+    const lines = body.split("\n");
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+      if (!/^\| .+\|/.test(lines[lineIndex]) || !/^\| ---/.test(lines[lineIndex + 1] || "")) continue;
+      const headers = splitRow(lines[lineIndex]).map((header) => header.toLowerCase());
+      const rows = [];
+      for (let rowIndex = lineIndex + 2; rowIndex < lines.length; rowIndex += 1) {
+        if (!/^\| /.test(lines[rowIndex])) break;
+        rows.push(splitRow(lines[rowIndex]));
+      }
+      tables.push({ heading: heading.title, headers, rows });
+    }
+  }
+  return tables;
+}
+
+function columnIndex(headers, names) {
+  return headers.findIndex((header) => names.includes(header));
+}
+
+test("every directory row in every category has non-empty description, network, and privacy-pattern fields", () => {
+  const tables = catalogueTables(content);
+  assert.ok(tables.length >= 9, "expected a table in each catalogue category, found " + tables.length);
+  let rowCount = 0;
+  for (const table of tables) {
+    const description = columnIndex(table.headers, ["what it does", "what i found"]);
+    const network = columnIndex(table.headers, ["network"]);
+    const privacy = columnIndex(table.headers, ["privacy pattern"]);
+    assert.ok(description >= 0, table.heading + " is missing a description column (What it does / What I found)");
+    assert.ok(network >= 0, table.heading + " is missing a Network column");
+    assert.ok(privacy >= 0, table.heading + " is missing a Privacy pattern column");
+    assert.ok(table.rows.length > 0, table.heading + " has no data rows");
+    for (const row of table.rows) {
+      const label = table.heading + " / " + (row[0] || "(unnamed row)");
+      assert.ok((row[description] || "").trim(), label + " is missing a description");
+      assert.ok((row[network] || "").trim(), label + " is missing a network field");
+      assert.ok((row[privacy] || "").trim(), label + " is missing a privacy-pattern field");
+      rowCount += 1;
+    }
+  }
+  assert.ok(rowCount >= 70, "expected a full catalogue, found " + rowCount + " rows");
 });
