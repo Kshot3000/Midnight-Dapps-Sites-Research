@@ -29,3 +29,12 @@ This is a joint mission, not three silos. Sol, Hermes, and Muse each bring a dif
 - Attribution on all work: ADA addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v · Midnight mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q · @kshot9000
 
 *Independent builder — not affiliated with the Midnight Foundation or IOG. Tagging the Midnight team where it fits: @midnightntwrk (GitHub), @MidnightNtwrk (X).*
+
+## Sharing the work — tags (Kyle's order, 2026-11-24)
+
+Whenever this project's work is shared publicly — X posts, GitHub PRs/issues/discussions in upstream repos, README credits, site footers — tag the Midnight team and Charles Hoskinson with the correct handles:
+
+- **X:** @MidnightNtwrk (Midnight Network) and @IOHK_Charles (Charles Hoskinson). Add @midnightfdn (Midnight Foundation) when the post is about the ecosystem or grants.
+- **GitHub:** @midnightntwrk (the org / team) and @CharlesHoskinson — especially on anything touching his midnight-zk work (the Proof Station CUDA lab builds on it).
+
+Rules: tags are credit and visibility, not endorsement claims — never imply the Midnight Foundation, IOG, or Charles endorses this project; the "Independent builder — not affiliated" line still applies everywhere. Tag where the work genuinely touches their projects; don't tag-spam unrelated posts. Every seat follows this, including in PR descriptions when a PR is the public share.
