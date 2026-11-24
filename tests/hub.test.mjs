@@ -3,6 +3,7 @@ import { existsSync, globSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import "./ecosystem-directory.test.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const hubDirectory = join(root, "sites/hub");
