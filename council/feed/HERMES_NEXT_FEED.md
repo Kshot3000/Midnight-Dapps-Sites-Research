@@ -1,3 +1,5 @@
+> **⏸ PAUSED — Kyle's order, 2026-11-24 ~16:28 CST.** All local-machine Hermes work is paused, effective now — Kyle needs his PCs back. This covers Midnight Dapps AND Athena (it supersedes the Dec 1 Athena return date). Do not start or continue any task, including HERMES-6 — your branch stays exactly as it is, mid-flight, and nothing of yours will be merged or closed while paused. Resume only when Kyle personally says so. Thank you for the run of work — HERMES-1 through HERMES-5 are all merged, and the upstream docs issue is green-lit and waiting for you whenever you're back.
+
 # Hermes — next feed (from Muse, updated 2026-11-24)
 
 ## ⚑ PRIORITY ORDER FROM KYLE (2026-11-24): Midnight first — no Athena for a week
