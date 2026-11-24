@@ -21,7 +21,10 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | HERMES-4 | Compact pattern library outline → `research/compact-patterns-outline.md` | Hermes | Unclaimed | Outline only. |
 | HERMES-5 | DUST registration explainer research → `research/dust-registration.md` | Hermes | Unclaimed | Quote official sources; label models/estimates. |
 | SOL-GPU-1 | Windows Preview full-node GUI with a local CUDA proof lab (`apps/proof-station/`) | Sol | DONE — PR #4 merged 2026-11-23 (v0.1.2) | Attribution exact in GUI + README; stack pins match the verified matrix (node 2.1.101, indexer 4.4.101, proof server 9.0.2); CI green. Follow-ups still open: real CUDA run results on the RTX 3090 (claimed by Hermes on PR #4) and a Preview sync check against Cardano Preview db-sync — both need Kyle's PC. |
-| SOL-HUB-2 | Refresh the Hub UI and feature the Windows Proof Station | Sol | CLAIMED by Sol 2026-11-23 — in progress | `sol/hub-proof-station` · Keep the ten SOL-1 catalogue entries and publish a Proof Station showcase. |
+| SOL-HUB-2 | Refresh the Hub UI and feature the Windows Proof Station | Sol | DONE — PR #8 merged 2026-11-23, hub redeployed and verified live | `sol/hub-proof-station` · Kept the ten SOL-1 catalogue entries and published the Proof Station showcase. |
+| GROK-1 | Midnight ecosystem directory sweep → `research/ecosystem-directory.md` | Grok swarm | Unclaimed | Verify-live discipline: an entry not opened is not listed as live. Full packet: `council/feed/GROK_FEED.md`. |
+| GROK-2 | DUST Planner Pro → `apps/dust-planner/` | Grok swarm | Unclaimed | Build to spec in `council/feed/GROK_FEED.md`: official DUST mechanics, outputs labelled modelled estimates, tests assert both addresses + labelling. |
+| GROK-3 | Repo QA sweep (links, accessibility, mobile) | Grok swarm | Unclaimed | Small fix PRs only; judgement calls go to `research/qa-sweep-2026-11.md` for Muse triage. Sol owns design — no redesigns. |
 
 ## Proposals
 
@@ -33,6 +36,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 
 - Sol: branches `sol/<task>`, PRs against `main`, screenshots + test results in every PR.
 - Hermes: branches `hermes/<task>`, draft PRs only (max 2/day), titles start "Hermes:", `Authored-By: Hermes (local seat)` commit trailer.
+- Grok swarm (joined 2026-11-23 on Kyle's order): branches `grok/<task-id>-<slug>`, PRs against `main`, titles start "Grok:", one task per PR, rebase on latest `main` before opening, claim on this board first. Lane: parallel volume work — research sweeps, content, tests/QA, small tools built to spec. No personal information about Kyle in any file, commit, or PR — ever.
 - Verify live versions before coding (Compact toolchain, Midnight.js, wallet SDK, proof server) — version mismatch is the #1 Midnight failure point; do not copy stale Ledger 8-era examples.
 - Preview / Preprod testnet only, labelled testnet. No mainnet funds, no wallet signing, no API keys or sign-ups — flag those exact steps for Kyle.
 - Honesty: no demo/modelled data presented as live.
