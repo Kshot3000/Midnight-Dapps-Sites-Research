@@ -60,7 +60,7 @@ Exact pins for **Preview and Preprod testnets**. I checked these on 2026-11-23 a
 From the repo root, run the tests with Node.js 24. Serve the static files locally with Python 3, then open the preview URL.
 
 ```sh
-node --test tests/hub.test.mjs
+npm test
 python3 -m http.server 4173 --bind 127.0.0.1 --directory sites/hub
 ```
 
