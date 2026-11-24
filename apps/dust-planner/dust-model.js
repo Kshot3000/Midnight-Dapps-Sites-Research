@@ -6,23 +6,47 @@
  * whitepaper speck ratio. This module does not read a wallet, indexer, or
  * network. Every computed balance or projection is a modelled estimate.
  *
- * Sources (checked 2026-11-23):
+ * Sources (parameters checked 2026-11-23; grace-period reading re-checked
+ * 2026-11-24):
  * - https://docs.midnight.network/concepts/dust-architecture
  *   Initial parameters: night_dust_ratio = 5_000_000_000 (5 DUST per NIGHT),
- *   generation_decay_rate = 8_267, dust_grace_period = 3 hours.
+ *   generation_decay_rate = 8_267, dust_grace_period = Duration::from_hours(3).
  *   Time to cap Δ = ρ ÷ g = 5,000,000,000 ÷ 8,267, rounded up to 604,815
  *   seconds. Units: 1 NIGHT = 1,000,000 STAR; 1 DUST = 10^15 SPECK.
+ *   Spending rules: "Once the backing NIGHT is spent, DUST immediately
+ *   starts to decay, even if it was still in the generation phase."
+ *   "The grace period": because DUST usage is shielded, value is computed
+ *   for the time of transaction creation; the grace period (initially
+ *   3 hours) is the acceptance window for that timestamp relative to
+ *   block time, to account for network delays.
  * - https://docs.midnight.network/guides/manage-dust
  *   Formulas: cap = night * nightDustRatio; generation per second =
  *   night * generationDecayRate; timeToCapSeconds is ρ / g rounded up.
  *   Linear generation to cap, then hold; after the backing NIGHT is spent,
  *   decay at the same rate to zero. Unregistered NIGHT does not generate
  *   a DUST UTXO. The guide also prints a Mainnet read at block 2,809,291
- *   with nightDustRatio 5000000000, generationDecayRate 8267, and
- *   timeToCapSeconds 604815. These are ledger parameters and can change.
+ *   with nightDustRatio 5000000000, generationDecayRate 8267,
+ *   dustGracePeriodSeconds 10800, and timeToCapSeconds 604815. These are
+ *   ledger parameters and can change.
+ *   Why the manage-dust generation and decay formulas omit the grace
+ *   period: that page lists dustGracePeriodSeconds as a separate field,
+ *   "the maximum age, measured against the block time, of the time that
+ *   a transaction's DUST spends and registrations declare. The ledger
+ *   rejects the transaction when the declared time is older than that,
+ *   or later than the block time." The cap, generation-per-second, and
+ *   time-to-cap formulas use only nightDustRatio, generationDecayRate,
+ *   and timeToCapSeconds. The official decay example starts subtracting
+ *   at the spend second, with no grace-period offset: value at spentAt
+ *   is the cap, at spentAt+1 is cap minus one second of rate, and at
+ *   2*spentAt is zero. The same guide also notes that the grace period
+ *   stays at 3 hours when describing unchanged DUST generation parameters.
  * - https://docs.midnight.network/relnotes/ledger-9
  *   "The DUST parameters stay the same: 5 DUST per NIGHT at the cap, and
  *   about 7 days to reach the cap."
+ *
+ * This model therefore does not add DUST_GRACE_PERIOD_SECONDS to decay
+ * timing. The constant is exported so the planner can cite the official
+ * parameter; it is not an extra delay before decay starts.
  */
 
 export const STARS_PER_NIGHT = 1_000_000n;
@@ -37,7 +61,13 @@ export const GENERATION_DECAY_RATE = 8267n;
 /** Seconds from empty to cap. Source: ρ / g, rounded up; manage-dust Mainnet example. */
 export const TIME_TO_CAP_SECONDS = 604815n;
 
-/** Seconds. Source: dust-architecture initial dust_grace_period; manage-dust Mainnet example (10800). */
+/**
+ * Seconds. Source: dust-architecture initial dust_grace_period (3 hours);
+ * manage-dust Mainnet example (10800) and field definition.
+ *
+ * This is the ledger's DUST transaction-timestamp validity window, not a
+ * delay before decay. Decay timing in this file does not add it.
+ */
 export const DUST_GRACE_PERIOD_SECONDS = 10800n;
 
 export const SECONDS_PER_DAY = 86400n;
@@ -85,6 +115,22 @@ export function secondsToZero(nightStars, currentSpecks) {
   }
   const rate = generationPerSecond(nightStars);
   return (currentSpecks + rate - 1n) / rate;
+}
+
+/**
+ * Official manage-dust linear decay from the spend instant: value falls
+ * by generationPerSecond each second, with no dustGracePeriodSeconds
+ * offset. secondsSinceNightSpent = 0 returns the pre-decay balance.
+ */
+export function decayedSpecks(nightStars, currentSpecks, secondsSinceNightSpent) {
+  if (currentSpecks <= 0n) {
+    return 0n;
+  }
+  if (secondsSinceNightSpent <= 0n || nightStars <= 0n) {
+    return currentSpecks;
+  }
+  const lost = generationPerSecond(nightStars) * secondsSinceNightSpent;
+  return currentSpecks > lost ? currentSpecks - lost : 0n;
 }
 
 export function remainingAfterSpend(currentSpecks, plannedSpendSpecks) {
