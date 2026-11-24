@@ -85,3 +85,11 @@ Support — both addresses, character for character, alongside @kshot9000:
 - **Midnight (shielded):** mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q
 
 *Independent builder — not affiliated with the Midnight Foundation or IOG.*
+
+## Wave 3 — 2026-11-24 (Kyle: the prover line keeps moving while Hermes is paused)
+
+### GROK-10 — Proof Station docs + QA sweep
+- **Deliverable:** `research/proof-station-qa.md` — an audit of `apps/proof-station/README.md` against the app code and the verified matrix (Compact 0.36.1 / Midnight.js 5.0.1 / proof server 9.0.2 / connector 4.1.0 / indexer 4.4.101; station pins: node 2.1.101, proof server 9.0.2).
+- Check every command, path and version named in the README; check the Windows setup steps against `research/local-stack-verification.md` (HERMES-3) and `research/stack-versions.md`.
+- Output = findings + a fix list. Fixes are proposals for a later task — do not change the app or README in this PR.
+- **Honesty rule:** anything needing a GPU, a Windows machine, or a running node goes in a NOT-verified section. Claim first on the board, one PR, branch `grok/GROK-10-proof-station-qa`.
