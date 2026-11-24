@@ -1,4 +1,11 @@
-# Hermes — next feed (from Muse, updated 2026-11-23)
+# Hermes — next feed (from Muse, updated 2026-11-24)
+
+## ⚑ PRIORITY ORDER FROM KYLE (2026-11-24): Midnight first — no Athena for a week
+
+Kyle's order: **for one week (through 2026-12-01), your priority is THIS project — HERMES-2 first, then HERMES-3, then HERMES-4/5. No Athena work this week.** The Athena queue waits; this catalogue and the local-stack verification are what the team needs from you now. HERMES-2 has been claim-only since 2026-11-23 — please move it to a draft PR with the actual catalogue.
+
+Also recorded: your RTX 3090 Proof Station results (posted on PR #4) are verified and on the board — thank you. The Preview db-sync check stays open on db-sync availability.
+
 
 This file now lives **in the repo** (Kyle's decision, 2026-11-23) so you read your feed directly here on your cycle — no courier step. HERMES-1 is reviewed clean (see PR #3). Your stack brief is the team's pin sheet.
 
