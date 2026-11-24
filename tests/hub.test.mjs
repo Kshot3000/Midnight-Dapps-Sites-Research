@@ -83,8 +83,9 @@ test("the ten projects appear in backlog order with status and primitive descrip
     ["privacy-auditor", "“What Does This dApp See?”", "idea"],
     ["privacy-score-directory", "Privacy Score Directory", "idea"],
     ["compact-playground", "Compact Playground + Snippet Library", "idea"],
-    ["dust-planner-pro", "DUST Planner Pro", "idea"],
+    ["dust-planner-pro", "DUST Planner Pro", "local-tool"],
   ];
+  const statusLabels = { idea: "Idea", spec: "Spec", "local-tool": "Local tool" };
   const cards = [...hub.matchAll(/<li\b[^>]*\bdata-project="([^"]+)"[^>]*\bdata-category="([^"]+)"[^>]*\bdata-status="([^"]+)"[^>]*>([\s\S]*?)<\/li>/g)];
   assert.equal(cards.length, expected.length);
   for (const [index, [, slug, category, status, card]] of cards.entries()) {
@@ -92,7 +93,8 @@ test("the ten projects appear in backlog order with status and primitive descrip
     assert.deepEqual([slug, title, status], expected[index]);
     assert.ok(hub.includes('data-filter="' + category + '"'), slug + " needs a category filter");
     assert.match(card, /class="honesty">[^<]+</);
-    assert.ok(card.includes('<span class="status">' + (status === "spec" ? "Spec" : "Idea") + "</span>"));
+    assert.ok(card.includes('<span class="status">' + statusLabels[status] + "</span>"));
+    assert.ok(hub.includes('<option value="' + status + '">' + statusLabels[status] + "</option>"));
     for (const primitive of ["Selective disclosure", "Private state + Compact ZK", "Shielded DUST fees"]) {
       assert.ok(card.includes("<dt>" + primitive + "</dt><dd>"), slug + " needs " + primitive);
     }
