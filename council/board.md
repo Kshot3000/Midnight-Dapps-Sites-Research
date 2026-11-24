@@ -13,7 +13,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | ID | Task | Seat | Status | Branch / notes |
 | --- | --- | --- | --- | --- |
 | SEED-1 | Initial `main`: README, structure, board, backlog | Muse | DONE 2026-11-23 | Direct seed commit on Kyle's order — GitHub requires an initial `main` before any PR can be opened. One-time only; all later work is by PR. |
-| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | DONE — PR #2 merged 2026-11-23 | Hub tests 8/8 pass on merged `main`. GitHub Pages enablement is the remaining step to a live URL. |
+| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | DONE — PR #2 merged 2026-11-23 | Hub deploys to GitHub Pages via the hub workflow (Pages enabled 2026-11-23 on Kyle's order). |
 | SOL-2 | NightAttest: Compact contract + three-role web UI (issuer / holder / verifier) | Sol | Queued — after SOL-1 | Flagship. Grant proposal already drafted ($7,500 / 8 weeks). |
 | HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | DONE — PR #3 merged 2026-11-23 | Official sources only, versions + source URLs + stale-guide locations. The team's pin sheet. |
 | HERMES-2 | Example dApp privacy-pattern catalogue → `research/example-patterns.md` | Hermes | CLAIMED by Hermes 2026-11-23 — in progress | Branch `hermes/hermes-2-catalogue`. Full packet: `council/feed/HERMES_NEXT_FEED.md`. |

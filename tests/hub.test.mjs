@@ -34,7 +34,7 @@ test("repository keeps the hub, apps, research, council and backlog structure", 
   for (const file of ["README.md", "council/board.md", "council/submissions.md", "ideas/backlog.md"]) {
     assert.ok(statSync(join(root, file)).isFile(), file);
   }
-  assert.match(read("council/board.md"), /\| SOL-1 \|[^\n]+\| Sol \| CLAIMED by Sol/);
+  assert.match(read("council/board.md"), /\| SOL-1 \|[^\n]+\| Sol \| [^\n]+\|/);
 });
 
 test("each authored HTML page has exact donation addresses and attribution in its footer", () => {
