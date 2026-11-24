@@ -8,7 +8,7 @@ I’m Kyle Cox. I build and publish open-source Midnight dApps, sites, and priva
 - **Private state with public verification.** Compact circuits use private inputs off-chain and the ledger verifies proofs against public inputs. Each design identifies its public outputs and ledger writes. [Compact privacy guide](https://docs.midnight.network/guides/build-a-private-smart-contract)
 - **Shielded fees.** Registered NIGHT generates DUST. The shielded fee spend hides the DUST input. Fee amounts, public transaction data, and timing can still be visible. [DUST guide](https://docs.midnight.network/guides/manage-dust)
 
-The [hub](sites/hub/) presents the ten projects in [the backlog](ideas/backlog.md). NightAttest, my credential dApp, is at the spec stage. I’ll label a dApp live on testnet once its deployment and proof flow can be independently verified.
+The [hub](sites/hub/) presents the ten projects in [the backlog](ideas/backlog.md). [NightAttest](apps/nightattest/) has a locally compiled and simulator-tested workshop pass contract. I’ll label a dApp live on testnet once its deployment and proof flow can be independently verified.
 
 The [Proof Station showcase](sites/hub/index.html#proof-station) includes the Windows build, CPU and NVIDIA CUDA screenshots, and verification results. [Proof Station setup guide](apps/proof-station/README.md)
 

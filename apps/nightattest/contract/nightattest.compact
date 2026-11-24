@@ -1,0 +1,71 @@
+pragma language_version 0.28;
+
+import CompactStandardLibrary;
+
+struct CredentialStatus {
+  slot: Uint<64>,
+  active: Boolean
+}
+
+export sealed ledger issuerDigest: Bytes<32>;
+export ledger issuedCount: Counter;
+export ledger credentials: Map<Bytes<32>, CredentialStatus>;
+export ledger activeCredentials: MerkleTree<10, Bytes<32>>;
+export ledger acceptedChallenges: Set<Bytes<32>>;
+
+witness issuerSecret(): Bytes<32>;
+witness holderSecret(): Bytes<32>;
+witness holderPath(commitment: Bytes<32>): MerkleTreePath<10, Bytes<32>>;
+
+constructor(digest: Bytes<32>) {
+  const publicDigest = disclose(digest);
+  assert(publicDigest != default<Bytes<32>>, "Issuer digest must be nonzero");
+  issuerDigest = publicDigest;
+}
+
+export pure circuit issuerKey(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightattest:issuer"), secret]);
+}
+
+export pure circuit credentialCommitment(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightattest:credential"), secret]);
+}
+
+circuit requireIssuer(): [] {
+  assert(disclose(issuerKey(issuerSecret()) == issuerDigest), "Issuer authorization required");
+}
+
+export circuit issue(commitment: Bytes<32>): [] {
+  requireIssuer();
+  const key = disclose(commitment);
+  assert(key != default<Bytes<32>>, "Credential commitment must be nonzero");
+  assert(!credentials.member(key), "Credential commitment has already been issued");
+  const slot = issuedCount.read();
+  assert(slot < 1024, "Workshop credential capacity reached");
+  activeCredentials.insertIndex(key, slot);
+  credentials.insert(key, CredentialStatus { slot: slot, active: true });
+  issuedCount.increment(1);
+}
+
+export circuit revoke(commitment: Bytes<32>): [] {
+  requireIssuer();
+  const key = disclose(commitment);
+  assert(credentials.member(key), "Credential commitment was never issued");
+  const record = credentials.lookup(key);
+  assert(record.active, "Credential is already revoked");
+  activeCredentials.insertIndexDefault(record.slot);
+  credentials.insert(key, CredentialStatus { slot: record.slot, active: false });
+}
+
+export circuit present(challenge: Bytes<32>): [] {
+  const nonce = disclose(challenge);
+  assert(nonce != default<Bytes<32>>, "Verifier challenge must be nonzero");
+  assert(!acceptedChallenges.member(nonce), "Verifier challenge has already been used");
+
+  const commitment = credentialCommitment(holderSecret());
+  const path = holderPath(commitment);
+  assert(disclose(path.leaf == commitment && commitment != default<Bytes<32>>), "Path does not match the credential");
+  // Revocation depends on the current root. Historical roots would admit old paths.
+  assert(activeCredentials.checkRoot(disclose(merkleTreePathRoot<10, Bytes<32>>(path))), "Credential is not in the current active tree");
+  acceptedChallenges.insert(nonce);
+}
