@@ -116,7 +116,7 @@
               <article class="estimate-card">
                 <h3>If backing NIGHT is spent</h3>
                 <p class="estimate-value" id="out-decay">—</p>
-                <p class="estimate-note">Modelled estimate of time for current DUST to decay to zero after the backing NIGHT is spent or deregistered. Decay uses the same rate as generation.</p>
+                <p class="estimate-note">Modelled estimate of time for current DUST to decay to zero after the backing NIGHT is spent or deregistered. Decay uses the same rate as generation and, per the official manage-dust formula, starts at the spend instant. The 3-hour dustGracePeriodSeconds parameter is a transaction timestamp window, not a delay before decay.</p>
               </article>
             </div>
             <p class="estimate-note" id="out-summary"></p>
@@ -135,14 +135,14 @@
           <article class="source-card">
             <h3>Cited docs</h3>
             <ul>
-              <li><a href="https://docs.midnight.network/guides/manage-dust">Managing DUST for transaction fees</a> — formulas for cap, generation per second, and time to cap; linear generation and decay; fee payment in DUST; a printed Mainnet parameter read at block 2,809,291.</li>
-              <li><a href="https://docs.midnight.network/concepts/dust-architecture">DUST architecture</a> — initial parameters, units (STAR and SPECK), and the 604,815-second time to cap.</li>
+              <li><a href="https://docs.midnight.network/guides/manage-dust">Managing DUST for transaction fees</a> — formulas for cap, generation per second, and time to cap; linear generation and decay; dustGracePeriodSeconds defined as a transaction timestamp validity window; a printed Mainnet parameter read at block 2,809,291 (including 10,800 seconds for the grace period).</li>
+              <li><a href="https://docs.midnight.network/concepts/dust-architecture">DUST architecture</a> — initial parameters, units (STAR and SPECK), the 604,815-second time to cap, immediate decay once backing NIGHT is spent, and the 3-hour grace period as a timestamp window relative to block time.</li>
               <li><a href="https://docs.midnight.network/relnotes/ledger-9">Ledger 9 upgrade notes</a> — “The DUST parameters stay the same: 5 DUST per NIGHT at the cap, and about 7 days to reach the cap.”</li>
             </ul>
           </article>
           <article class="source-card">
             <h3>What this model assumes</h3>
-            <p>One registered, unspent NIGHT UTXO of the amount you enter, generating from empty at the start of the period. Official docs note that spending registered NIGHT, including a transfer to yourself or a change output, starts decay on the old DUST UTXO and creates a new one from zero. Unregistered NIGHT generates nothing. This tool does not model multiple UTXOs, fee-market prices, or a live testnet or mainnet balance.</p>
+            <p>One registered, unspent NIGHT UTXO of the amount you enter, generating from empty at the start of the period. Official docs note that spending registered NIGHT, including a transfer to yourself or a change output, starts decay on the old DUST UTXO immediately and creates a new one from zero. The 3-hour dustGracePeriodSeconds parameter is not a 3-hour buffer before that decay; it is only the allowed age of a transaction's declared DUST timestamp relative to block time. Unregistered NIGHT generates nothing. This tool does not model multiple UTXOs, fee-market prices, clock skew, or a live testnet or mainnet balance.</p>
           </article>
         </div>
         <dl class="param-grid">
@@ -157,6 +157,10 @@
           <div class="param">
             <dt>timeToCapSeconds</dt>
             <dd>604,815 seconds (about 7 days)<span class="cite">Source: nightDustRatio ÷ generationDecayRate, rounded up; DUST guide Mainnet example; Ledger 9 notes.</span></dd>
+          </div>
+          <div class="param">
+            <dt>dustGracePeriodSeconds</dt>
+            <dd>10,800 seconds (3 hours). Transaction timestamp validity window, not a decay delay. This planner does not add it to the time-to-zero estimate.<span class="cite">Source: DUST architecture initial dust_grace_period; DUST guide field definition and Mainnet example.</span></dd>
           </div>
         </dl>
       </div>
