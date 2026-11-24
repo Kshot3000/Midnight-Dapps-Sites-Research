@@ -11,9 +11,16 @@
  * listed in the report and are not a hard fail.
  *
  * Live mode (`--live`) fetches each unique https URL and records status
- * plus the check date. Timeouts, 403 bot-blocks, 429s, and other flaky
- * or blocked responses are recorded, not treated as a CI hard-fail.
- * Unit tests must not use --live and must not call the network.
+ * plus the check date. Classification:
+ *   ok       — HTTP 2xx/3xx
+ *   dead     — HTTP 404/410, DNS failures, ECONNREFUSED
+ *   blocked  — HTTP 401/403/407/429/451 and 502/503/504
+ *   timeout  — aborted or timed-out fetches
+ *   error    — other network/TLS failures and other 4xx/5xx
+ *              (including 500, 501, 505)
+ * Timeouts, blocked responses, and other flaky results are recorded, not
+ * treated as a CI hard-fail. Unit tests must not use --live and must not
+ * call the network. Redirected fetches record and print the final URL.
  *
  * Usage:
  *   node scripts/check-directory-links.mjs [path] [--live]
@@ -212,6 +219,10 @@ export function checkStructure(markdown) {
   };
 }
 
+// blocked = 401/403/407/429/451 (auth, bot-block, rate-limit, legal) and
+// 502/503/504 (gateway / temporarily unavailable). Other 5xx such as
+// 500, 501, and 505 are unexpected server errors and land in "error",
+// not "blocked".
 export function classifyFetch(result) {
   if (result.statusClass) return result.statusClass;
   const errorCode = String(result.errorCode || "");
@@ -377,26 +388,40 @@ export function formatLiveReport(live) {
       " · timeout " + counts.timeout +
       " · error " + counts.error,
   );
-  lines.push("Blocked (403/429/401/5xx) is not the same as dead (404/410/DNS).");
+  lines.push("Blocked (401/403/407/429/451 and 502/503/504) is not the same as dead (404/410/DNS). Other 5xx (500/501/505) land in error.");
   const order = [
     ["dead", "Dead"],
     ["blocked", "Blocked or rate-limited"],
     ["timeout", "Timed out"],
     ["error", "Other errors (TLS/network/unexpected status)"],
   ];
+  const redirected = (live.results || []).filter(
+    (item) => item.redirected && item.finalUrl && item.finalUrl !== item.url,
+  );
+  if (redirected.length > 0) {
+    lines.push("");
+    lines.push("Redirected:");
+    for (const item of redirected) lines.push(formatFetchLine(item));
+  }
   for (const [key, title] of order) {
     const items = live.byClass[key] || [];
     if (items.length === 0) continue;
     lines.push("");
     lines.push(title + ":");
-    for (const item of items) {
-      const detail = item.status
-        ? "HTTP " + item.status
-        : (item.errorCode || "error") + (item.errorMessage ? " (" + item.errorMessage + ")" : "");
-      lines.push("- " + item.url + " — " + detail);
-    }
+    for (const item of items) lines.push(formatFetchLine(item));
   }
   return lines.join("\n");
+}
+
+export function formatFetchLine(item) {
+  const detail = item.status
+    ? "HTTP " + item.status
+    : (item.errorCode || "error") + (item.errorMessage ? " (" + item.errorMessage + ")" : "");
+  let line = "- " + item.url + " — " + detail;
+  if (item.redirected && item.finalUrl && item.finalUrl !== item.url) {
+    line += " (redirected to " + item.finalUrl + ")";
+  }
+  return line;
 }
 
 export function parseArgs(argv) {

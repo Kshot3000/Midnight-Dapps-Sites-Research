@@ -88,21 +88,23 @@ test("URL extraction strips trailing punctuation and ignores surrounding backtic
   ]);
 });
 
-test("fetch classification distinguishes ok, dead, and blocked (403/429) without calling the network", () => {
-  assert.equal(classifyFetch({ status: 200 }), "ok");
-  assert.equal(classifyFetch({ status: 301 }), "ok");
-  assert.equal(classifyFetch({ status: 404 }), "dead");
-  assert.equal(classifyFetch({ status: 410 }), "dead");
-  assert.equal(classifyFetch({ status: 403 }), "blocked");
-  assert.equal(classifyFetch({ status: 429 }), "blocked");
-  assert.equal(classifyFetch({ status: 401 }), "blocked");
-  assert.equal(classifyFetch({ status: 503 }), "blocked");
+test("fetch classification pins each HTTP status and error code to ok, dead, blocked, timeout, or error", () => {
+  const expected = {
+    ok: [200, 201, 204, 301, 302, 304],
+    dead: [404, 410],
+    blocked: [401, 403, 407, 429, 451, 502, 503, 504],
+    error: [400, 405, 408, 418, 500, 501, 505, 506, 507, 508, 510, 511],
+  };
+  for (const [statusClass, codes] of Object.entries(expected)) {
+    for (const status of codes) {
+      assert.equal(classifyFetch({ status }), statusClass, "HTTP " + status + " should be " + statusClass);
+    }
+  }
   assert.equal(classifyFetch({ errorCode: "TIMEOUT" }), "timeout");
   assert.equal(classifyFetch({ errorCode: "AbortError", errorMessage: "The operation was aborted" }), "timeout");
   assert.equal(classifyFetch({ errorCode: "ENOTFOUND", errorMessage: "getaddrinfo ENOTFOUND" }), "dead");
   assert.equal(classifyFetch({ errorCode: "ECONNREFUSED" }), "dead");
   assert.equal(classifyFetch({ errorCode: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" }), "error");
-  assert.equal(classifyFetch({ status: 500 }), "error");
 });
 
 test("default structural mode and unit tests never call fetch", async () => {
@@ -160,7 +162,8 @@ test("live mode records mixed results through an injected fetch and does not har
   assert.equal(live.byClass.blocked.length, 1);
   assert.equal(live.byClass.timeout.length, 1);
   const report = formatLiveReport(live);
-  assert.match(report, /Blocked \(403\/429\/401\/5xx\) is not the same as dead/);
+  assert.match(report, /Blocked \(401\/403\/407\/429\/451 and 502\/503\/504\) is not the same as dead/);
+  assert.match(report, /Other 5xx \(500\/501\/505\) land in error/);
   assert.match(report, /https:\/\/example.com\/gone — HTTP 404/);
   assert.match(report, /https:\/\/example.com\/blocked — HTTP 429/);
 });
@@ -201,6 +204,31 @@ test("an aborted fetch with a DOM abort code of 20 is classified as timeout, not
   assert.equal(live.byClass.timeout.length, 1);
   assert.equal(live.results[0].errorCode, "TIMEOUT");
   assert.match(formatLiveReport(live), /TIMEOUT/);
+});
+
+test("the live report prints the final URL for a redirected link, including an otherwise-ok result", async () => {
+  const live = await runLive(
+    ["https://example.com/old", "https://example.com/ok"],
+    {
+      now: new Date("2026-11-24T17:00:00Z"),
+      fetchImpl: async (url) => {
+        if (url.endsWith("/old")) {
+          return { status: 200, url: "https://example.com/new", redirected: true };
+        }
+        return { status: 200, url, redirected: false };
+      },
+    },
+  );
+  assert.equal(live.byClass.ok.length, 2);
+  assert.equal(live.results[0].finalUrl, "https://example.com/new");
+  assert.equal(live.results[0].redirected, true);
+  const report = formatLiveReport(live);
+  assert.match(report, /Redirected:/);
+  assert.match(
+    report,
+    /https:\/\/example.com\/old — HTTP 200 \(redirected to https:\/\/example.com\/new\)/,
+  );
+  assert.doesNotMatch(report, /https:\/\/example.com\/ok — HTTP 200 \(redirected/);
 });
 
 test("parseArgs and isCli keep --live opt-in and do not treat the test file as the CLI entry", () => {
