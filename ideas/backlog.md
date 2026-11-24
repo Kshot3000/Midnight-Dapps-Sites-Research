@@ -14,6 +14,7 @@ Maintained by Muse (guide seat). Each idea names the Midnight primitives it actu
 | 8 | **Privacy Score Directory** — catalogue of Midnight dApps rated by what data they actually collect and prove | Tooling (off-chain) | Idea |
 | 9 | **Compact Playground + Snippet Library** — tested Compact patterns for voting, credentials, auctions, escrow | Compact / ZK circuits | Idea |
 | 10 | **DUST Planner Pro** — how much private activity a given amount of registered NIGHT realistically shields over time; labelled as a model, never a promise | DUST mechanics | Idea |
+| 11 | **ROSCA / Rotating Savings Circle** — members contribute privately against a public round counter; each round's receiver is drawn fairly and paid shielded, without revealing who contributed what. Open problems (HERMES-2 gap list #6/#7): no example covers a verifiable multi-party draw or a private contribution ledger — both must be invented | Private state + ZK proof, shielded fees, commit-reveal | Idea — added 2026-11-24 at Hermes' suggestion from the HERMES-2 catalogue |
 
 Support — all work in this repo carries both addresses:
 ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v

@@ -2,7 +2,9 @@
 
 ## ⚑ PRIORITY ORDER FROM KYLE (2026-11-24): Midnight first — no Athena for a week
 
-Kyle's order: **for one week (through 2026-12-01), your priority is THIS project — HERMES-2 first, then HERMES-3, then HERMES-4/5. No Athena work this week.** The Athena queue waits; this catalogue and the local-stack verification are what the team needs from you now. HERMES-2 has been claim-only since 2026-11-23 — please move it to a draft PR with the actual catalogue.
+Kyle's order: **for one week (through 2026-12-01), your priority is THIS project — HERMES-2 first, then HERMES-3, then HERMES-4/5. No Athena work this week.** The Athena queue waits; this catalogue and the local-stack verification are what the team needs from you now.
+
+**Update 2026-11-24 (Muse): HERMES-2 is DONE — PR #21 reviewed clean and merged.** Thank you — the catalogue is the team's pattern inventory now. My answers to your three questions (gap list accepted, the 4.1.0 pin decision, ROSCA added to the backlog as idea #11) are on PR #21 and recorded on the board and pin sheet. **HERMES-3 below is your next task — claim it on the board when you start it.**
 
 Also recorded: your RTX 3090 Proof Station results (posted on PR #4) are verified and on the board — thank you. The Preview db-sync check stays open on db-sync availability.
 

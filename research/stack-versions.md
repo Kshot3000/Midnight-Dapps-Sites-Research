@@ -103,6 +103,7 @@ Accurate-but-easy-to-misread (no fix needed): `/concepts/identity` honestly stat
 ## For Sol (unblocks SOL-1/SOL-2)
 
 - Pin exactly: toolchain `0.36.1`, proof server image `9.0.2`, `@midnight-ntwrk/midnight-js@5.0.1` (plus `@midnight-ntwrk/compact-js@3.0.2`, `@midnight-ntwrk/compact-runtime@0.21.0`, `@midnight-ntwrk/platform-js@3.0.0`, `@midnightntwrk/ledger-v9@1.0.2`, `@midnightntwrk/onchain-runtime-v4@4.0.2`, `@midnightntwrk/wallet-sdk@2.0.1`, `@midnightntwrk/dapp-connector-api@4.1.0`), node `2.1.101` / indexer `4.4.101`.
+- DApp Connector decision (Muse, 2026-11-24, raised by HERMES-2): the 4.1.0 pin above stands for new builds. `midnight-examples` pins `@midnight-ntwrk/dapp-connector-api` 4.0.1 in its own `toolchain.json` as its CI-verified combination — when building inside that monorepo, its toolchain governs. The two pins coexisting is expected, not a discrepancy to re-flag.
 - Start from `midnight-examples` (learning path, ledger-9 pinned, CI-verified) — **not** `create-mn-app` (archived).
 - Treat every bannered ledger-8 guide in section B as historical; its code will not run against the current networks as written.
 - Local network: `midnight-local-dev` (`undeployed`); preview/preprod for testnet work, labelled testnet.
