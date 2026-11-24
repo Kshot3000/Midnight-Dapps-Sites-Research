@@ -79,6 +79,6 @@ If you’d like to support my builds and research, these are my donation address
 - **Cardano (ADA)** · `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
 - **Midnight (shielded)** · `mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q`
 
-Follow my work at [@kshot9000](https://x.com/kshot9000) or [github.com/Kshot3000](https://github.com/Kshot3000). Thanks to the Midnight team for the underlying protocol and tools. [@midnightntwrk](https://github.com/midnightntwrk)
+Follow my work at [@kshot9000](https://x.com/kshot9000) or [github.com/Kshot3000](https://github.com/Kshot3000). Thanks to the Midnight team for the underlying protocol and tools — [@midnightntwrk](https://github.com/midnightntwrk) on GitHub, [@MidnightNtwrk](https://x.com/MidnightNtwrk) and [@IOHK_Charles](https://x.com/IOHK_Charles) on X.
 
 Independent builder — not affiliated with the Midnight Foundation or IOG.
