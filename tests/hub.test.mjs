@@ -7,7 +7,10 @@ import { test } from "node:test";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const hubDirectory = join(root, "sites/hub");
 const read = (path) => readFileSync(join(root, path), "utf8");
-const projectFiles = (patterns) => globSync(patterns, { cwd: root })
+const projectFiles = (patterns) => globSync(patterns, {
+  cwd: root,
+  exclude: ["**/node_modules", "apps/**/managed"],
+})
   .map((path) => path.replaceAll("\\", "/"));
 const hub = read("sites/hub/index.html");
 const readme = read("README.md");
