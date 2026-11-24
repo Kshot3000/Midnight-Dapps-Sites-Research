@@ -376,3 +376,64 @@ test("the planner is in the same visual family as the hub and stays keyboard-usa
   assert.match(css, /min-height: 2\.75rem/);
   assert.match(css, /:focus-visible/);
 });
+
+test("the wordmark accessible name includes its visible text", () => {
+  const wordmark = page.match(/<a\s[^>]*class="[^"]*\bwordmark\b[^"]*"[^>]*>[\s\S]*?<\/a>/)?.[0];
+  assert.ok(wordmark, "missing .wordmark link");
+  const decode = (value) =>
+    value
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;|&apos;/g, "'");
+  const withoutHidden = wordmark.replace(
+    /<[^>]*\baria-hidden="true"[^>]*>[\s\S]*?<\/[^>]+>/g,
+    " ",
+  );
+  const visible = decode(withoutHidden.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  assert.ok(visible.length > 0, "wordmark has no visible text");
+  const labelled = wordmark.match(/\baria-label="([^"]*)"/)?.[1];
+  const accessibleName = labelled
+    ? decode(labelled).replace(/\s+/g, " ").trim()
+    : visible;
+  assert.ok(
+    accessibleName.includes(visible),
+    `wordmark accessible name "${accessibleName}" does not include visible text "${visible}"`,
+  );
+});
+
+test("the results panel has a role that allows aria-labelledby", () => {
+  const open = page.match(/<([a-zA-Z0-9]+)([^>]*\bclass="[^"]*\bresults-panel\b[^"]*"[^>]*)>/);
+  assert.ok(open, "missing .results-panel");
+  const tag = open[1].toLowerCase();
+  const attrs = open[2];
+  assert.match(attrs, /\baria-labelledby\s*=/, "results panel should keep aria-labelledby");
+  const role = attrs.match(/\brole="([^"]+)"/)?.[1]?.toLowerCase();
+  const implicitNamedRegions = new Set([
+    "section",
+    "article",
+    "aside",
+    "nav",
+    "main",
+    "header",
+    "footer",
+    "form",
+  ]);
+  const explicitNamedRegions = new Set([
+    "region",
+    "group",
+    "complementary",
+    "navigation",
+    "main",
+    "banner",
+    "contentinfo",
+    "form",
+    "search",
+    "article",
+  ]);
+  assert.ok(
+    implicitNamedRegions.has(tag) || (role && explicitNamedRegions.has(role)),
+    `results panel <${tag}${role ? ` role="${role}"` : ""}> has no role that allows a name via aria-labelledby`,
+  );
+});
