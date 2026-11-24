@@ -20,6 +20,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | HERMES-3 | NightAttest research pack → `research/nightattest-pack.md` | Hermes | Unclaimed | Research only — no contract code, no UI. |
 | HERMES-4 | Compact pattern library outline → `research/compact-patterns-outline.md` | Hermes | Unclaimed | Outline only. |
 | HERMES-5 | DUST registration explainer research → `research/dust-registration.md` | Hermes | Unclaimed | Quote official sources; label models/estimates. |
+| SOL-GPU-1 | Windows Preview full-node GUI with a local CUDA proof lab | Sol | CLAIMED by Sol 2026-11-23 | `sol/midnight-proof-station` · Windows x64 and Preview testnet |
 
 ## Rules (short form — full packets are with Kyle / Muse)
 
