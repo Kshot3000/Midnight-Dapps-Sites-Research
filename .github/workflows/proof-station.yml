@@ -3,6 +3,7 @@ name: Proof Station
 on:
   push:
     branches:
+      - main
       - sol/midnight-proof-station
     paths:
       - 'apps/proof-station/**'
@@ -32,16 +33,21 @@ jobs:
           dotnet publish apps/proof-station/MidnightProofStation.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -o publish
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           foreach ($file in @('MidnightProofStation.exe', 'preview.compose.yaml', 'db-tls.compose.yaml', 'gpu-lab.sh', 'README.md')) {
-            if (-not (Test-Path "publish/$file")) { throw "Missing package file $file" }
+            if (-not (Test-Path "publish/$file" -PathType Leaf)) { throw "Missing package file $file" }
           }
-      - name: Render CPU and CUDA Proof Lab modes
+      - name: Extract a portable ZIP and verify both Windows views
         shell: pwsh
         run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'proof-station-portable.zip'
+          $unpacked = Join-Path $env:RUNNER_TEMP 'Proof Station portable'
+          Compress-Archive -Path 'publish/*' -DestinationPath $zip
+          Expand-Archive -Path $zip -DestinationPath $unpacked
+          $exe = Join-Path $unpacked 'MidnightProofStation.exe'
           foreach ($mode in @('cpu', 'cuda')) {
             $preview = Join-Path $env:RUNNER_TEMP "proof-station-$mode.png"
             $previewArgs = '--capture-preview "{0}"' -f $preview
             if ($mode -eq 'cuda') { $previewArgs += ' cuda' }
-            $app = Start-Process -FilePath (Resolve-Path 'publish/MidnightProofStation.exe') -ArgumentList $previewArgs -PassThru
+            $app = Start-Process -FilePath $exe -ArgumentList $previewArgs -WorkingDirectory $env:RUNNER_TEMP -PassThru
             if (-not $app.WaitForExit(45000)) {
               $app.Kill()
               throw "The $mode dashboard did not finish rendering."

@@ -3,10 +3,49 @@ set -euo pipefail
 
 upstream=https://github.com/CharlesHoskinson/midnight-zk.git
 revision=6bcc6a56e85e584357a67b3bd8a15fb8fda4e2e8
+readonly minimum_cuda_free_mib=3072
 
 fail() {
     printf '%s\n' "$*" >&2
     exit 1
+}
+
+require_wsl_cuda() {
+    [[ -e /dev/dxg ]] || fail "WSL2 GPU passthrough is unavailable. Check WSL2 and your Windows NVIDIA driver."
+    export PATH="/usr/lib/wsl/lib:$PATH"
+    command -v nvidia-smi >/dev/null || fail "nvidia-smi is unavailable in WSL2."
+}
+
+read_cuda_device() {
+    local selector="$1" gpu uuid name capability free_memory total_memory driver
+    gpu=$(nvidia-smi -i "$selector" --query-gpu=uuid,name,compute_cap,memory.free,memory.total,driver_version \
+        --format=csv,noheader,nounits) || fail "NVIDIA device $selector is unavailable in WSL2."
+    [[ "$gpu" != *$'\n'* && "$gpu" != *$'\r'* && "$gpu" != *$'\t'* ]] || fail "Select one NVIDIA device."
+    IFS=',' read -r uuid name capability free_memory total_memory driver <<< "$gpu"
+    capability=${capability# }
+    free_memory=${free_memory# }
+    total_memory=${total_memory# }
+    [[ "$uuid" =~ ^GPU-[a-fA-F0-9-]+$ && "$capability" =~ ^[0-9]+\.[0-9]+$ && -n "${name# }" && -n "${driver# }" ]] ||
+        fail "The NVIDIA driver did not report a usable CUDA device."
+    [[ "$free_memory" =~ ^[0-9]{1,9}$ && "$total_memory" =~ ^[0-9]{1,9}$ ]] ||
+        fail "The NVIDIA driver did not report free and total VRAM in MiB."
+    free_memory=$((10#$free_memory))
+    total_memory=$((10#$total_memory))
+    (( total_memory > 0 && free_memory <= total_memory )) ||
+        fail "The NVIDIA driver reported inconsistent VRAM totals."
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$uuid" "${name# }" "${capability/./}" "$free_memory" "$total_memory" "${driver# }"
+}
+
+report_cuda_device() {
+    local device="$1"
+    # The UUID selects the device in WSL. The dashboard only displays the remaining fields.
+    printf 'STATION_GPU\t%s\t%s\n' "${device#*$'\t'}" "$minimum_cuda_free_mib"
+}
+
+require_cuda_memory() {
+    local free_memory="$1"
+    (( free_memory >= minimum_cuda_free_mib )) ||
+        fail "CUDA proofs need at least $minimum_cuda_free_mib MiB of free VRAM. This device has $free_memory MiB free. Close a GPU workload or select CPU."
 }
 
 verify_proof_rows() {
@@ -48,24 +87,15 @@ main() {
 
     export PATH="$HOME/.cargo/bin:$PATH"
     local root="${XDG_DATA_HOME:-$HOME/.local/share}/midnight-proof-station/$revision"
-    local source="$root/upstream" work="$root/cpu" arch
+    local source="$root/upstream" work="$root/cpu" arch gpu uuid free_memory
     if [[ "$mode" == gpu ]]; then
         [[ "$gpu_index" =~ ^[0-9]+$ ]] || fail "Select a non-negative NVIDIA device index."
-        [[ -e /dev/dxg ]] || fail "WSL2 GPU passthrough is unavailable. Check WSL2 and your Windows NVIDIA driver."
-        export PATH="/usr/lib/wsl/lib:$PATH"
-        command -v nvidia-smi >/dev/null || fail "nvidia-smi is unavailable in WSL2."
-
-        local gpu uuid name capability free_memory total_memory driver
-        gpu=$(nvidia-smi -i "$gpu_index" --query-gpu=uuid,name,compute_cap,memory.free,memory.total,driver_version \
-            --format=csv,noheader,nounits) || fail "NVIDIA device $gpu_index is unavailable in WSL2."
-        [[ "$gpu" != *$'\n'* ]] || fail "Select one NVIDIA device."
-        IFS=',' read -r uuid name capability free_memory total_memory driver <<< "$gpu"
-        capability=${capability// /}
-        [[ "$uuid" =~ ^GPU-[a-fA-F0-9-]+$ && "$capability" =~ ^([0-9]+)\.([0-9]+)$ ]] ||
-            fail "The NVIDIA driver did not report a usable CUDA device."
-        arch="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
-        printf 'STATION_GPU\t%s\t%s\t%s\t%s\t%s\n' "${name# }" "$arch" "${free_memory# }" "${total_memory# }" "${driver# }"
+        require_wsl_cuda
+        gpu=$(read_cuda_device "$gpu_index") || return 1
+        IFS=$'\t' read -r uuid _ arch free_memory _ _ <<< "$gpu"
+        report_cuda_device "$gpu"
         [[ "$action" != detect ]] || return 0
+        if [[ "$action" == prove ]]; then require_cuda_memory "$free_memory"; fi
         work="$root/sm-$arch"
         export CUDA_VISIBLE_DEVICES="$uuid" MIDNIGHT_GPU_ARCHS="$arch" MIDNIGHT_GPU_REQUIRE_CUDA=1 MIDNIGHT_GPU_MIN_K=14
     fi
@@ -134,6 +164,13 @@ main() {
     local rows
     printf 'Preparing the synthetic test circuit and checking the proofs with the stock CPU verifier.\n' >&2
     timeout --kill-after=5s 240s "$RC1_STOCK_BIN" prepare
+    if [[ "$mode" == gpu ]]; then
+        # Measure the same device again just before proving. Another workload can start during preparation.
+        gpu=$(read_cuda_device "$uuid") || return 1
+        IFS=$'\t' read -r _ _ _ free_memory _ _ <<< "$gpu"
+        report_cuda_device "$gpu"
+        require_cuda_memory "$free_memory"
+    fi
     rows=$(timeout --kill-after=5s 240s "$proof_bin" run)
     printf '%s\n' "$rows" | verify_proof_rows "$mode" ||
         fail "Both proofs must verify with the stock verifier and report the expected $label execution."
