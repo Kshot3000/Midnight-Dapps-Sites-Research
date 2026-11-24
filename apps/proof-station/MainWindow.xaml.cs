@@ -49,9 +49,19 @@ public partial class MainWindow : Window
     private async void StartPreview_Click(object sender, RoutedEventArgs e)
     {
         string uri = DatabaseUrl.Password.Trim();
+        if (uri.Length == 0)
+        {
+            DatabaseSettings.IsExpanded = true;
+            DatabaseSettings.UpdateLayout();
+            DatabaseUrl.Focus();
+            DatabaseUrl.BringIntoView();
+            SetMessage("Enter the PostgreSQL URI for a synced Cardano Preview db-sync database.");
+            return;
+        }
+
         await RunServicesAsync("Starting Preview services", () => backend.StartPreviewAsync(uri, caPath, line =>
         {
-            Log(uri.Length > 0 ? line.Replace(uri, "[database URI hidden]", StringComparison.Ordinal) : line);
+            Log(line.Replace(uri, "[database URI hidden]", StringComparison.Ordinal));
         }));
     }
 
@@ -77,8 +87,7 @@ public partial class MainWindow : Window
         if (GpuStatus is null || GpuResult is null) return;
         GpuStatus.Text = "GPU not checked";
         GpuDetail.Text = "CUDA through your default WSL2 distribution";
-        GpuResult.Text = "No proof job run for this selection";
-        GpuResultDetail.Text = "Run a proof job to check CUDA work and stock verification.";
+        SetProofState("No proof job run for this selection", "Run a sample job to check CUDA execution and stock verification.");
     }
 
     private async void CheckGpu_Click(object sender, RoutedEventArgs e) =>
@@ -93,29 +102,36 @@ public partial class MainWindow : Window
         await RunGpuAsync("Building the pinned CUDA backend", async index =>
         {
             await backend.BuildGpuAsync(index, Log);
-            GpuResult.Text = "CUDA backend built";
-            GpuResultDetail.Text = "Generate sample proofs to confirm device execution.";
+            SetProofState("CUDA backend built", "Generate sample proofs to confirm device execution.");
         });
 
     private async void GenerateProofs_Click(object sender, RoutedEventArgs e) =>
         await RunGpuAsync("Generating sample proofs", async index =>
         {
-            GpuResult.Text = "Proof job running";
-            GpuResultDetail.Text = "Checking a cold and warm proof with the stock verifier.";
+            SetProofState("Proof job running", "Checking a cold and warm proof with the stock verifier.");
             try
             {
                 var result = await backend.ProveAsync(index, Log);
                 GpuResult.Text = $"{result.Count} GPU proofs verified";
-                GpuResultDetail.Text = $"Cold {result.ColdSeconds}s · warm {result.WarmSeconds}s · verify {result.VerifySeconds}s"
-                    + $"\n{result.DeviceCalls:N0} CUDA calls · {result.PeakBytes / 1048576d:N1} MiB peak · {result.Fallbacks:N0} fallbacks";
+                GpuResultDetail.Text = $"Cold {result.ColdSeconds} s · verify {result.VerifySeconds} s · {result.Fallbacks:N0} CPU fallbacks";
+                WarmProofTime.Text = $"{result.WarmSeconds} s";
+                DeviceCallCount.Text = $"{result.DeviceCalls:N0}";
+                PeakVram.Text = $"{result.PeakBytes / 1048576d:N1} MiB";
+                ProofMetrics.Visibility = Visibility.Visible;
             }
             catch
             {
-                GpuResult.Text = "Proof job failed";
-                GpuResultDetail.Text = "See the activity log for the reason.";
+                SetProofState("Proof job failed", "See the activity log for the reason.");
                 throw;
             }
         });
+
+    private void SetProofState(string title, string detail)
+    {
+        ProofMetrics.Visibility = Visibility.Collapsed;
+        GpuResult.Text = title;
+        GpuResultDetail.Text = detail;
+    }
 
     private void CopyAda_Click(object sender, RoutedEventArgs e) => CopyAddress(AdaAddress, "Cardano");
 
@@ -123,17 +139,20 @@ public partial class MainWindow : Window
 
     private void CopyAddress(TextBox field, string network)
     {
+        string feedback;
         try
         {
             Clipboard.SetText(field.Text);
-            SetMessage($"{network} address copied.");
+            feedback = $"{network} address copied.";
         }
         catch (System.Runtime.InteropServices.ExternalException)
         {
             field.Focus();
             field.SelectAll();
-            SetMessage($"{network} address selected. Press Ctrl+C to copy.");
+            feedback = $"{network} address selected. Press Ctrl+C to copy.";
         }
+        CopyFeedback.Text = feedback;
+        SetMessage(feedback);
     }
 
     private void Profile_Click(object sender, RoutedEventArgs e) =>
@@ -209,8 +228,8 @@ public partial class MainWindow : Window
         catch (Exception)
         {
             if (closing) return;
-            EngineStatus.Text = "Docker Desktop Linux engine unavailable";
-            var unknown = new ServiceStatus("Status unavailable", "Start Docker Desktop and refresh.");
+            EngineStatus.Text = "Start Docker Desktop in Linux container mode and refresh.";
+            var unknown = new ServiceStatus("Status unavailable", "");
             ShowStatus(NodeStatus, NodeDetail, unknown);
             ShowStatus(IndexerStatus, IndexerDetail, unknown);
             ShowStatus(ProofServerStatus, ProofServerDetail, unknown);

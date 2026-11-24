@@ -1,15 +1,20 @@
 <Window x:Class="MidnightProofStation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Midnight Proof Station" Width="1170" Height="910" MinWidth="855" MinHeight="650"
-        WindowStartupLocation="CenterScreen" Background="#0D0E17" Foreground="#F3F1FF"
+        Title="Midnight Proof Station" Width="1160" Height="900" MinWidth="855" MinHeight="600"
+        WindowStartupLocation="CenterScreen" ThemeMode="Dark"
+        Background="#080B12" Foreground="#F2F5FD"
         FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True">
   <Window.Resources>
-    <SolidColorBrush x:Key="Panel" Color="#171927"/>
-    <SolidColorBrush x:Key="CardFill" Color="#10121E"/>
-    <SolidColorBrush x:Key="Line" Color="#363951"/>
-    <SolidColorBrush x:Key="Muted" Color="#BDC0D6"/>
-    <SolidColorBrush x:Key="Accent" Color="#D0BFFF"/>
+    <SolidColorBrush x:Key="Page" Color="#080B12"/>
+    <SolidColorBrush x:Key="Panel" Color="#101621"/>
+    <SolidColorBrush x:Key="Inset" Color="#0B101A"/>
+    <SolidColorBrush x:Key="Line" Color="#2B364A"/>
+    <SolidColorBrush x:Key="Ink" Color="#F2F5FD"/>
+    <SolidColorBrush x:Key="Muted" Color="#AEBBD1"/>
+    <SolidColorBrush x:Key="Accent" Color="#A5BAFF"/>
+    <SolidColorBrush x:Key="Success" Color="#A1E4D7"/>
+
     <Style TargetType="TextBlock">
       <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
@@ -18,26 +23,71 @@
       <Setter Property="FontSize" Value="13"/>
     </Style>
     <Style x:Key="SectionTitle" TargetType="TextBlock">
-      <Setter Property="FontSize" Value="23"/>
+      <Setter Property="FontSize" Value="22"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="AutomationProperties.HeadingLevel" Value="Level2"/>
     </Style>
-    <Style x:Key="Card" TargetType="Border">
-      <Setter Property="Background" Value="{StaticResource CardFill}"/>
+    <Style x:Key="Endpoint" TargetType="TextBlock" BasedOn="{StaticResource Secondary}">
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+    <Style x:Key="ServiceDetail" TargetType="TextBlock" BasedOn="{StaticResource Secondary}">
+      <Setter Property="Margin" Value="0,2,0,0"/>
+      <Style.Triggers>
+        <Trigger Property="Text" Value="">
+          <Setter Property="Visibility" Value="Collapsed"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="StationPanel" TargetType="Border">
+      <Setter Property="Background" Value="{StaticResource Panel}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Padding" Value="17,14"/>
+    </Style>
+    <Style x:Key="InsetCard" TargetType="Border">
+      <Setter Property="Background" Value="{StaticResource Inset}"/>
       <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Padding" Value="13,10"/>
-      <Setter Property="Margin" Value="0,0,0,8"/>
+      <Setter Property="Padding" Value="11,7"/>
     </Style>
-    <Style TargetType="Button">
-      <Setter Property="Padding" Value="12,7"/>
-      <Setter Property="MinHeight" Value="37"/>
-      <Setter Property="Margin" Value="0,0,7,6"/>
-      <Setter Property="Background" Value="#25283B"/>
-      <Setter Property="Foreground" Value="#F3F1FF"/>
+    <Style x:Key="ServiceBadge" TargetType="Border">
+      <Setter Property="Background" Value="#18233A"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Padding" Value="6,2"/>
+      <Setter Property="Margin" Value="9,0,0,0"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="ServiceState" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style x:Key="ProofMetricValue" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="FontSize" Value="17"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+    </Style>
+    <Style x:Key="ExpanderPanel" TargetType="Expander">
+      <Setter Property="Background" Value="{StaticResource Inset}"/>
       <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+      <Setter Property="Padding" Value="11,8"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style TargetType="Button">
+      <Setter Property="Padding" Value="11,6"/>
+      <Setter Property="MinHeight" Value="34"/>
+      <Setter Property="Margin" Value="0,0,7,6"/>
+      <Setter Property="Background" Value="#192235"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+      <Setter Property="BorderBrush" Value="#394A67"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="FontSize" Value="13"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Template">
         <Setter.Value>
@@ -48,14 +98,16 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="ButtonBox" Property="BorderBrush" Value="#E6DCFF"/>
+                <Setter TargetName="ButtonBox" Property="BorderBrush" Value="{StaticResource Accent}"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="ButtonBox" Property="Opacity" Value=".82"/>
               </Trigger>
               <Trigger Property="IsKeyboardFocused" Value="True">
                 <Setter TargetName="ButtonBox" Property="BorderBrush" Value="White"/>
-                <Setter TargetName="ButtonBox" Property="BorderThickness" Value="2"/>
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
-                <Setter TargetName="ButtonBox" Property="Opacity" Value=".48"/>
+                <Setter TargetName="ButtonBox" Property="Opacity" Value=".55"/>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -63,156 +115,239 @@
       </Setter>
     </Style>
     <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-      <Setter Property="Background" Value="{StaticResource Accent}"/>
-      <Setter Property="Foreground" Value="#161024"/>
-      <Setter Property="BorderBrush" Value="#D0BFFF"/>
+      <Setter Property="Background" Value="#3157E7"/>
+      <Setter Property="BorderBrush" Value="#6D8AFB"/>
+      <Setter Property="Foreground" Value="White"/>
     </Style>
     <Style TargetType="TextBox">
-      <Setter Property="Background" Value="#10121E"/>
-      <Setter Property="Foreground" Value="#F3F1FF"/>
-      <Setter Property="CaretBrush" Value="#F3F1FF"/>
+      <Setter Property="Background" Value="{StaticResource Inset}"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+      <Setter Property="CaretBrush" Value="{StaticResource Ink}"/>
       <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
-      <Setter Property="Padding" Value="8,5"/>
+      <Setter Property="Padding" Value="8,4"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
     <Style TargetType="PasswordBox">
-      <Setter Property="Background" Value="#10121E"/>
-      <Setter Property="Foreground" Value="#F3F1FF"/>
-      <Setter Property="CaretBrush" Value="#F3F1FF"/>
+      <Setter Property="Background" Value="{StaticResource Inset}"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+      <Setter Property="CaretBrush" Value="{StaticResource Ink}"/>
       <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
-      <Setter Property="Padding" Value="8,5"/>
-      <Setter Property="MinHeight" Value="34"/>
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="MinHeight" Value="33"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
   </Window.Resources>
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="28,23,28,20">
-      <DockPanel Margin="0,0,0,19">
-        <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="12" BorderBrush="#63517E"
-                BorderThickness="1" Padding="11,5" Margin="10,6,0,0">
-          <TextBlock Foreground="{StaticResource Accent}" FontSize="12" FontWeight="SemiBold"
-                     Text="PREVIEW TESTNET"/>
+  <ScrollViewer Background="{StaticResource Page}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="1380" Margin="22,20,22,22">
+      <Border Height="148" Background="#060A15" BorderBrush="#334369" BorderThickness="1" CornerRadius="16" Margin="0,0,0,15">
+        <Border CornerRadius="15">
+          <Border.Background>
+            <ImageBrush ImageSource="Assets/midnight-horizon.jpg" Stretch="UniformToFill" AlignmentY="Top"/>
+          </Border.Background>
+          <Border CornerRadius="15">
+            <Border.Background>
+              <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#E6060913" Offset="0"/>
+                <GradientStop Color="#CC060913" Offset=".35"/>
+                <GradientStop Color="#00060913" Offset=".73"/>
+              </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel VerticalAlignment="Center" Margin="23,0,23,0">
+              <Border HorizontalAlignment="Left" Background="#17223A" BorderBrush="#415480" BorderThickness="1"
+                      CornerRadius="11" Padding="8,3">
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="6" Height="6" Fill="#8FADFF" Margin="0,0,6,0"/>
+                  <TextBlock Text="PREVIEW TESTNET" FontSize="11" FontWeight="SemiBold" Foreground="#CFDBFF"/>
+                </StackPanel>
+              </Border>
+              <TextBlock Text="Midnight Proof Station" FontSize="40" FontWeight="SemiBold" Margin="0,2,0,1"
+                         AutomationProperties.HeadingLevel="Level1"/>
+              <TextBlock Text="Run a local Midnight node and verify sample proofs on your NVIDIA GPU."
+                         Foreground="#CDD8ED" FontSize="14"/>
+            </StackPanel>
+          </Border>
         </Border>
-        <StackPanel>
-          <TextBlock Text="Midnight Proof Station" FontSize="37" FontWeight="SemiBold"/>
-          <TextBlock Style="{StaticResource Secondary}" Margin="0,4,0,0"
-                     Text="Run a local Midnight full node and generate zero-knowledge test proofs on your NVIDIA GPU."/>
-        </StackPanel>
-      </DockPanel>
+      </Border>
 
       <Grid>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="1.17*"/>
+          <ColumnDefinition Width="1.08*"/>
           <ColumnDefinition Width="14"/>
           <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="12" Padding="16">
+
+        <Border Style="{StaticResource StationPanel}">
           <StackPanel>
             <TextBlock Text="Preview services" Style="{StaticResource SectionTitle}"/>
-            <TextBlock x:Name="EngineStatus" Style="{StaticResource Secondary}" Text="Docker status not checked" Margin="0,2,0,11"/>
-            <Border Style="{StaticResource Card}">
+            <TextBlock x:Name="EngineStatus" Text="Docker status not checked" Style="{StaticResource Secondary}"
+                       Margin="0,1,0,10"/>
+
+            <Border Style="{StaticResource InsetCard}" Margin="0,0,0,5">
               <StackPanel>
-                <TextBlock Text="Full node · 2.1.101" FontWeight="SemiBold"/>
-                <TextBlock x:Name="NodeStatus" Text="Status not checked" Foreground="{StaticResource Accent}"/>
-                <TextBlock x:Name="NodeDetail" Text="RPC · 127.0.0.1:9944" Style="{StaticResource Secondary}"/>
+                <DockPanel>
+                  <Border DockPanel.Dock="Right" Style="{StaticResource ServiceBadge}">
+                    <TextBlock x:Name="NodeStatus" Text="Not checked" Style="{StaticResource ServiceState}"/>
+                  </Border>
+                  <TextBlock Text="Full node · 2.1.101" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </DockPanel>
+                <TextBlock Text="RPC · 127.0.0.1:9944" Style="{StaticResource Endpoint}"/>
+                <TextBlock x:Name="NodeDetail" Style="{StaticResource ServiceDetail}"/>
               </StackPanel>
             </Border>
-            <Border Style="{StaticResource Card}">
+            <Border Style="{StaticResource InsetCard}" Margin="0,0,0,5">
               <StackPanel>
-                <TextBlock Text="Indexer · 4.4.101" FontWeight="SemiBold"/>
-                <TextBlock x:Name="IndexerStatus" Text="Status not checked" Foreground="{StaticResource Accent}"/>
-                <TextBlock x:Name="IndexerDetail" Text="GraphQL · 127.0.0.1:8088" Style="{StaticResource Secondary}"/>
+                <DockPanel>
+                  <Border DockPanel.Dock="Right" Style="{StaticResource ServiceBadge}">
+                    <TextBlock x:Name="IndexerStatus" Text="Not checked" Style="{StaticResource ServiceState}"/>
+                  </Border>
+                  <TextBlock Text="Indexer · 4.4.101" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </DockPanel>
+                <TextBlock Text="GraphQL · 127.0.0.1:8088" Style="{StaticResource Endpoint}"/>
+                <TextBlock x:Name="IndexerDetail" Style="{StaticResource ServiceDetail}"/>
               </StackPanel>
             </Border>
-            <Border Style="{StaticResource Card}">
+            <Border Style="{StaticResource InsetCard}">
               <StackPanel>
-                <TextBlock Text="Wallet proof server · 9.0.2" FontWeight="SemiBold"/>
-                <TextBlock x:Name="ProofServerStatus" Text="Status not checked" Foreground="{StaticResource Accent}"/>
-                <TextBlock x:Name="ProofServerDetail" Text="Lace local CPU prover · 127.0.0.1:6300" Style="{StaticResource Secondary}"/>
+                <DockPanel>
+                  <Border DockPanel.Dock="Right" Style="{StaticResource ServiceBadge}">
+                    <TextBlock x:Name="ProofServerStatus" Text="Not checked" Style="{StaticResource ServiceState}"/>
+                  </Border>
+                  <TextBlock Text="Wallet proof server · 9.0.2" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </DockPanel>
+                <TextBlock Text="Local CPU prover · 127.0.0.1:6300" Style="{StaticResource Endpoint}"/>
+                <TextBlock x:Name="ProofServerDetail" Style="{StaticResource ServiceDetail}"/>
               </StackPanel>
             </Border>
-            <TextBlock Text="Cardano Preview db-sync" FontWeight="SemiBold" Margin="0,6,0,3"/>
-            <TextBlock Text="The full node needs a synced database over TLS. The wallet prover can start on its own."
-                       Style="{StaticResource Secondary}" Margin="0,0,0,7"/>
-            <PasswordBox x:Name="DatabaseUrl" AutomationProperties.Name="Cardano Preview db-sync PostgreSQL connection URI"
-                         ToolTip="Paste the PostgreSQL connection URI for your synced Cardano Preview db-sync."/>
-            <DockPanel Margin="0,7,0,7">
-              <Button DockPanel.Dock="Left" Content="Select CA certificate" Click="SelectCa_Click"
-                      ToolTip="Optional PEM certificate for verifying the database server" />
-              <TextBlock x:Name="CaLabel" Style="{StaticResource Secondary}" Text="Optional database CA"
-                         TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-            </DockPanel>
-            <WrapPanel>
+
+            <WrapPanel Margin="0,10,0,2">
               <Button x:Name="StartPreview" Style="{StaticResource Primary}" Content="Start Preview stack" Click="StartPreview_Click"/>
-              <Button x:Name="StartWallet" Content="Start wallet prover" Click="StartWallet_Click"/>
+              <Button x:Name="StartWallet" Content="Start wallet prover" Click="StartWallet_Click"
+                      ToolTip="Start the released CPU prover for Lace independently."/>
               <Button x:Name="StopStack" Content="Stop services" Click="StopStack_Click"/>
             </WrapPanel>
+
+            <Expander x:Name="DatabaseSettings" Header="Cardano Preview database" Style="{StaticResource ExpanderPanel}">
+              <StackPanel>
+                <TextBlock Text="The full node requires a synced Cardano Preview db-sync database over TLS."
+                           Style="{StaticResource Secondary}" Margin="0,0,0,7"/>
+                <Label Target="{Binding ElementName=DatabaseUrl}" Content="PostgreSQL connection URI" Padding="0,0,0,4"/>
+                <PasswordBox x:Name="DatabaseUrl"/>
+                <DockPanel Margin="0,7,0,0">
+                  <Button DockPanel.Dock="Left" Content="Select CA certificate" Click="SelectCa_Click"
+                          Margin="0,0,8,0" ToolTip="Optional PEM certificate for verifying the database server."/>
+                  <TextBlock x:Name="CaLabel" Style="{StaticResource Secondary}" Text="Optional database CA"
+                             TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                </DockPanel>
+              </StackPanel>
+            </Expander>
           </StackPanel>
         </Border>
 
-        <Border Grid.Column="2" Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="12" Padding="16">
+        <Border Grid.Column="2" Style="{StaticResource StationPanel}">
           <StackPanel>
             <TextBlock Text="CUDA proof lab" Style="{StaticResource SectionTitle}"/>
-            <TextBlock Style="{StaticResource Secondary}" Margin="0,3,0,11"
-                       Text="Experimental local proofs from Charles Hoskinson’s draft. Uses a synthetic circuit and a stock verifier."/>
-            <Border Style="{StaticResource Card}">
-              <StackPanel>
-                <TextBlock Text="NVIDIA device" FontWeight="SemiBold"/>
-                <TextBlock x:Name="GpuStatus" Text="GPU not checked" Foreground="{StaticResource Accent}"/>
-                <TextBlock x:Name="GpuDetail" Text="CUDA through your default WSL2 distribution" Style="{StaticResource Secondary}"/>
-                <DockPanel Margin="0,8,0,0">
-                  <TextBlock DockPanel.Dock="Left" Text="Device index" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                  <TextBox x:Name="DeviceIndex" Width="55" HorizontalAlignment="Left" Text="0" MaxLength="3"
-                           TextChanged="DeviceIndex_Changed" AutomationProperties.Name="NVIDIA device index"/>
-                </DockPanel>
-              </StackPanel>
+            <TextBlock Text="Synthetic proofs from Charles Hoskinson’s CUDA draft." Style="{StaticResource Secondary}"
+                       Margin="0,1,0,10"/>
+
+            <Border Style="{StaticResource InsetCard}" Padding="11,9" Margin="0,0,0,6">
+              <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Margin="10,0,0,0" VerticalAlignment="Center">
+                  <Label Content="Device index" Target="{Binding ElementName=DeviceIndex}" Padding="0,0,0,3" FontSize="12"/>
+                  <TextBox x:Name="DeviceIndex" Width="65" HorizontalAlignment="Left" Text="0" MaxLength="3"
+                           FontFamily="Consolas" TextChanged="DeviceIndex_Changed"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="NVIDIA device" FontWeight="SemiBold"/>
+                  <TextBlock x:Name="GpuStatus" Text="GPU not checked" Foreground="{StaticResource Accent}"/>
+                  <TextBlock x:Name="GpuDetail" Text="CUDA through your default WSL2 distribution" Style="{StaticResource Secondary}"/>
+                </StackPanel>
+              </DockPanel>
             </Border>
-            <Border Style="{StaticResource Card}">
+
+            <Border Style="{StaticResource InsetCard}" Padding="11,9">
               <StackPanel>
-                <TextBlock Text="Last proof job" FontWeight="SemiBold"/>
-                <TextBlock x:Name="GpuResult" Text="No proof job run" Foreground="{StaticResource Accent}"/>
+                <TextBlock Text="Proof verification" FontWeight="SemiBold"/>
+                <TextBlock x:Name="GpuResult" Text="No proof job run" Margin="0,1,0,2">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                      <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding Visibility, ElementName=ProofMetrics}" Value="Visible">
+                          <Setter Property="Foreground" Value="{StaticResource Success}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
                 <TextBlock x:Name="GpuResultDetail" Style="{StaticResource Secondary}"
-                           Text="The result shows completed CUDA calls, proof verification and fallbacks."/>
+                           Text="Run a sample job to check CUDA execution and stock verification."/>
+                <UniformGrid x:Name="ProofMetrics" Columns="3" Visibility="Collapsed" Margin="0,9,0,0">
+                  <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5" Margin="0,0,5,0">
+                    <StackPanel>
+                      <TextBlock Text="Warm proof" Style="{StaticResource Secondary}"/>
+                      <TextBlock x:Name="WarmProofTime" Style="{StaticResource ProofMetricValue}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5" Margin="0,0,5,0">
+                    <StackPanel>
+                      <TextBlock Text="CUDA calls" Style="{StaticResource Secondary}"/>
+                      <TextBlock x:Name="DeviceCallCount" Style="{StaticResource ProofMetricValue}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5"
+                          ToolTip="Peak device memory tracked by the CUDA prover.">
+                    <StackPanel>
+                      <TextBlock Text="Peak VRAM" Style="{StaticResource Secondary}"/>
+                      <TextBlock x:Name="PeakVram" Style="{StaticResource ProofMetricValue}"/>
+                    </StackPanel>
+                  </Border>
+                </UniformGrid>
               </StackPanel>
             </Border>
-            <WrapPanel Margin="0,6,0,0">
+
+            <WrapPanel Margin="0,10,0,0">
               <Button x:Name="CheckGpu" Content="Detect GPU" Click="CheckGpu_Click"/>
               <Button x:Name="BuildCuda" Content="Build CUDA backend" Click="BuildCuda_Click"/>
               <Button x:Name="GenerateProofs" Style="{StaticResource Primary}" Content="Generate sample proofs" Click="GenerateProofs_Click"/>
             </WrapPanel>
-            <TextBlock Style="{StaticResource Secondary}" Margin="0,6,0,0"
-                       Text="The stock wallet prover handles Preview transactions. CUDA jobs stay in the lab until the draft supports the released wallet proving API."/>
+
+            <TextBlock Text="Preview wallet transactions use the released CPU prover."
+                       Style="{StaticResource Secondary}" Margin="0,2,0,0"/>
           </StackPanel>
         </Border>
       </Grid>
 
-      <DockPanel Margin="0,15,0,4">
-        <Button x:Name="RefreshStatus" DockPanel.Dock="Right" Content="Refresh status" Click="Refresh_Click" Margin="0"/>
-        <TextBlock Text="Activity" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center"/>
-      </DockPanel>
-      <TextBox x:Name="ActivityLog" Height="87" IsReadOnly="True" AcceptsReturn="True"
-               VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
-               AutomationProperties.Name="Local activity log" Text="Start a service or detect a GPU to see activity here."/>
-      <TextBlock x:Name="Message" Text="Waiting for an action." Style="{StaticResource Secondary}" Margin="0,9,0,9"
-                 AutomationProperties.LiveSetting="Polite"/>
+      <Border Style="{StaticResource StationPanel}" Margin="0,13,0,10" Padding="14,10">
+        <StackPanel>
+          <DockPanel Margin="0,0,0,7">
+            <Button x:Name="RefreshStatus" DockPanel.Dock="Right" Content="Refresh status" Click="Refresh_Click"
+                    MinHeight="30" Margin="10,0,0,0" Padding="9,4"/>
+            <TextBlock Text="Activity" Style="{StaticResource SectionTitle}" FontSize="18" VerticalAlignment="Center"/>
+          </DockPanel>
+          <TextBox x:Name="ActivityLog" Height="53" IsReadOnly="True" AcceptsReturn="True" VerticalContentAlignment="Top"
+                   VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                   AutomationProperties.Name="Local activity log" Text="Start a service or detect a GPU to see activity here."/>
+          <TextBlock x:Name="Message" Text="Waiting for an action." Style="{StaticResource Secondary}" Margin="0,6,0,0"
+                     AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+      </Border>
 
-      <Expander Header="Support the project" Foreground="#F3F1FF" Margin="0,3,0,0">
-        <StackPanel Margin="0,8,0,0">
+      <Expander Header="Support the project · @kshot9000" Style="{StaticResource ExpanderPanel}">
+        <StackPanel>
           <TextBlock Text="Independent builder — not affiliated with the Midnight Foundation or IOG." Style="{StaticResource Secondary}"/>
           <TextBlock Margin="0,4,0,8">
             Built by Kyle Cox · <Hyperlink Click="Profile_Click" Foreground="{StaticResource Accent}">@kshot9000</Hyperlink>
           </TextBlock>
-          <TextBlock Text="Cardano donation address" FontWeight="SemiBold"/>
+          <Label Target="{Binding ElementName=AdaAddress}" Content="Cardano donation address" FontWeight="SemiBold" Padding="0,0,0,4"/>
           <TextBox x:Name="AdaAddress" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas"
-                   AutomationProperties.Name="Cardano donation address"
                    Text="addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v"/>
           <Button Content="Copy Cardano address" Click="CopyAda_Click" HorizontalAlignment="Left" Margin="0,5,0,8"/>
-          <TextBlock Text="Midnight shielded donation address" FontWeight="SemiBold"/>
+          <Label Target="{Binding ElementName=MidnightAddress}" Content="Midnight shielded donation address" FontWeight="SemiBold" Padding="0,0,0,4"/>
           <TextBox x:Name="MidnightAddress" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas"
-                   AutomationProperties.Name="Midnight shielded donation address"
                    Text="mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q"/>
           <Button Content="Copy Midnight address" Click="CopyMidnight_Click" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+          <TextBlock x:Name="CopyFeedback" Style="{StaticResource ServiceDetail}"/>
         </StackPanel>
       </Expander>
     </StackPanel>
