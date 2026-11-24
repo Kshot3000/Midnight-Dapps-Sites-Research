@@ -13,7 +13,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | ID | Task | Seat | Status | Branch / notes |
 | --- | --- | --- | --- | --- |
 | SEED-1 | Initial `main`: README, structure, board, backlog | Muse | DONE 2026-11-23 | Direct seed commit on Kyle's order — GitHub requires an initial `main` before any PR can be opened. One-time only; all later work is by PR. |
-| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | CLAIMED by Sol 2026-11-23 — in progress | Branch `sol/sol-1-hub-v1`, PR against `main`. Seed is now in place, so the normal PR flow works. Do not re-seed the structure — build on it. |
+| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | CLAIMED by Sol 2026-11-23 — in progress | Branch `sol/sol-1-hub-v1`, PR against `main`. Feature-branch claim confirmed by Sol before the hub build. Build on the existing seed. |
 | SOL-2 | NightAttest: Compact contract + three-role web UI (issuer / holder / verifier) | Sol | Queued — after SOL-1 | Flagship. Grant proposal already drafted ($7,500 / 8 weeks). |
 | HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | Unclaimed — first feed item | Official sources only, versions + source URLs + stale-guide locations. Unblocks Sol. |
 | HERMES-2 | Example dApp privacy-pattern catalogue → `research/example-dapps-catalogue.md` | Hermes | Unclaimed | Every link verified live. |
