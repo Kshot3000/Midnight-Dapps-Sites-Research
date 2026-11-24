@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b15">
+  <meta name="description" content="DUST Planner Pro models how much DUST a given amount of registered NIGHT can generate over time. Every output is a modelled estimate. This is a planner, not a wallet.">
+  <title>DUST Planner Pro · Midnight Dapps, Sites &amp; Research</title>
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="stylesheet" href="./planner.css?v=1">
+  <script defer type="module" src="./planner.js?v=1"></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="wordmark" href="#top" aria-label="DUST Planner Pro home">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span>DUST Planner Pro <small>Midnight Dapps, Sites &amp; Research</small></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a class="nav-highlight" href="#planner">Planner</a>
+        <a href="#sources">Sources</a>
+        <a href="#support">Support</a>
+      </nav>
+      <a class="repo-link" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research">GitHub</a>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-content">
+        <p class="eyebrow">Open-source work by Kyle Cox</p>
+        <h1 id="hero-title">DUST Planner Pro<br><em>a modelled estimate, never a promise.</em></h1>
+        <p class="hero-intro">Estimate how much DUST a given amount of registered NIGHT can generate, and whether a planned fee spend fits that model. This is a static planner. It does not connect to a wallet, read an indexer, request keys, or submit transactions.</p>
+        <div class="hero-flags">
+          <span class="flag">Every output is a modelled estimate</span>
+          <span class="flag">Preview &amp; Preprod are testnets</span>
+          <span class="flag">Not a live wallet balance</span>
+        </div>
+        <p class="network-note">Model only · testnet tNIGHT / tDUST where you use Preview or Preprod</p>
+      </div>
+    </section>
+
+    <section class="section" id="planner" aria-labelledby="planner-title">
+      <div class="wrap planner-layout">
+        <form class="form-card" id="planner-form" novalidate>
+          <div class="section-intro">
+            <h2 id="planner-title">Plan a DUST balance</h2>
+            <p>Enter a NIGHT amount, whether it is registered for DUST generation, how long it has been generating, and a planned DUST fee spend. The math uses official ledger&nbsp;9 DUST parameters cited under Sources.</p>
+          </div>
+
+          <div class="field">
+            <label for="night-amount">NIGHT amount</label>
+            <input id="night-amount" name="night" type="text" inputmode="decimal" autocomplete="off" value="100" required aria-describedby="night-hint">
+            <p class="hint" id="night-hint">Whole NIGHT or up to 6 decimal places (STAR). On Preview and Preprod testnets this is tNIGHT.</p>
+          </div>
+
+          <label class="check-field" for="registered">
+            <input id="registered" name="registered" type="checkbox" checked>
+            <span>NIGHT is registered for DUST generation. Unregistered NIGHT generates nothing.</span>
+          </label>
+
+          <div class="field">
+            <label for="days-registered">Days since registration</label>
+            <input id="days-registered" name="days" type="text" inputmode="decimal" autocomplete="off" value="7" required aria-describedby="days-hint">
+            <p class="hint" id="days-hint">Modelled as time the generating NIGHT UTXO has been unspent. Official time to cap is 604,815 seconds, about 7 days plus 15 seconds.</p>
+          </div>
+
+          <div class="field">
+            <label for="planned-spend">Planned DUST fee spend</label>
+            <input id="planned-spend" name="spend" type="text" inputmode="decimal" autocomplete="off" value="0" required aria-describedby="spend-hint">
+            <p class="hint" id="spend-hint">A one-time fee amount in DUST, used only to compare against the modelled balance. This planner does not pay a fee. On testnets the display name is tDUST.</p>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button button-primary">Update modelled estimate</button>
+            <button type="reset" class="button button-quiet">Reset example</button>
+          </div>
+        </form>
+
+        <div class="results-panel" aria-labelledby="results-title">
+          <h2 id="results-title">Modelled estimates</h2>
+          <p class="estimate-label" id="estimate-banner">Every figure below is a modelled estimate, not a live wallet or network balance.</p>
+          <div id="form-errors" hidden></div>
+          <div id="unregistered-alert" class="alert" hidden role="alert">
+            <p><strong>Unregistered NIGHT generates no DUST.</strong> This modelled estimate of spendable DUST is 0. The cap and generation rate below are what the same NIGHT amount would reach if it were registered. This planner does not register NIGHT or connect to a wallet.</p>
+          </div>
+          <div id="results" class="results-body">
+            <div class="results-grid">
+              <article class="estimate-card">
+                <h3>Modelled DUST now</h3>
+                <p class="estimate-value" id="out-current">—</p>
+                <p class="estimate-note">Modelled estimate of DUST at the time you entered.</p>
+              </article>
+              <article class="estimate-card">
+                <h3>DUST cap</h3>
+                <p class="estimate-value" id="out-cap">—</p>
+                <p class="estimate-note">Protocol parameter: 5 DUST per 1 NIGHT. Source: DUST architecture and Ledger 9 notes.</p>
+              </article>
+              <article class="estimate-card">
+                <h3>Generation rate</h3>
+                <p class="estimate-value" id="out-rate">—</p>
+                <p class="estimate-note">Modelled estimate from generationDecayRate = 8,267 SPECK per STAR per second.</p>
+              </article>
+              <article class="estimate-card">
+                <h3>Time to cap</h3>
+                <p class="estimate-value" id="out-to-cap">—</p>
+                <p class="estimate-note">Protocol-derived time from empty to cap is 604,815 seconds. The value here is the remaining modelled estimate.</p>
+              </article>
+              <article class="estimate-card">
+                <h3>After planned fee spend</h3>
+                <p class="estimate-value" id="out-remaining">—</p>
+                <p class="estimate-note">Modelled estimate of DUST left after the planned fee. Fees are paid in DUST.</p>
+              </article>
+              <article class="estimate-card">
+                <h3>If backing NIGHT is spent</h3>
+                <p class="estimate-value" id="out-decay">—</p>
+                <p class="estimate-note">Modelled estimate of time for current DUST to decay to zero after the backing NIGHT is spent or deregistered. Decay uses the same rate as generation.</p>
+              </article>
+            </div>
+            <p class="estimate-note" id="out-summary"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sources" aria-labelledby="sources-title">
+      <div class="wrap">
+        <div class="section-intro">
+          <h2 id="sources-title">Official sources and parameters</h2>
+          <p>The planner uses documented ledger&nbsp;9 DUST parameters. It does not copy Ledger&nbsp;8-era numbers, and it does not treat the older tokenomics whitepaper speck ratio as authoritative. These are ledger parameters, not constants: each network stores its own set, and governance can replace it. This page does not read live parameters from an indexer.</p>
+        </div>
+        <div class="planner-layout">
+          <article class="source-card">
+            <h3>Cited docs</h3>
+            <ul>
+              <li><a href="https://docs.midnight.network/guides/manage-dust">Managing DUST for transaction fees</a> — formulas for cap, generation per second, and time to cap; linear generation and decay; fee payment in DUST; a printed Mainnet parameter read at block 2,809,291.</li>
+              <li><a href="https://docs.midnight.network/concepts/dust-architecture">DUST architecture</a> — initial parameters, units (STAR and SPECK), and the 604,815-second time to cap.</li>
+              <li><a href="https://docs.midnight.network/relnotes/ledger-9">Ledger 9 upgrade notes</a> — “The DUST parameters stay the same: 5 DUST per NIGHT at the cap, and about 7 days to reach the cap.”</li>
+            </ul>
+          </article>
+          <article class="source-card">
+            <h3>What this model assumes</h3>
+            <p>One registered, unspent NIGHT UTXO of the amount you enter, generating from empty at the start of the period. Official docs note that spending registered NIGHT, including a transfer to yourself or a change output, starts decay on the old DUST UTXO and creates a new one from zero. Unregistered NIGHT generates nothing. This tool does not model multiple UTXOs, fee-market prices, or a live testnet or mainnet balance.</p>
+          </article>
+        </div>
+        <dl class="param-grid">
+          <div class="param">
+            <dt>nightDustRatio</dt>
+            <dd>5,000,000,000 SPECK per STAR (5 DUST per NIGHT)<span class="cite">Source: DUST architecture initial parameters; DUST guide Mainnet example.</span></dd>
+          </div>
+          <div class="param">
+            <dt>generationDecayRate</dt>
+            <dd>8,267 SPECK per STAR per second<span class="cite">Source: DUST architecture initial parameters; DUST guide Mainnet example.</span></dd>
+          </div>
+          <div class="param">
+            <dt>timeToCapSeconds</dt>
+            <dd>604,815 seconds (about 7 days)<span class="cite">Source: nightDustRatio ÷ generationDecayRate, rounded up; DUST guide Mainnet example; Ledger 9 notes.</span></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer id="support">
+    <div class="wrap section">
+      <div class="section-intro">
+        <h2>Support the work</h2>
+        <p>If you’d like to support these independent builds and research, you can copy either donation address below.</p>
+      </div>
+      <div class="wallets">
+        <div class="wallet" data-wallet="cardano">
+          <div class="wallet-heading">
+            <h3>Cardano <span>ADA</span></h3>
+            <button type="button" class="button copy-button" data-copy="cardano-address" hidden>Copy address<span class="sr-only"> for Cardano donation</span></button>
+          </div>
+          <code id="cardano-address">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        </div>
+        <div class="wallet" data-wallet="midnight">
+          <div class="wallet-heading">
+            <h3>Midnight <span>shielded</span></h3>
+            <button type="button" class="button copy-button" data-copy="midnight-address" hidden>Copy address<span class="sr-only"> for Midnight shielded donation</span></button>
+          </div>
+          <code id="midnight-address">mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q</code>
+        </div>
+      </div>
+      <p id="copy-feedback" class="copy-feedback" role="status"></p>
+      <div class="footer-meta">
+        <div>
+          <p>I’m Kyle Cox · <a href="https://x.com/kshot9000">@kshot9000</a> · <a href="https://github.com/Kshot3000">GitHub</a></p>
+          <p>Independent builder — not affiliated with the Midnight Foundation or IOG.</p>
+        </div>
+        <a href="#top">Back to top</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
