@@ -87,7 +87,8 @@ async function verify() {
     await page.getByRole("button", { name: "Credentials", exact: true }).click();
     assert.equal(await cards.count(), 3);
     assert.equal(await page.getByRole("button", { name: "Credentials", exact: true }).getAttribute("aria-pressed"), "true");
-    await page.getByRole("combobox", { name: "Project status" }).selectOption("spec");
+    const statusFilter = page.getByRole("combobox", { name: "Project status" });
+    await statusFilter.selectOption("spec");
     assert.equal(await cards.count(), 1);
     assert.equal(await cards.first().getAttribute("data-project"), "nightattest");
     await page.getByRole("searchbox").fill("sEaLeD");
@@ -100,7 +101,25 @@ async function verify() {
     assert.equal(await cards.count(), 1);
     assert.equal(await cards.first().getAttribute("data-project"), "sealed-bid-auction");
     await page.getByRole("searchbox").fill("");
+    await statusFilter.selectOption("local-tool");
+    assert.equal(await cards.count(), 1);
+    assert.equal(await cards.first().getAttribute("data-project"), "dust-planner-pro");
+    assert.equal(await cards.first().getByRole("link", { name: "Run locally" }).isVisible(), true);
+    await statusFilter.selectOption("all");
+    assert.equal(await cards.count(), 10);
 
+    const footer = page.locator("footer");
+    for (const [handle, url] of [
+      ["@MidnightNtwrk", "https://x.com/MidnightNtwrk"],
+      ["@IOHK_Charles", "https://x.com/IOHK_Charles"],
+      ["@midnightntwrk", "https://github.com/midnightntwrk"],
+      ["@CharlesHoskinson", "https://github.com/CharlesHoskinson"],
+    ]) {
+      const credit = footer.getByRole("link", { name: handle, exact: true });
+      assert.equal(await credit.isVisible(), true);
+      assert.equal(await credit.getAttribute("href"), url);
+    }
+    await footer.screenshot({ path: path.join(previews, "hub-credits.png") });
     for (const network of ["cardano", "midnight"]) {
       const address = await page.locator("#" + network + "-address").innerText();
       await page.locator('[data-copy="' + network + '-address"]').click();
@@ -108,7 +127,7 @@ async function verify() {
       assert.equal(await page.evaluate(() => navigator.clipboard.readText()), address);
     }
     assert.deepEqual(errors, []);
-    console.log("Desktop: 10 cards, keyboard skip link, combined filters, reset, and both clipboards verified.");
+    console.log("Desktop: 10 cards, keyboard skip link, combined filters, Local tool status, footer credits, and both clipboards verified.");
 
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });

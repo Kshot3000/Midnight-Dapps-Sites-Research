@@ -92,7 +92,9 @@
           </article>
           <article>
             <h3>Verification status</h3>
-            <p>Two CPU proofs verified on Linux, and both modes rendered from the packaged Windows app. The app’s RTX 3090 CUDA run and live Preview sync are pending.</p>
+            <p>Two sample proofs on an RTX 3090 passed stock CPU verification. The cold proof took 1.168 s and the warm proof 0.766 s, with 38 CUDA MSM calls and zero fallbacks.</p>
+            <p>Two CPU proofs also verified on Linux, and both modes rendered from the Windows package. Full-node sync on Preview is pending.</p>
+            <a href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/pull/4#issuecomment-7125334907">RTX 3090 hardware results</a>
             <a href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/actions/runs/45300060466">Build and test results</a>
           </article>
         </div>
@@ -125,6 +127,7 @@
               <option value="idea">Idea</option>
               <option value="spec">Spec</option>
               <option value="building">Building</option>
+              <option value="local-tool">Local tool</option>
               <option value="live-testnet">Live on testnet</option>
             </select>
           </div>
@@ -293,17 +296,17 @@
           </article>
         </li>
 
-        <li class="project" data-project="dust-planner-pro" data-category="tools" data-status="idea">
+        <li class="project" data-project="dust-planner-pro" data-category="tools" data-status="local-tool">
           <article aria-labelledby="dust-planner-pro">
-            <div class="project-meta"><span>Tools</span><span class="status">Idea</span></div>
+            <div class="project-meta"><span>Tools</span><span class="status">Local tool</span></div>
             <h3 id="dust-planner-pro">DUST Planner Pro</h3>
-            <p>Estimate testnet fee capacity and how long registered tNIGHT takes to replenish it.</p>
-            <p class="honesty">Planner concept · Outputs will be labelled estimates</p>
+            <p>Estimate DUST generation and testnet fee capacity from registered tNIGHT using documented parameters.</p>
+            <p class="honesty">Modelled estimates · <a href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/blob/main/apps/dust-planner/README.md">Run locally</a></p>
             <details class="project-details">
               <summary>Privacy design</summary>
               <dl class="primitives">
-                <div><dt>Selective disclosure</dt><dd>Share a fee-readiness result while keeping wallet inputs local.</dd></div>
-                <div><dt>Private state + Compact ZK</dt><dd>Explore a proof of a capacity threshold with verifiable inputs.</dd></div>
+                <div><dt>Selective disclosure</dt><dd>Calculate a fee-readiness estimate from values entered locally in the browser.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>The current model uses local JavaScript. A proof of fee capacity is a future design.</dd></div>
                 <div><dt>Shielded DUST fees</dt><dd>Model spendable DUST from testnet generation and fee parameters.</dd></div>
               </dl>
             </details>
@@ -377,6 +380,7 @@
       <div class="footer-meta">
         <div>
           <p>I’m Kyle Cox · <a href="https://x.com/kshot9000">@kshot9000</a> · <a href="https://github.com/Kshot3000">GitHub</a></p>
+          <p>Project credits · X <a href="https://x.com/MidnightNtwrk">@MidnightNtwrk</a> and <a href="https://x.com/IOHK_Charles">@IOHK_Charles</a> · GitHub <a href="https://github.com/midnightntwrk">@midnightntwrk</a> and <a href="https://github.com/CharlesHoskinson">@CharlesHoskinson</a></p>
           <p>Independent builder — not affiliated with the Midnight Foundation or IOG.</p>
         </div>
         <a href="#top">Back to top</a>
