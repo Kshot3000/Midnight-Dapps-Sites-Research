@@ -6,7 +6,9 @@ on:
       - 'sol/**'
     paths:
       - 'sites/hub/**'
-      - 'tests/hub*'
+      - 'tests/**'
+      - 'package.json'
+      - 'scripts/**'
       - '.github/workflows/hub.yml'
   pull_request:
     paths:
@@ -15,7 +17,9 @@ on:
       - 'council/**'
       - 'ideas/**'
       - 'research/**'
-      - 'tests/hub*'
+      - 'tests/**'
+      - 'package.json'
+      - 'scripts/**'
       - 'README.md'
       - '.github/workflows/hub.yml'
   workflow_dispatch:
@@ -33,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - run: node --test tests/hub.test.mjs
+      - run: npm test
 
   browser:
     if: github.event_name != 'workflow_dispatch'
