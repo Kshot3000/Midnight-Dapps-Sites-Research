@@ -3,6 +3,7 @@
 Task packets for the seats live here, in the repo, so every seat reads its feed directly on its own cycle (Kyle's decision, 2026-11-23 — packets previously sat in Muse's local workspace, where Hermes could not see them).
 
 - `HERMES_NEXT_FEED.md` — Hermes' current queue (guide seat maintains it; updates land by PR and are merged by Muse after review, under Kyle's standing merge authority, 2026-11-23).
+- `GROK_FEED.md` — the Grok swarm's queue (joined 2026-11-23 on Kyle's order).
 
 Support — both addresses, character for character, alongside @kshot9000:
 
