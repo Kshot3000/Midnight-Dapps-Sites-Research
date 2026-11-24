@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090a13">
-  <meta name="description" content="Kyle Cox’s open build queue for Midnight dApps, selective disclosure, and privacy research on the Preview and Preprod testnets.">
+  <meta name="theme-color" content="#090b15">
+  <meta name="description" content="Explore Kyle Cox’s Midnight testnet projects and Midnight Proof Station, a Windows app for running a Preview node and generating CPU and CUDA sample proofs.">
   <title>Midnight Dapps, Sites &amp; Research · Kyle Cox</title>
   <link rel="icon" type="image/png" href="./assets/favicon.png">
-  <link rel="stylesheet" href="./assets/hub.css?v=1">
-  <script defer src="./assets/hub.js?v=1"></script>
+  <link rel="stylesheet" href="./assets/hub.css?v=3">
+  <script defer src="./assets/hub.js?v=2"></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -19,11 +19,12 @@
         <span>Midnight <small>Dapps, Sites &amp; Research</small></span>
       </a>
       <nav aria-label="Main navigation">
+        <a class="nav-highlight" href="#proof-station">Proof Station</a>
         <a href="#catalogue">Catalogue</a>
-        <a href="#how-midnight-works">How it works</a>
+        <a href="#how-midnight-works">Privacy</a>
         <a href="#support">Support</a>
       </nav>
-      <a class="repo-link" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research">GitHub <span aria-hidden="true">↗</span></a>
+      <a class="repo-link" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research">GitHub</a>
     </div>
   </header>
 
@@ -36,12 +37,65 @@
       <div class="wrap hero-content">
         <p class="eyebrow">Open-source work by Kyle Cox</p>
         <h1 id="hero-title">Midnight dApps<br><em>built in the open.</em></h1>
-        <p class="hero-intro">I’m building apps that let people prove a fact while keeping the underlying data private. I share the designs, code, and testnet findings as the work progresses.</p>
+        <p class="hero-intro">I build privacy-preserving apps and developer tools for Midnight. Explore the project designs, open-source code, and progress on testnet.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#catalogue">Explore the catalogue <span aria-hidden="true">↓</span></a>
-          <a class="button button-quiet" href="#testnet">Testnet setup <span aria-hidden="true">↘</span></a>
+          <a class="button button-primary" href="#proof-station">Explore Proof Station</a>
+          <a class="button button-quiet" href="#catalogue">Explore the catalogue</a>
         </div>
-        <p class="network-note"><span aria-hidden="true"></span> Development targets · Preview &amp; Preprod testnets</p>
+        <p class="network-note">Preview &amp; Preprod testnets</p>
+      </div>
+    </section>
+
+    <section class="proof-section section" id="proof-station" aria-labelledby="proof-station-title">
+      <div class="wrap">
+        <div class="proof-feature">
+          <div class="proof-intro">
+            <p class="eyebrow proof-version">Windows x64 · v0.1.2</p>
+            <h2 id="proof-station-title">Midnight<br class="proof-title-break"> Proof Station</h2>
+            <p>Run a Midnight Preview full node and indexer, and generate zero-knowledge sample proofs locally with CPU or NVIDIA CUDA.</p>
+            <div class="proof-actions">
+              <a class="button button-primary" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/actions/runs/45300060466/artifacts/14878013039"
+                 aria-describedby="proof-download-note">Download Windows x64 ZIP</a>
+              <a class="button button-quiet" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/blob/main/apps/proof-station/README.md">Setup guide</a>
+            </div>
+            <p class="proof-download-note" id="proof-download-note">The ZIP requires a GitHub sign-in.</p>
+          </div>
+
+          <figure class="proof-screen">
+            <figcaption class="proof-screen-bar">
+              <span>Windows Proof Lab</span>
+              <div class="proof-modes" id="proof-modes" role="group" aria-label="Proof Lab screenshots" hidden>
+                <button type="button" aria-pressed="true" aria-controls="proof-preview-cpu">CPU</button>
+                <button type="button" aria-pressed="false" aria-controls="proof-preview-cuda">NVIDIA CUDA</button>
+              </div>
+            </figcaption>
+            <a class="proof-preview" id="proof-preview-cpu" href="./assets/proof-station-cpu.webp" aria-label="View full-size CPU screenshot">
+              <img src="./assets/proof-station-cpu.webp" width="1028" height="749" loading="lazy" decoding="async"
+                   alt="Midnight Proof Station dashboard showing the Preview node controls and CPU Proof Lab mode.">
+            </a>
+            <a class="proof-preview" id="proof-preview-cuda" href="./assets/proof-station-cuda.webp" aria-label="View full-size NVIDIA CUDA screenshot" hidden>
+              <img src="./assets/proof-station-cuda.webp" width="1028" height="749" loading="lazy" decoding="async"
+                   alt="Midnight Proof Station dashboard showing the NVIDIA device picker and CUDA Proof Lab mode.">
+            </a>
+          </figure>
+        </div>
+
+        <div class="proof-notes">
+          <article>
+            <h3>Preview services</h3>
+            <p>Monitor the full node and indexer, and run the released CPU prover for Preview wallet transactions. Node sync requires a synced Cardano Preview db-sync connection.</p>
+          </article>
+          <article>
+            <h3>CPU and CUDA proving</h3>
+            <p>Both modes run the same synthetic circuit in WSL2 and verify a cold and a warm proof. CUDA also reports device calls and peak tracked VRAM.</p>
+            <a href="https://github.com/Kshot3000/Midnight-Prover-Gpu-Tests-for-BIG-HOSSSS-/blob/50fe68f89404fe38e13566d603f70115d4287b2e/RESULTS.md">Original RTX 3090 benchmark</a>
+          </article>
+          <article>
+            <h3>Verification status</h3>
+            <p>Two CPU proofs verified on Linux, and both modes rendered from the packaged Windows app. The app’s RTX 3090 CUDA run and live Preview sync are pending.</p>
+            <a href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/actions/runs/45300060466">Build and test results</a>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -92,11 +146,14 @@
               <p>An issuer grants a private credential. The holder proves a fact, like being over 21 or a member in good standing, and the verifier receives a yes/no result.</p>
               <p class="honesty">Grant proposal drafted · Testnet build pending</p>
             </div>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Share the result of a single credential check.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Prove the issuer’s attestation and unrevoked status against public commitment and revocation state.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Pay for on-chain credential and revocation updates with shielded DUST.</dd></div>
-            </dl>
+            <details class="project-details" open>
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Share the result of a single credential check.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Prove the issuer’s attestation and unrevoked status against public commitment and revocation state.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Pay for on-chain credential and revocation updates with shielded DUST.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -106,11 +163,14 @@
             <h3 id="private-voting">Private Voting</h3>
             <p>Cast a private ballot with proven eligibility and publish an auditable tally.</p>
             <p class="honesty">Concept · Ballot and tally design pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Show eligibility and the final tally.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Check ballot validity and enforce one vote per eligible credential.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Cover ballot submission and tally calls.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Show eligibility and the final tally.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Check ballot validity and enforce one vote per eligible credential.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Cover ballot submission and tally calls.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -120,11 +180,14 @@
             <h3 id="sealed-bid-auction">Sealed-Bid Auction</h3>
             <p>Keep bids private through closing, then prove the winner while keeping losing bids private.</p>
             <p class="honesty">Concept · Settlement design pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Reveal the winner at close.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Check the winning bid against the committed set.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Cover bid commitments and the closing transaction.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Reveal the winner at close.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Check the winning bid against the committed set.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Cover bid commitments and the closing transaction.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -134,11 +197,14 @@
             <h3 id="confidential-freelance-escrow">Confidential Freelance Escrow</h3>
             <p>Prove a milestone is funded and delivery approved while keeping rates and work history private.</p>
             <p class="honesty">Concept · Asset and dispute design pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Show whether funding and delivery conditions are met.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Verify private milestone terms against escrow commitments.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Cover funding and release calls.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Show whether funding and delivery conditions are met.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Verify private milestone terms against escrow commitments.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Cover funding and release calls.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -148,11 +214,14 @@
             <h3 id="eligibility-without-kyc">Eligibility-Without-KYC Widget</h3>
             <p>Give a site a yes/no check for age, residency, or a licence using an issuer’s attestation.</p>
             <p class="honesty">Concept · Issuer requirements pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Send the eligibility result with a proof.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Check the attestation using private credential inputs.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Cover any on-chain issuer registry updates.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Send the eligibility result with a proof.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Check the attestation using private credential inputs.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Cover any on-chain issuer registry updates.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -162,11 +231,14 @@
             <h3 id="private-payroll-proof">Private Payroll Proof</h3>
             <p>Prove employment, tenure, or salary above a threshold while keeping identity and exact pay private.</p>
             <p class="honesty">Concept · Attestation design pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Share the outcome of a single employment or pay check.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Use payroll attestation fields as private circuit inputs.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Cover publishing or revoking a commitment.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Share the outcome of a single employment or pay check.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Use payroll attestation fields as private circuit inputs.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Cover publishing or revoking a commitment.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -176,11 +248,14 @@
             <h3 id="privacy-auditor">“What Does This dApp See?”</h3>
             <p>An off-chain privacy auditor for reviewing what a dApp requests, proves, and shares.</p>
             <p class="honesty">Audit tool concept · Based on inspectable evidence</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Compare requested fields with the verifier’s public inputs.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Inspect circuit disclosures, public state writes, and events.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Identify fee spends and accompanying public metadata.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Compare requested fields with the verifier’s public inputs.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Inspect circuit disclosures, public state writes, and events.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Identify fee spends and accompanying public metadata.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -190,11 +265,14 @@
             <h3 id="privacy-score-directory">Privacy Score Directory</h3>
             <p>Compare Midnight dApps by the data they collect and the claims their proofs support.</p>
             <p class="honesty">Directory concept · Scoring rubric pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Record which facts a dApp intentionally reveals.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Link privacy claims to inspectable circuits and verified testnet evidence.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Record how testnet fees are paid and which metadata is visible.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Record which facts a dApp intentionally reveals.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Link privacy claims to inspectable circuits and verified testnet evidence.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Record how testnet fees are paid and which metadata is visible.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -204,11 +282,14 @@
             <h3 id="compact-playground">Compact Playground + Snippet Library</h3>
             <p>Learn Compact through small examples for credentials, voting, sealed bids, and escrow.</p>
             <p class="honesty">Learning tool concept · Examples pending</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Change a circuit output and see what it reveals.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Run private-input examples with a local proof server.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Walk through fee setup for examples that submit to testnet.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Change a circuit output and see what it reveals.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Run private-input examples with a local proof server.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Walk through fee setup for examples that submit to testnet.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
 
@@ -218,11 +299,14 @@
             <h3 id="dust-planner-pro">DUST Planner Pro</h3>
             <p>Estimate testnet fee capacity and how long registered tNIGHT takes to replenish it.</p>
             <p class="honesty">Planner concept · Outputs will be labelled estimates</p>
-            <dl class="primitives">
-              <div><dt>Selective disclosure</dt><dd>Share a fee-readiness result while keeping wallet inputs local.</dd></div>
-              <div><dt>Private state + Compact ZK</dt><dd>Explore a proof of a capacity threshold with verifiable inputs.</dd></div>
-              <div><dt>Shielded DUST fees</dt><dd>Model spendable DUST from testnet generation and fee parameters.</dd></div>
-            </dl>
+            <details class="project-details">
+              <summary>Privacy design</summary>
+              <dl class="primitives">
+                <div><dt>Selective disclosure</dt><dd>Share a fee-readiness result while keeping wallet inputs local.</dd></div>
+                <div><dt>Private state + Compact ZK</dt><dd>Explore a proof of a capacity threshold with verifiable inputs.</dd></div>
+                <div><dt>Shielded DUST fees</dt><dd>Model spendable DUST from testnet generation and fee parameters.</dd></div>
+              </dl>
+            </details>
           </article>
         </li>
       </ul>
@@ -231,7 +315,7 @@
     <section class="section mechanics" id="how-midnight-works" aria-labelledby="mechanics-title">
       <div class="wrap">
         <div class="section-intro">
-          <h2 id="mechanics-title">How Midnight is actually used here</h2>
+          <h2 id="mechanics-title">How Midnight is used here</h2>
           <p>The catalogue describes planned uses. I’ll mark an app live on testnet when there’s a verified deployment and reproducible evidence.</p>
         </div>
         <div class="mechanics-grid">
@@ -242,12 +326,12 @@
           <article>
             <h3>Private state + public proof</h3>
             <p>A Compact circuit can use data from a local private store. The ledger verifies a zero-knowledge proof against public inputs. The app’s design determines what appears in public outputs and state.</p>
-            <a href="https://docs.midnight.network/guides/build-a-private-smart-contract">Compact privacy guide <span aria-hidden="true">↗</span></a>
+            <a href="https://docs.midnight.network/guides/build-a-private-smart-contract">Compact privacy guide</a>
           </article>
           <article>
             <h3>Shielded fees in DUST</h3>
             <p>Registered NIGHT generates the DUST that pays fees. The fee amount is public. A shielded DUST spend keeps the fee input hidden, while timing and other public transaction details can still be observable.</p>
-            <a href="https://docs.midnight.network/guides/manage-dust">DUST registration guide <span aria-hidden="true">↗</span></a>
+            <a href="https://docs.midnight.network/guides/manage-dust">DUST registration guide</a>
           </article>
         </div>
 
@@ -255,7 +339,7 @@
           <div>
             <h3 id="testnet-title">Testnet setup</h3>
             <p>This catalogue runs in your browser. The checklist applies when testing a dApp on Midnight.</p>
-            <a href="https://docs.midnight.network/relnotes/support-matrix">Check compatible versions <span aria-hidden="true">↗</span></a>
+            <a href="https://docs.midnight.network/relnotes/support-matrix">Check compatible versions</a>
           </div>
           <ol>
             <li>Set Lace to the same <strong>Preview or Preprod testnet</strong> as the dApp. Use testnet tNIGHT and synthetic data.</li>
@@ -295,7 +379,7 @@
           <p>I’m Kyle Cox · <a href="https://x.com/kshot9000">@kshot9000</a> · <a href="https://github.com/Kshot3000">GitHub</a></p>
           <p>Independent builder — not affiliated with the Midnight Foundation or IOG.</p>
         </div>
-        <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+        <a href="#top">Back to top</a>
       </div>
     </div>
   </footer>

@@ -9,7 +9,8 @@ const emptyState = document.querySelector("#empty-state");
 const clear = document.querySelector("#clear-filters");
 const projects = [...document.querySelectorAll("[data-project]")].map((card) => ({
   card,
-  text: card.textContent.toLowerCase().replace(/\s+/g, " "),
+  text: [...card.querySelectorAll(".project-meta, .eyebrow, h3, h3 + p, .honesty, .primitives")]
+    .map((part) => part.textContent).join(" ").toLowerCase().replace(/\s+/g, " "),
 }));
 
 let selectedCategory = "all";
@@ -55,6 +56,27 @@ clear.addEventListener("click", () => {
 applyFilters();
 filters.hidden = false;
 count.hidden = false;
+
+const proofModes = document.querySelector("#proof-modes");
+
+if (proofModes) {
+  const modes = [...proofModes.querySelectorAll("button")].map((button) => ({
+    button,
+    preview: document.getElementById(button.getAttribute("aria-controls")),
+  }));
+
+  for (const { button } of modes) {
+    button.addEventListener("click", () => {
+      for (const mode of modes) {
+        const selected = mode.button === button;
+        mode.button.setAttribute("aria-pressed", String(selected));
+        mode.preview.hidden = !selected;
+      }
+    });
+  }
+
+  proofModes.hidden = false;
+}
 
 const copyFeedback = document.querySelector("#copy-feedback");
 

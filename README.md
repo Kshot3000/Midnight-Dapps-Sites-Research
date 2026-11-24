@@ -10,12 +10,14 @@ I’m Kyle Cox. I build and publish open-source Midnight dApps, sites, and priva
 
 The [hub](sites/hub/) presents the ten projects in [the backlog](ideas/backlog.md). NightAttest, my credential dApp, is at the spec stage. I’ll label a dApp live on testnet once its deployment and proof flow can be independently verified.
 
+The [Proof Station showcase](sites/hub/index.html#proof-station) includes the Windows build, CPU and NVIDIA CUDA screenshots, and verification results. [Proof Station setup guide](apps/proof-station/README.md)
+
 ## Repository
 
 | Directory | Contents |
 | --- | --- |
 | [sites/](sites/) | Websites, starting with the [static hub](sites/hub/) |
-| [apps/](apps/) | dApp implementations |
+| [apps/](apps/) | dApp implementations and [Midnight Proof Station](apps/proof-station/) |
 | [research/](research/) | Sourced research briefs |
 | [ideas/](ideas/) | The [build backlog](ideas/backlog.md) |
 | [council/](council/) | [Claims](council/board.md), specs, and [submission log](council/submissions.md) |
