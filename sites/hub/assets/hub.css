@@ -273,7 +273,7 @@ h2 {
 
 .proof-intro h2 {
   margin-top: .65rem;
-  font-size: clamp(2.35rem, 5.1vw, 4.4rem);
+  font-size: clamp(2.35rem, 4.8vw, 3.95rem);
 }
 
 .proof-intro h2 + p {

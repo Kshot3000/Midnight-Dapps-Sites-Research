@@ -142,7 +142,14 @@ async function verify() {
     assert.equal(await phone.evaluate(() => location.hash), "#catalogue");
     await phone.getByRole("button", { name: "Tools", exact: true }).tap();
     assert.equal(await phone.locator("[data-project]:visible").count(), 4);
-    console.log("Mobile: mobile hero image, navigation, and touch filtering verified.");
+    await phone.getByRole("link", { name: "Explore Proof Station", exact: true }).tap();
+    assert.equal(await phone.evaluate(() => location.hash), "#proof-station");
+    const phoneCuda = phone.getByRole("button", { name: "NVIDIA CUDA", exact: true });
+    await phoneCuda.tap();
+    assert.equal(await phoneCuda.getAttribute("aria-pressed"), "true");
+    await phone.waitForFunction(() => document.querySelector("#proof-preview-cuda img").naturalWidth === 1028);
+    await phone.screenshot({ path: path.join(previews, "proof-station-mobile.png") });
+    console.log("Mobile: hero image, navigation, touch filtering, and CUDA preview verified.");
 
     const rejected = await browser.newContext();
     await rejected.addInitScript(() => {
