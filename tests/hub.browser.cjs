@@ -159,7 +159,7 @@ async function verify() {
     });
     const fallback = await rejected.newPage();
     await fallback.goto(origin);
-    await fallback.getByRole("button", { name: "Copy Midnight shielded donation address" }).click();
+    await fallback.getByRole("button", { name: "Copy address for the Midnight shielded donation" }).click();
     assert.equal(await fallback.evaluate(() => window.getSelection().toString()), await fallback.locator("#midnight-address").innerText());
     assert.match(await fallback.locator("#copy-feedback").innerText(), /address selected/);
 
