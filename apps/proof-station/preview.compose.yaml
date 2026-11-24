@@ -1,0 +1,71 @@
+name: midnight-proof-station
+
+services:
+  node:
+    image: midnightntwrk/midnight-node:2.1.101
+    environment:
+      CFG_PRESET: preview
+      BASE_PATH: /node/chain
+      CARDANO_SECURITY_PARAMETER: "432"
+      DB_SYNC_POSTGRES_CONNECTION_STRING: "${MIDNIGHT_STATION_DB_URL:-}"
+    command:
+      - --base-path
+      - /node/chain
+      - --name
+      - midnight-proof-station
+      - --rpc-external
+      - --rpc-methods
+      - Safe
+      - --state-pruning
+      - archive
+      - --blocks-pruning
+      - archive
+      - --pool-limit
+      - "35"
+      - --bootnodes
+      - /dns/bootnode-1.preview.midnight.network/tcp/30333/ws/p2p/12D3KooWK66i7dtGVNSwDh9tTeqov1q6LSdWsRLJvTyzTCaywYgK
+      - /dns/bootnode-2.preview.midnight.network/tcp/30333/ws/p2p/12D3KooWHqFfXFwb7WW4jwR8pr4BEf562v5M6c8K3CXAJq4Wx6ym
+      - --no-private-ip
+    ports:
+      - "127.0.0.1:9944:9944"
+    volumes:
+      - node-data:/node/chain
+    stop_grace_period: 45s
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl -fsS --max-time 4 -H 'Content-Type: application/json'
+          -d '{"jsonrpc":"2.0","id":1,"method":"chain_getBlockHash","params":[1]}'
+          http://127.0.0.1:9944 | jq -e '.result | type == "string" and startswith("0x")'
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 40
+
+  indexer:
+    depends_on:
+      node:
+        condition: service_healthy
+    image: midnightntwrk/indexer-standalone:4.4.101
+    environment:
+      APP__APPLICATION__NETWORK_ID: preview
+      APP__INFRA__NODE__URL: ws://node:9944
+      APP__INFRA__SPO_NODE__URL: ws://node:9944
+      APP__INFRA__SPO_NODE__BLOCKFROST_ID: unused-spo
+      APP__INFRA__SECRET: "${MIDNIGHT_STATION_INDEXER_SECRET:-}"
+    ports:
+      - "127.0.0.1:8088:8088"
+    volumes:
+      - indexer-data:/data
+    stop_grace_period: 30s
+
+  proof-server:
+    image: midnightntwrk/proof-server:9.0.2
+    ports:
+      - "127.0.0.1:6300:6300"
+    stop_grace_period: 20s
+
+volumes:
+  node-data:
+  indexer-data:

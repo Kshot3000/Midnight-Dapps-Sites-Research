@@ -1,0 +1,11 @@
+services:
+  node:
+    environment:
+      SSL_ROOT_CERT: /run/station-db-ca.pem
+    volumes:
+      - type: bind
+        source: "${MIDNIGHT_STATION_DB_CA:?Select a database CA certificate}"
+        target: /run/station-db-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false

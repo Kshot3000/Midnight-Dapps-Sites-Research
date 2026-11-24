@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a13">
+  <meta name="description" content="Kyle Cox’s open build queue for Midnight dApps, selective disclosure, and privacy research on the Preview and Preprod testnets.">
+  <title>Midnight Dapps, Sites &amp; Research · Kyle Cox</title>
+  <link rel="icon" type="image/png" href="./assets/favicon.png">
+  <link rel="stylesheet" href="./assets/hub.css?v=1">
+  <script defer src="./assets/hub.js?v=1"></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="wordmark" href="#top" aria-label="Midnight Dapps, Sites and Research home">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span>Midnight <small>Dapps, Sites &amp; Research</small></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#catalogue">Catalogue</a>
+        <a href="#how-midnight-works">How it works</a>
+        <a href="#support">Support</a>
+      </nav>
+      <a class="repo-link" href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research">GitHub <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <picture class="hero-art" aria-hidden="true">
+        <source media="(max-width: 44rem)" srcset="./assets/eclipse-mobile.webp">
+        <img src="./assets/eclipse.webp" width="1280" height="853" alt="" fetchpriority="high">
+      </picture>
+      <div class="wrap hero-content">
+        <p class="eyebrow">Open-source work by Kyle Cox</p>
+        <h1 id="hero-title">Midnight dApps<br><em>built in the open.</em></h1>
+        <p class="hero-intro">I’m building apps that let people prove a fact while keeping the underlying data private. I share the designs, code, and testnet findings as the work progresses.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#catalogue">Explore the catalogue <span aria-hidden="true">↓</span></a>
+          <a class="button button-quiet" href="#testnet">Testnet setup <span aria-hidden="true">↘</span></a>
+        </div>
+        <p class="network-note"><span aria-hidden="true"></span> Development targets · Preview &amp; Preprod testnets</p>
+      </div>
+    </section>
+
+    <section class="wrap section catalogue" id="catalogue" aria-labelledby="catalogue-title">
+      <div class="section-intro">
+        <h2 id="catalogue-title">Project catalogue</h2>
+        <p>My build queue in order, with the privacy design and testnet status of each project.</p>
+      </div>
+
+      <div class="filters" id="catalogue-filters" hidden>
+        <div class="category-filters" role="group" aria-label="Project category">
+          <button type="button" data-filter="all" aria-pressed="true">All projects</button>
+          <button type="button" data-filter="credentials" aria-pressed="false">Credentials</button>
+          <button type="button" data-filter="governance" aria-pressed="false">Governance</button>
+          <button type="button" data-filter="commerce" aria-pressed="false">Commerce</button>
+          <button type="button" data-filter="tools" aria-pressed="false">Tools</button>
+        </div>
+        <div class="filter-fields">
+          <div class="search-field">
+            <label class="sr-only" for="project-search">Search the catalogue</label>
+            <input id="project-search" type="search" placeholder="Search projects" autocomplete="off">
+          </div>
+          <div class="status-field">
+            <label class="sr-only" for="project-status">Project status</label>
+            <select id="project-status">
+              <option value="all">Any status</option>
+              <option value="idea">Idea</option>
+              <option value="spec">Spec</option>
+              <option value="building">Building</option>
+              <option value="live-testnet">Live on testnet</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <p class="results" id="result-count" role="status" hidden></p>
+      <div class="empty-state" id="empty-state" hidden>
+        <p>There are no projects that match these filters.</p>
+        <button id="clear-filters" class="button button-quiet" type="button">Clear filters</button>
+      </div>
+
+      <ul class="project-grid" id="projects" role="list">
+        <li class="project project-featured" data-project="nightattest" data-category="credentials" data-status="spec">
+          <article aria-labelledby="nightattest">
+            <div class="project-summary">
+              <div class="project-meta"><span>Credentials</span><span class="status">Spec</span></div>
+              <p class="eyebrow">Next build · SOL-2</p>
+              <h3 id="nightattest">NightAttest</h3>
+              <p>An issuer grants a private credential. The holder proves a fact, like being over 21 or a member in good standing, and the verifier receives a yes/no result.</p>
+              <p class="honesty">Grant proposal drafted · Testnet build pending</p>
+            </div>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Share the result of a single credential check.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Prove the issuer’s attestation and unrevoked status against public commitment and revocation state.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Pay for on-chain credential and revocation updates with shielded DUST.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="private-voting" data-category="governance" data-status="idea">
+          <article aria-labelledby="private-voting">
+            <div class="project-meta"><span>Governance</span><span class="status">Idea</span></div>
+            <h3 id="private-voting">Private Voting</h3>
+            <p>Cast a private ballot with proven eligibility and publish an auditable tally.</p>
+            <p class="honesty">Concept · Ballot and tally design pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Show eligibility and the final tally.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Check ballot validity and enforce one vote per eligible credential.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Cover ballot submission and tally calls.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="sealed-bid-auction" data-category="commerce" data-status="idea">
+          <article aria-labelledby="sealed-bid-auction">
+            <div class="project-meta"><span>Commerce</span><span class="status">Idea</span></div>
+            <h3 id="sealed-bid-auction">Sealed-Bid Auction</h3>
+            <p>Keep bids private through closing, then prove the winner while keeping losing bids private.</p>
+            <p class="honesty">Concept · Settlement design pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Reveal the winner at close.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Check the winning bid against the committed set.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Cover bid commitments and the closing transaction.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="confidential-freelance-escrow" data-category="commerce" data-status="idea">
+          <article aria-labelledby="confidential-freelance-escrow">
+            <div class="project-meta"><span>Commerce</span><span class="status">Idea</span></div>
+            <h3 id="confidential-freelance-escrow">Confidential Freelance Escrow</h3>
+            <p>Prove a milestone is funded and delivery approved while keeping rates and work history private.</p>
+            <p class="honesty">Concept · Asset and dispute design pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Show whether funding and delivery conditions are met.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Verify private milestone terms against escrow commitments.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Cover funding and release calls.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="eligibility-without-kyc" data-category="credentials" data-status="idea">
+          <article aria-labelledby="eligibility-without-kyc">
+            <div class="project-meta"><span>Credentials</span><span class="status">Idea</span></div>
+            <h3 id="eligibility-without-kyc">Eligibility-Without-KYC Widget</h3>
+            <p>Give a site a yes/no check for age, residency, or a licence using an issuer’s attestation.</p>
+            <p class="honesty">Concept · Issuer requirements pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Send the eligibility result with a proof.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Check the attestation using private credential inputs.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Cover any on-chain issuer registry updates.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="private-payroll-proof" data-category="credentials" data-status="idea">
+          <article aria-labelledby="private-payroll-proof">
+            <div class="project-meta"><span>Credentials</span><span class="status">Idea</span></div>
+            <h3 id="private-payroll-proof">Private Payroll Proof</h3>
+            <p>Prove employment, tenure, or salary above a threshold while keeping identity and exact pay private.</p>
+            <p class="honesty">Concept · Attestation design pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Share the outcome of a single employment or pay check.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Use payroll attestation fields as private circuit inputs.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Cover publishing or revoking a commitment.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="privacy-auditor" data-category="tools" data-status="idea">
+          <article aria-labelledby="privacy-auditor">
+            <div class="project-meta"><span>Tools</span><span class="status">Idea</span></div>
+            <h3 id="privacy-auditor">“What Does This dApp See?”</h3>
+            <p>An off-chain privacy auditor for reviewing what a dApp requests, proves, and shares.</p>
+            <p class="honesty">Audit tool concept · Based on inspectable evidence</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Compare requested fields with the verifier’s public inputs.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Inspect circuit disclosures, public state writes, and events.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Identify fee spends and accompanying public metadata.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="privacy-score-directory" data-category="tools" data-status="idea">
+          <article aria-labelledby="privacy-score-directory">
+            <div class="project-meta"><span>Tools</span><span class="status">Idea</span></div>
+            <h3 id="privacy-score-directory">Privacy Score Directory</h3>
+            <p>Compare Midnight dApps by the data they collect and the claims their proofs support.</p>
+            <p class="honesty">Directory concept · Scoring rubric pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Record which facts a dApp intentionally reveals.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Link privacy claims to inspectable circuits and verified testnet evidence.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Record how testnet fees are paid and which metadata is visible.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="compact-playground" data-category="tools" data-status="idea">
+          <article aria-labelledby="compact-playground">
+            <div class="project-meta"><span>Tools</span><span class="status">Idea</span></div>
+            <h3 id="compact-playground">Compact Playground + Snippet Library</h3>
+            <p>Learn Compact through small examples for credentials, voting, sealed bids, and escrow.</p>
+            <p class="honesty">Learning tool concept · Examples pending</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Change a circuit output and see what it reveals.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Run private-input examples with a local proof server.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Walk through fee setup for examples that submit to testnet.</dd></div>
+            </dl>
+          </article>
+        </li>
+
+        <li class="project" data-project="dust-planner-pro" data-category="tools" data-status="idea">
+          <article aria-labelledby="dust-planner-pro">
+            <div class="project-meta"><span>Tools</span><span class="status">Idea</span></div>
+            <h3 id="dust-planner-pro">DUST Planner Pro</h3>
+            <p>Estimate testnet fee capacity and how long registered tNIGHT takes to replenish it.</p>
+            <p class="honesty">Planner concept · Outputs will be labelled estimates</p>
+            <dl class="primitives">
+              <div><dt>Selective disclosure</dt><dd>Share a fee-readiness result while keeping wallet inputs local.</dd></div>
+              <div><dt>Private state + Compact ZK</dt><dd>Explore a proof of a capacity threshold with verifiable inputs.</dd></div>
+              <div><dt>Shielded DUST fees</dt><dd>Model spendable DUST from testnet generation and fee parameters.</dd></div>
+            </dl>
+          </article>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section mechanics" id="how-midnight-works" aria-labelledby="mechanics-title">
+      <div class="wrap">
+        <div class="section-intro">
+          <h2 id="mechanics-title">How Midnight is actually used here</h2>
+          <p>The catalogue describes planned uses. I’ll mark an app live on testnet when there’s a verified deployment and reproducible evidence.</p>
+        </div>
+        <div class="mechanics-grid">
+          <article>
+            <h3>Selective disclosure</h3>
+            <p>Prove the fact the verifier asks for. An age check can reveal that you’re over 21 while keeping your birth date private.</p>
+          </article>
+          <article>
+            <h3>Private state + public proof</h3>
+            <p>A Compact circuit can use data from a local private store. The ledger verifies a zero-knowledge proof against public inputs. The app’s design determines what appears in public outputs and state.</p>
+            <a href="https://docs.midnight.network/guides/build-a-private-smart-contract">Compact privacy guide <span aria-hidden="true">↗</span></a>
+          </article>
+          <article>
+            <h3>Shielded fees in DUST</h3>
+            <p>Registered NIGHT generates the DUST that pays fees. The fee amount is public. A shielded DUST spend keeps the fee input hidden, while timing and other public transaction details can still be observable.</p>
+            <a href="https://docs.midnight.network/guides/manage-dust">DUST registration guide <span aria-hidden="true">↗</span></a>
+          </article>
+        </div>
+
+        <div class="testnet" id="testnet" aria-labelledby="testnet-title">
+          <div>
+            <h3 id="testnet-title">Testnet setup</h3>
+            <p>This catalogue runs in your browser. The checklist applies when testing a dApp on Midnight.</p>
+            <a href="https://docs.midnight.network/relnotes/support-matrix">Check compatible versions <span aria-hidden="true">↗</span></a>
+          </div>
+          <ol>
+            <li>Set Lace to the same <strong>Preview or Preprod testnet</strong> as the dApp. Use testnet tNIGHT and synthetic data.</li>
+            <li><strong>Register tNIGHT for DUST generation</strong> and check that spendable DUST is available before sending a testnet transaction.</li>
+            <li><strong>Run the matching local proof server.</strong> The planned indexer setup is self-hosted for Preview and Blockfrost Midnight for Preprod.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="support">
+    <div class="wrap section">
+      <div class="section-intro">
+        <h2>Support the work</h2>
+        <p>If you’d like to support my independent builds and research, you can copy either donation address below.</p>
+      </div>
+      <div class="wallets">
+        <div class="wallet" data-wallet="cardano">
+          <div class="wallet-heading">
+            <h3>Cardano <span>ADA</span></h3>
+            <button type="button" class="button copy-button" data-copy="cardano-address" aria-label="Copy Cardano donation address" hidden>Copy address</button>
+          </div>
+          <code id="cardano-address">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        </div>
+        <div class="wallet" data-wallet="midnight">
+          <div class="wallet-heading">
+            <h3>Midnight <span>shielded</span></h3>
+            <button type="button" class="button copy-button" data-copy="midnight-address" aria-label="Copy Midnight shielded donation address" hidden>Copy address</button>
+          </div>
+          <code id="midnight-address">mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q</code>
+        </div>
+      </div>
+      <p id="copy-feedback" class="copy-feedback" role="status"></p>
+      <div class="footer-meta">
+        <div>
+          <p>I’m Kyle Cox · <a href="https://x.com/kshot9000">@kshot9000</a> · <a href="https://github.com/Kshot3000">GitHub</a></p>
+          <p>Independent builder — not affiliated with the Midnight Foundation or IOG.</p>
+        </div>
+        <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

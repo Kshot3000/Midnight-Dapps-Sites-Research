@@ -13,14 +13,14 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 | ID | Task | Seat | Status | Branch / notes |
 | --- | --- | --- | --- | --- |
 | SEED-1 | Initial `main`: README, structure, board, backlog | Muse | DONE 2026-11-23 | Direct seed commit on Kyle's order — GitHub requires an initial `main` before any PR can be opened. One-time only; all later work is by PR. |
-| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | SUBMITTED — PR #2 open, reviewed clean by Muse 2026-11-23 (tests run on the PR tree: 8/8) | Branch `sol/sol-1-hub-v1`. Awaiting Kyle's merge. |
+| SOL-1 | Hub site v1 in `sites/hub/` + repo catalogue/tests | Sol | DONE — PR #2 merged 2026-11-23 | Hub tests 8/8 pass on merged `main`. GitHub Pages enablement is the remaining step to a live URL. |
 | SOL-2 | NightAttest: Compact contract + three-role web UI (issuer / holder / verifier) | Sol | Queued — after SOL-1 | Flagship. Grant proposal already drafted ($7,500 / 8 weeks). |
-| HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | SUBMITTED — draft PR #3, reviewed clean by Muse 2026-11-23 | Official sources only, versions + source URLs + stale-guide locations. Unblocks Sol. Awaiting Kyle's merge. |
-| HERMES-2 | Example dApp privacy-pattern catalogue → `research/example-dapps-catalogue.md` | Hermes | CLAIMED by Hermes 2026-11-23 — in progress | Branch `hermes/hermes-2-catalogue`. Every link verified live. |
-| HERMES-3 | NightAttest research pack → `research/nightattest-pack.md` | Hermes | Unclaimed | Research only — no contract code, no UI. |
+| HERMES-1 | Live stack verification brief → `research/stack-versions.md` | Hermes | DONE — PR #3 merged 2026-11-23 | Official sources only, versions + source URLs + stale-guide locations. The team's pin sheet. |
+| HERMES-2 | Example dApp privacy-pattern catalogue → `research/example-patterns.md` | Hermes | CLAIMED by Hermes 2026-11-23 — in progress | Branch `hermes/hermes-2-catalogue`. Full packet: `council/feed/HERMES_NEXT_FEED.md`. |
+| HERMES-3 | Hands-on local stack verification → `research/local-stack-verification.md` | Hermes | Queued — after HERMES-2 | REVISED 2026-11-23 (Kyle approved): re-pointed from the archived `midnight-local-dev` to the `midnight-examples` local environment. Hardware task (Hermes' machine). Supersedes the earlier NightAttest-pack definition of HERMES-3 — that research folds into SOL-2 prep. Full packet: `council/feed/HERMES_NEXT_FEED.md`. |
 | HERMES-4 | Compact pattern library outline → `research/compact-patterns-outline.md` | Hermes | Unclaimed | Outline only. |
 | HERMES-5 | DUST registration explainer research → `research/dust-registration.md` | Hermes | Unclaimed | Quote official sources; label models/estimates. |
-| SOL-GPU-1 | Windows Preview full-node GUI with a local CUDA proof lab (`apps/proof-station/`) | Sol | SUBMITTED — draft PR #4, reviewed clean by Muse 2026-11-23 | Branch `sol/midnight-proof-station`. Attribution exact in GUI + README; stack pins match the verified matrix (node 2.1.101, indexer 4.4.101, proof server 9.0.2); tests run on the PR tree (attribution PASS, 6/6 proof fixtures) and CI green. Still open: real CUDA run on the RTX 3090 and a Preview sync check against Cardano Preview db-sync — both need Kyle's PC. |
+| SOL-GPU-1 | Windows Preview full-node GUI with a local CUDA proof lab (`apps/proof-station/`) | Sol | DONE — PR #4 merged 2026-11-23 (v0.1.2) | Attribution exact in GUI + README; stack pins match the verified matrix (node 2.1.101, indexer 4.4.101, proof server 9.0.2); CI green. Follow-ups still open: real CUDA run results on the RTX 3090 (claimed by Hermes on PR #4) and a Preview sync check against Cardano Preview db-sync — both need Kyle's PC. |
 
 ## Proposals
 
@@ -35,3 +35,10 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 - Verify live versions before coding (Compact toolchain, Midnight.js, wallet SDK, proof server) — version mismatch is the #1 Midnight failure point; do not copy stale Ledger 8-era examples.
 - Preview / Preprod testnet only, labelled testnet. No mainnet funds, no wallet signing, no API keys or sign-ups — flag those exact steps for Kyle.
 - Honesty: no demo/modelled data presented as live.
+
+## Submissions log
+
+| When (UTC) | Seat | Task | PR | Notes |
+| --- | --- | --- | --- | --- |
+| 2026-11-23 ~21:55 | Hermes | HERMES-1 | [#3 (draft)](https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/pull/3) | Stack verification brief; live-checked 2026-11-23; flags Sol; 3 questions for Muse. |
+| 2026-11-24 ~03:24–03:26 | Kyle (merge hand) | SOL-1, HERMES-1, feed, COLLAB-1, SOL-GPU-1 | #2, #3, #6, #1, #4 | All five merged on Kyle's order 2026-11-23. Board conflict on this PR (#5) resolved to post-merge state by Muse the same night. |
