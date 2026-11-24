@@ -10,7 +10,8 @@ namespace MidnightProofStation;
 internal sealed record ServiceStatus(string State, string Detail);
 internal sealed record StationStatus(string Docker, ServiceStatus Node, ServiceStatus Indexer, ServiceStatus ProofServer);
 internal sealed record GpuDevice(string Name, string Architecture, string FreeMemory, string TotalMemory, string Driver);
-internal sealed record GpuProof(string Count, string ColdSeconds, string WarmSeconds, string VerifySeconds,
+internal enum ProofMode { Cpu, Cuda }
+internal sealed record SampleProofResult(int Count, decimal ColdSeconds, decimal WarmSeconds, decimal VerifySeconds,
     long DeviceCalls, long PeakBytes, long Fallbacks);
 
 internal sealed class StationBackend : IDisposable
@@ -75,25 +76,29 @@ internal sealed class StationBackend : IDisposable
 
     public async Task<GpuDevice> DetectGpuAsync(int index)
     {
-        var result = await GpuAsync("detect", index, TimeSpan.FromSeconds(40));
+        var result = await LabAsync("detect", index, TimeSpan.FromSeconds(40));
         result.RequireSuccess("Checking the WSL2 GPU");
         string[] parts = ReadRecord(result.Output, "STATION_GPU", 6);
         return new GpuDevice(parts[1], parts[2], parts[3], parts[4], parts[5]);
     }
 
-    public async Task BuildGpuAsync(int index, Action<string> progress)
+    public async Task BuildProverAsync(ProofMode mode, int index, Action<string> progress)
     {
-        var result = await GpuAsync("build", index, TimeSpan.FromMinutes(90), progress);
-        result.RequireSuccess("Building the CUDA draft");
+        string action = mode == ProofMode.Cpu ? "build-cpu" : "build";
+        var result = await LabAsync(action, index, TimeSpan.FromMinutes(90), progress);
+        result.RequireSuccess("Building the sample prover");
         ReadRecord(result.Output, "STATION_READY", 2);
     }
 
-    public async Task<GpuProof> ProveAsync(int index, Action<string> progress)
+    public async Task<SampleProofResult> ProveAsync(ProofMode mode, int index, Action<string> progress)
     {
-        var result = await GpuAsync("prove", index, TimeSpan.FromMinutes(10), progress);
+        string action = mode == ProofMode.Cpu ? "prove-cpu" : "prove";
+        var result = await LabAsync(action, index, TimeSpan.FromMinutes(10), progress);
         result.RequireSuccess("Generating the sample proofs");
         string[] parts = ReadRecord(result.Output, "STATION_PROOF", 8);
-        return new GpuProof(parts[1], parts[2], parts[3], parts[4],
+        return new SampleProofResult(int.Parse(parts[1], CultureInfo.InvariantCulture),
+            decimal.Parse(parts[2], CultureInfo.InvariantCulture), decimal.Parse(parts[3], CultureInfo.InvariantCulture),
+            decimal.Parse(parts[4], CultureInfo.InvariantCulture),
             long.Parse(parts[5], CultureInfo.InvariantCulture), long.Parse(parts[6], CultureInfo.InvariantCulture),
             long.Parse(parts[7], CultureInfo.InvariantCulture));
     }
@@ -102,10 +107,10 @@ internal sealed class StationBackend : IDisposable
     {
         string? line = output.Split('\n').LastOrDefault(value => value.StartsWith(prefix + "\t", StringComparison.Ordinal));
         var parts = line?.TrimEnd('\r').Split('\t');
-        return parts?.Length == fields ? parts : throw new InvalidOperationException("The CUDA lab did not return the expected result.");
+        return parts?.Length == fields ? parts : throw new InvalidOperationException("The Proof Lab did not return the expected result.");
     }
 
-    private async Task<CommandResult> GpuAsync(string action, int index, TimeSpan timeout, Action<string>? progress = null)
+    private async Task<CommandResult> LabAsync(string action, int index, TimeSpan timeout, Action<string>? progress = null)
     {
         string input = (await File.ReadAllTextAsync(labScript)).Replace("\r\n", "\n");
         return await CommandRunner.RunAsync("wsl.exe",

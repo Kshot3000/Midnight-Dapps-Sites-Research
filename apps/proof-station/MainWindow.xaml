@@ -119,6 +119,38 @@
       <Setter Property="BorderBrush" Value="#6D8AFB"/>
       <Setter Property="Foreground" Value="White"/>
     </Style>
+    <Style x:Key="ProofModeButton" TargetType="RadioButton">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="ModeBox" CornerRadius="5" Padding="10,4" BorderThickness="1"
+                    Background="Transparent" BorderBrush="Transparent">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter TargetName="ModeBox" Property="Background" Value="#243A7B"/>
+                <Setter TargetName="ModeBox" Property="BorderBrush" Value="#536FC4"/>
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ModeBox" Property="BorderBrush" Value="{StaticResource Accent}"/>
+              </Trigger>
+              <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="ModeBox" Property="BorderBrush" Value="White"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="ModeBox" Property="Opacity" Value=".55"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
     <Style TargetType="TextBox">
       <Setter Property="Background" Value="{StaticResource Inset}"/>
       <Setter Property="Foreground" Value="{StaticResource Ink}"/>
@@ -163,7 +195,7 @@
               </Border>
               <TextBlock Text="Midnight Proof Station" FontSize="40" FontWeight="SemiBold" Margin="0,2,0,1"
                          AutomationProperties.HeadingLevel="Level1"/>
-              <TextBlock Text="Run a local Midnight node and verify sample proofs on your NVIDIA GPU."
+              <TextBlock Text="Run a local Midnight node and verify sample proofs on CPU or NVIDIA CUDA."
                          Foreground="#CDD8ED" FontSize="14"/>
             </StackPanel>
           </Border>
@@ -246,11 +278,27 @@
 
         <Border Grid.Column="2" Style="{StaticResource StationPanel}">
           <StackPanel>
-            <TextBlock Text="CUDA proof lab" Style="{StaticResource SectionTitle}"/>
-            <TextBlock Text="Synthetic proofs from Charles Hoskinson’s CUDA draft." Style="{StaticResource Secondary}"
-                       Margin="0,1,0,10"/>
+            <DockPanel>
+              <Border DockPanel.Dock="Right" Background="{StaticResource Inset}" BorderBrush="{StaticResource Line}"
+                      BorderThickness="1" CornerRadius="7" Padding="2" Margin="8,0,0,0">
+                <StackPanel x:Name="ProofModePicker" Orientation="Horizontal">
+                  <RadioButton x:Name="CpuMode" GroupName="ProofMode" Content="CPU" IsChecked="True"
+                               Style="{StaticResource ProofModeButton}" Checked="ProofMode_Changed"/>
+                  <RadioButton x:Name="CudaMode" GroupName="ProofMode" Content="NVIDIA CUDA"
+                               Style="{StaticResource ProofModeButton}" Checked="ProofMode_Changed"/>
+                </StackPanel>
+              </Border>
+              <TextBlock Text="Proof Lab" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+            </DockPanel>
+            <TextBlock Text="Both modes prove the same synthetic circuit." Style="{StaticResource Secondary}" Margin="0,4,0,10"/>
 
-            <Border Style="{StaticResource InsetCard}" Padding="11,9" Margin="0,0,0,6">
+            <Border x:Name="CpuCard" Style="{StaticResource InsetCard}" Padding="11,9" Margin="0,0,0,6">
+              <StackPanel>
+                <TextBlock Text="Stock CPU prover" FontWeight="SemiBold"/>
+                <TextBlock Text="Runs on your processor through WSL2." Style="{StaticResource Secondary}"/>
+              </StackPanel>
+            </Border>
+            <Border x:Name="GpuCard" Style="{StaticResource InsetCard}" Padding="11,9" Margin="0,0,0,6" Visibility="Collapsed">
               <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Margin="10,0,0,0" VerticalAlignment="Center">
                   <Label Content="Device index" Target="{Binding ElementName=DeviceIndex}" Padding="0,0,0,3" FontSize="12"/>
@@ -268,7 +316,7 @@
             <Border Style="{StaticResource InsetCard}" Padding="11,9">
               <StackPanel>
                 <TextBlock Text="Proof verification" FontWeight="SemiBold"/>
-                <TextBlock x:Name="GpuResult" Text="No proof job run" Margin="0,1,0,2">
+                <TextBlock x:Name="ProofResult" Text="No proof job run" Margin="0,1,0,2">
                   <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                       <Setter Property="Foreground" Value="{StaticResource Accent}"/>
@@ -280,8 +328,8 @@
                     </Style>
                   </TextBlock.Style>
                 </TextBlock>
-                <TextBlock x:Name="GpuResultDetail" Style="{StaticResource Secondary}"
-                           Text="Run a sample job to check CUDA execution and stock verification."/>
+                <TextBlock x:Name="ProofResultDetail" Style="{StaticResource Secondary}"
+                           Text="Build the CPU prover once, then generate sample proofs."/>
                 <UniformGrid x:Name="ProofMetrics" Columns="3" Visibility="Collapsed" Margin="0,9,0,0">
                   <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5" Margin="0,0,5,0">
                     <StackPanel>
@@ -291,15 +339,14 @@
                   </Border>
                   <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5" Margin="0,0,5,0">
                     <StackPanel>
-                      <TextBlock Text="CUDA calls" Style="{StaticResource Secondary}"/>
-                      <TextBlock x:Name="DeviceCallCount" Style="{StaticResource ProofMetricValue}"/>
+                      <TextBlock x:Name="SecondMetricLabel" Style="{StaticResource Secondary}"/>
+                      <TextBlock x:Name="SecondMetricValue" Style="{StaticResource ProofMetricValue}"/>
                     </StackPanel>
                   </Border>
-                  <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5"
-                          ToolTip="Peak device memory tracked by the CUDA prover.">
+                  <Border Style="{StaticResource InsetCard}" Background="#121D32" Padding="7,5">
                     <StackPanel>
-                      <TextBlock Text="Peak VRAM" Style="{StaticResource Secondary}"/>
-                      <TextBlock x:Name="PeakVram" Style="{StaticResource ProofMetricValue}"/>
+                      <TextBlock x:Name="ThirdMetricLabel" Style="{StaticResource Secondary}"/>
+                      <TextBlock x:Name="ThirdMetricValue" Style="{StaticResource ProofMetricValue}"/>
                     </StackPanel>
                   </Border>
                 </UniformGrid>
@@ -307,8 +354,8 @@
             </Border>
 
             <WrapPanel Margin="0,10,0,0">
-              <Button x:Name="CheckGpu" Content="Detect GPU" Click="CheckGpu_Click"/>
-              <Button x:Name="BuildCuda" Content="Build CUDA backend" Click="BuildCuda_Click"/>
+              <Button x:Name="CheckGpu" Content="Detect GPU" Click="CheckGpu_Click" Visibility="Collapsed"/>
+              <Button x:Name="BuildProver" Content="Build CPU prover" Click="BuildProver_Click"/>
               <Button x:Name="GenerateProofs" Style="{StaticResource Primary}" Content="Generate sample proofs" Click="GenerateProofs_Click"/>
             </WrapPanel>
 
@@ -327,7 +374,7 @@
           </DockPanel>
           <TextBox x:Name="ActivityLog" Height="53" IsReadOnly="True" AcceptsReturn="True" VerticalContentAlignment="Top"
                    VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
-                   AutomationProperties.Name="Local activity log" Text="Start a service or detect a GPU to see activity here."/>
+                   AutomationProperties.Name="Local activity log" Text="Service and proof job output appears here."/>
           <TextBlock x:Name="Message" Text="Waiting for an action." Style="{StaticResource Secondary}" Margin="0,6,0,0"
                      AutomationProperties.LiveSetting="Polite"/>
         </StackPanel>

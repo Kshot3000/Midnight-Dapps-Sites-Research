@@ -1,6 +1,6 @@
 # Midnight Proof Station
 
-I’m building a Windows desktop console for a **Midnight Preview testnet** full node, indexer, and local proving. This is an experimental build for developers. The CUDA lab runs real zero-knowledge proofs on synthetic inputs. The released wallet prover handles Preview transactions.
+I’m building a Windows desktop console for a **Midnight Preview testnet** full node, indexer, and local proving. The experimental Proof Lab generates and verifies zero-knowledge proofs on synthetic inputs with either the stock CPU prover or NVIDIA CUDA. The released wallet prover handles Preview transactions.
 
 ## Run on Windows
 
@@ -19,11 +19,16 @@ The GUI masks the database URI and does not write it to disk. Docker retains it 
 
 The node uses archival pruning settings so the indexer can backfill from genesis. Cardano db-sync and the archive take disk space and time to sync. A testnet wallet that submits later needs tNIGHT registered for DUST generation and spendable DUST. The desktop app does not access wallet keys or submit transactions. [Full node guide](https://docs.midnight.network/nodes/full-node) · [DUST guide](https://docs.midnight.network/guides/manage-dust)
 
-## Use the CUDA lab
+## Use the Proof Lab
 
-On Windows, install the NVIDIA driver with WSL support. In the default WSL2 Linux distribution, have Git, a C++ toolchain, Rust via rustup, and a CUDA toolkit with `nvcc`. Launch Proof Station, set the NVIDIA device index, and click **Detect GPU**. A 3090 should report `sm_86`. **Build CUDA backend** fetches the exact draft revision and compiles the CPU verifier and CUDA prover for the detected architecture. It can take several minutes. Build files stay in the distro’s user data directory. [NVIDIA compute capabilities](https://developer.nvidia.com/cuda/gpus) · [Microsoft CUDA on WSL](https://learn.microsoft.com/windows/ai/directml/gpu-cuda-in-wsl)
+Install a default WSL2 Linux distribution with Git, a C/C++ toolchain, and Rust via rustup. The Proof Lab runs independently of Docker and the Preview stack. The first build downloads the pinned source and Rust dependencies. Build files stay in the distribution’s user data directory.
 
-**Generate sample proofs** builds a synthetic circuit with test-only parameters and runs one cold and one warm proof on the selected device. The stock CPU verifier checks both. The dashboard shows proof timings, device calls, CPU fallback counts, and peak tracked device memory after both proofs verify and both record actual CUDA calls without device errors. Close GPU-heavy workloads when the 3090 has little free VRAM.
+- **CPU** is selected at launch. Choose **Build CPU prover** once, then **Generate sample proofs**. The stock build works on machines without NVIDIA hardware or a CUDA toolkit.
+- **NVIDIA CUDA** requires the Windows NVIDIA driver with WSL support and a CUDA toolkit with `nvcc` in the distribution. Select the NVIDIA device index, click **Detect GPU**, and choose **Build CUDA backend**. An RTX 3090 reports `sm_86`. Then choose **Generate sample proofs**. [NVIDIA compute capabilities](https://developer.nvidia.com/cuda/gpus) · [Microsoft CUDA on WSL](https://learn.microsoft.com/windows/ai/directml/gpu-cuda-in-wsl)
+
+Each mode runs one cold and one warm proof of the same synthetic circuit at `k=16` with eight prover threads and test-only parameters. The stock CPU verifier checks both proofs. The CPU view shows cold and warm proof times plus the warm proof’s verification time. CUDA results also show device calls, CPU fallbacks, and peak tracked device memory. A CUDA job passes only if both proofs verify, both record device calls, and both finish without device errors.
+
+My [RTX 3090 benchmark for Charles](https://github.com/Kshot3000/Midnight-Prover-Gpu-Tests-for-BIG-HOSSSS-/blob/50fe68f89404fe38e13566d603f70115d4287b2e/RESULTS.md) used the same pinned circuit code with a larger `k=21` workload and 16 threads.
 
 The lab uses [Charles Hoskinson’s draft PR #667](https://github.com/midnightntwrk/midnight-zk/pull/667) at [`6bcc6a5`](https://github.com/CharlesHoskinson/midnight-zk/tree/6bcc6a56e85e584357a67b3bd8a15fb8fda4e2e8). The draft’s `midnight-proofs 0.9.0-rc.1` path is experimental. The older Compact CUDA backport described upstream is outside that PR. Wallet transaction proofs use the official `proof-server:9.0.2` image. A wallet-compatible CUDA release will need fresh end-to-end checks against the Ledger 9 proof API, stock verification, and a confirmed Preview transaction before we enable it. Keep real wallet and circuit witnesses on the operator’s machine. [Draft benchmark notes](https://github.com/CharlesHoskinson/midnight-zk/blob/6bcc6a56e85e584357a67b3bd8a15fb8fda4e2e8/docs/gpu-prover/benchmarks.md) · [Local proving and witness privacy](https://docs.midnight.network/guides/local-proving)
 
@@ -37,7 +42,7 @@ dotnet run --project apps/proof-station/MidnightProofStation.csproj
 
 The [Preview compatibility matrix](https://docs.midnight.network/relnotes/support-matrix) was checked on 2026-11-23. The Compose stack pins node **2.1.101**, indexer **4.4.101**, and proof server **9.0.2**. The matching dApp tools are Compact **0.36.1**, Midnight.js **5.0.1**, and Wallet SDK **2.0.1**.
 
-The **Proof Station** workflow verifies the proof result parser, renders a screenshot of the Windows app, and packages a self-contained Windows x64 build. It runs the released wallet prover and checks that it offers the Ledger 9 proof version. Verifying Preview sync requires a real Cardano Preview db-sync, and verifying CUDA execution requires an NVIDIA device on Windows/WSL2.
+The **Proof Station** workflow verifies the CPU and CUDA result parser, builds the stock prover and generates two verified CPU proofs, renders both modes of the Windows app, and packages a self-contained Windows x64 build. It runs the released wallet prover and checks that it offers the Ledger 9 proof version. Verifying Preview sync requires a real Cardano Preview db-sync, and verifying CUDA execution requires an NVIDIA device on Windows/WSL2.
 
 ## Support
 

@@ -17,15 +17,20 @@ public partial class MainWindow : Window
     private string caPath = "";
     private bool refreshing;
     private bool servicesBusy;
-    private bool gpuBusy;
+    private bool proofBusy;
     private bool closing;
+    private ProofMode SelectedProofMode => CudaMode.IsChecked == true ? ProofMode.Cuda : ProofMode.Cpu;
 
     public MainWindow() : this(false) { }
 
-    internal MainWindow(bool capturePreview)
+    internal MainWindow(bool capturePreview, bool captureCuda = false)
     {
         InitializeComponent();
-        if (capturePreview) return;
+        if (capturePreview)
+        {
+            if (captureCuda) CudaMode.IsChecked = true;
+            return;
+        }
         timer.Tick += async (_, _) => await RefreshAsync();
         Loaded += async (_, _) =>
         {
@@ -34,7 +39,7 @@ public partial class MainWindow : Window
         };
         Closing += (_, args) =>
         {
-            if (!(servicesBusy || gpuBusy)) return;
+            if (!(servicesBusy || proofBusy)) return;
             args.Cancel = true;
             SetMessage("Wait for the current operation to finish before closing Proof Station.");
         };
@@ -82,55 +87,92 @@ public partial class MainWindow : Window
         CaLabel.ToolTip = caPath;
     }
 
+    private void ProofMode_Changed(object sender, RoutedEventArgs e)
+    {
+        if (BuildProver is null) return;
+        bool cuda = SelectedProofMode == ProofMode.Cuda;
+        CpuCard.Visibility = cuda ? Visibility.Collapsed : Visibility.Visible;
+        GpuCard.Visibility = CheckGpu.Visibility = cuda ? Visibility.Visible : Visibility.Collapsed;
+        BuildProver.Content = cuda ? "Build CUDA backend" : "Build CPU prover";
+        SetProofState("No proof result", cuda
+            ? "Detect the GPU and build the CUDA backend for its architecture."
+            : "Build the CPU prover once, then generate sample proofs.");
+    }
+
     private void DeviceIndex_Changed(object sender, TextChangedEventArgs e)
     {
-        if (GpuStatus is null || GpuResult is null) return;
+        if (GpuStatus is null || ProofMetrics is null) return;
         GpuStatus.Text = "GPU not checked";
         GpuDetail.Text = "CUDA through your default WSL2 distribution";
-        SetProofState("No proof job run for this selection", "Run a sample job to check CUDA execution and stock verification.");
+        SetProofState("No proof result for this device", "Run sample proofs to check CUDA execution and stock verification.");
     }
 
     private async void CheckGpu_Click(object sender, RoutedEventArgs e) =>
-        await RunGpuAsync("Detecting the NVIDIA GPU", async index =>
+        await RunProofAsync(ProofMode.Cuda, "Detecting the NVIDIA GPU", async index =>
         {
             var device = await backend.DetectGpuAsync(index);
             GpuStatus.Text = device.Name;
             GpuDetail.Text = $"sm_{device.Architecture} · {device.FreeMemory} / {device.TotalMemory} MiB free · Driver {device.Driver}";
         });
 
-    private async void BuildCuda_Click(object sender, RoutedEventArgs e) =>
-        await RunGpuAsync("Building the pinned CUDA backend", async index =>
+    private async void BuildProver_Click(object sender, RoutedEventArgs e)
+    {
+        var mode = SelectedProofMode;
+        string prover = mode == ProofMode.Cpu ? "CPU prover" : "CUDA backend";
+        await RunProofAsync(mode, $"Building the {prover}", async index =>
         {
-            await backend.BuildGpuAsync(index, Log);
-            SetProofState("CUDA backend built", "Generate sample proofs to confirm device execution.");
+            await backend.BuildProverAsync(mode, index, Log);
+            SetProofState($"{prover} built", "Generate sample proofs to check both proofs with the stock verifier.");
         });
+    }
 
-    private async void GenerateProofs_Click(object sender, RoutedEventArgs e) =>
-        await RunGpuAsync("Generating sample proofs", async index =>
+    private async void GenerateProofs_Click(object sender, RoutedEventArgs e)
+    {
+        var mode = SelectedProofMode;
+        string label = mode == ProofMode.Cpu ? "CPU" : "CUDA";
+        await RunProofAsync(mode, $"Generating {label} sample proofs", async index =>
         {
-            SetProofState("Proof job running", "Checking a cold and warm proof with the stock verifier.");
+            SetProofState($"{label} proof job running", "Producing a cold and warm proof for the stock verifier.");
             try
             {
-                var result = await backend.ProveAsync(index, Log);
-                GpuResult.Text = $"{result.Count} GPU proofs verified";
-                GpuResultDetail.Text = $"Cold {result.ColdSeconds} s · verify {result.VerifySeconds} s · {result.Fallbacks:N0} CPU fallbacks";
-                WarmProofTime.Text = $"{result.WarmSeconds} s";
-                DeviceCallCount.Text = $"{result.DeviceCalls:N0}";
-                PeakVram.Text = $"{result.PeakBytes / 1048576d:N1} MiB";
+                var result = await backend.ProveAsync(mode, index, Log);
+                string verificationTime = $"{result.VerifySeconds * 1000:0.00} ms";
+                ProofResult.Text = $"{result.Count} {label} proofs verified";
+                WarmProofTime.Text = $"{result.WarmSeconds:0.000} s";
+                if (mode == ProofMode.Cuda)
+                {
+                    ProofResultDetail.Text = $"Cold {result.ColdSeconds:0.000} s · warm verify {verificationTime} · {result.Fallbacks:N0} CPU fallbacks";
+                    SecondMetricLabel.Text = "CUDA calls";
+                    SecondMetricValue.Text = $"{result.DeviceCalls:N0}";
+                    ThirdMetricLabel.Text = "Peak VRAM";
+                    ThirdMetricValue.Text = $"{result.PeakBytes / 1048576d:N1} MiB";
+                    ThirdMetricValue.ToolTip = "Peak device memory tracked by the CUDA prover.";
+                }
+                else
+                {
+                    ProofResultDetail.Text = "The stock verifier accepted both CPU proofs.";
+                    SecondMetricLabel.Text = "Cold proof";
+                    SecondMetricValue.Text = $"{result.ColdSeconds:0.000} s";
+                    ThirdMetricLabel.Text = "Warm verify";
+                    ThirdMetricValue.Text = verificationTime;
+                    ThirdMetricValue.ToolTip = null;
+                }
                 ProofMetrics.Visibility = Visibility.Visible;
+                Log($"{ProofResult.Text} · cold {result.ColdSeconds:0.000} s · warm {result.WarmSeconds:0.000} s · warm verify {verificationTime}.");
             }
             catch
             {
-                SetProofState("Proof job failed", "See the activity log for the reason.");
+                SetProofState($"{label} proof job failed", "See the activity log for the reason.");
                 throw;
             }
         });
+    }
 
     private void SetProofState(string title, string detail)
     {
         ProofMetrics.Visibility = Visibility.Collapsed;
-        GpuResult.Text = title;
-        GpuResultDetail.Text = detail;
+        ProofResult.Text = title;
+        ProofResultDetail.Text = detail;
     }
 
     private void CopyAda_Click(object sender, RoutedEventArgs e) => CopyAddress(AdaAddress, "Cardano");
@@ -183,16 +225,18 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task RunGpuAsync(string title, Func<int, Task> operation)
+    private async Task RunProofAsync(ProofMode mode, string title, Func<int, Task> operation)
     {
-        if (gpuBusy) return;
-        if (!int.TryParse(DeviceIndex.Text, NumberStyles.None, CultureInfo.InvariantCulture, out int index))
+        if (proofBusy) return;
+        int index = 0;
+        if (mode == ProofMode.Cuda && !int.TryParse(DeviceIndex.Text, NumberStyles.None, CultureInfo.InvariantCulture, out index))
         {
             SetMessage("Enter a numeric NVIDIA device index, such as 0.");
+            DeviceIndex.Focus();
             return;
         }
-        gpuBusy = true;
-        CheckGpu.IsEnabled = BuildCuda.IsEnabled = GenerateProofs.IsEnabled = DeviceIndex.IsEnabled = false;
+        proofBusy = true;
+        ProofModePicker.IsEnabled = CheckGpu.IsEnabled = BuildProver.IsEnabled = GenerateProofs.IsEnabled = DeviceIndex.IsEnabled = false;
         SetMessage(title + "…");
         Log(title + ".");
         try
@@ -202,12 +246,12 @@ public partial class MainWindow : Window
         }
         catch (Exception error)
         {
-            ReportError(error, "Check WSL2, your NVIDIA driver, and the CUDA prerequisites in the README.");
+            ReportError(error, "Install WSL2 and select a default Linux distribution. See the setup guide in the README.");
         }
         finally
         {
-            gpuBusy = false;
-            CheckGpu.IsEnabled = BuildCuda.IsEnabled = GenerateProofs.IsEnabled = DeviceIndex.IsEnabled = true;
+            proofBusy = false;
+            ProofModePicker.IsEnabled = CheckGpu.IsEnabled = BuildProver.IsEnabled = GenerateProofs.IsEnabled = DeviceIndex.IsEnabled = true;
         }
     }
 

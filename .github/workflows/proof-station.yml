@@ -34,17 +34,21 @@ jobs:
           foreach ($file in @('MidnightProofStation.exe', 'preview.compose.yaml', 'db-tls.compose.yaml', 'gpu-lab.sh', 'README.md')) {
             if (-not (Test-Path "publish/$file")) { throw "Missing package file $file" }
           }
-      - name: Render the Windows dashboard
+      - name: Render CPU and CUDA Proof Lab modes
         shell: pwsh
         run: |
-          $preview = Join-Path $env:RUNNER_TEMP 'proof-station.png'
-          $app = Start-Process -FilePath (Resolve-Path 'publish/MidnightProofStation.exe') -ArgumentList ('--capture-preview "{0}"' -f $preview) -PassThru
-          if (-not $app.WaitForExit(45000)) {
-            $app.Kill()
-            throw 'The dashboard did not finish rendering.'
+          foreach ($mode in @('cpu', 'cuda')) {
+            $preview = Join-Path $env:RUNNER_TEMP "proof-station-$mode.png"
+            $previewArgs = '--capture-preview "{0}"' -f $preview
+            if ($mode -eq 'cuda') { $previewArgs += ' cuda' }
+            $app = Start-Process -FilePath (Resolve-Path 'publish/MidnightProofStation.exe') -ArgumentList $previewArgs -PassThru
+            if (-not $app.WaitForExit(45000)) {
+              $app.Kill()
+              throw "The $mode dashboard did not finish rendering."
+            }
+            if (Test-Path "$preview.error") { Get-Content "$preview.error" }
+            if ($app.ExitCode -ne 0 -or -not (Test-Path $preview)) { throw "$mode dashboard preview failed." }
           }
-          if (Test-Path "$preview.error") { Get-Content "$preview.error" }
-          if ($app.ExitCode -ne 0 -or -not (Test-Path $preview)) { throw 'Dashboard preview failed.' }
       - uses: actions/upload-artifact@v4
         with:
           name: midnight-proof-station-win-x64
@@ -53,7 +57,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: proof-station-screenshot
-          path: ${{ runner.temp }}/proof-station.png
+          path: ${{ runner.temp }}/proof-station-*.png
           if-no-files-found: error
 
   proving:
@@ -74,6 +78,15 @@ jobs:
           docker compose -f preview.compose.yaml config --quiet
           MIDNIGHT_STATION_DB_CA=/tmp/preview-ca.pem \
             docker compose -f preview.compose.yaml -f db-tls.compose.yaml config --quiet
+      - name: Generate and verify two stock CPU proofs
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/proof-station-cpu
+          CARGO_NET_GIT_FETCH_WITH_CLI: 'true'
+        run: |
+          bash -s -- build-cpu < gpu-lab.sh
+          proof_result=$(bash -s -- prove-cpu < gpu-lab.sh)
+          printf '%s\n' "$proof_result"
+          grep -Eq $'^STATION_PROOF\t2(\t[0-9]+\\.[0-9]+){3}\t0\t0\t0$' <<< "$proof_result"
       - name: Exercise the released local wallet prover
         run: |
           docker compose -f preview.compose.yaml up -d --no-deps proof-server

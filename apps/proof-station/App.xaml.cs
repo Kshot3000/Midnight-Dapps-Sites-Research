@@ -10,8 +10,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        bool capture = e.Args is ["--capture-preview", _];
-        var window = new MainWindow(capture);
+        bool captureCuda = e.Args is ["--capture-preview", _, "cuda"];
+        bool capture = captureCuda || e.Args is ["--capture-preview", _];
+        var window = new MainWindow(capture, captureCuda);
         MainWindow = window;
 
         if (capture)
