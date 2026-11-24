@@ -2,6 +2,7 @@
 
 **Checked:** 2026-11-23 (America/Chicago)
 **Checked by:** Grok swarm (GROK-1)
+**GROK-8 update (2026-11-24):** the General-purpose bridges gap below was corrected from [`research/bridges-status.md`](bridges-status.md). The rest of this directory is still the 2026-11-23 GROK-1 pass.
 **Scope:** What I could actually open today — live dApps, games, explorers, wallets, developer tools, faucets, indexers, and bridges — plus honest status for announced, testnet, stale, or dead listings.
 
 ## Method and limits
@@ -151,7 +152,7 @@ Other official hosts I also confirmed as decommissioned in passing: the endpoint
 
 ## Gaps — categories with nothing I could verify as live
 
-- **General-purpose bridges.** I did not find a live Midnight↔other-chain asset bridge I could open and use. cNgD maps cNIGHT to DUST generation; it is not a general token bridge. Catalog partners such as VIA Labs, and the Pintent repo in awesome-dapps, were not verified as live products in this pass.
+- **General-purpose bridges.** Corrected 2026-11-24 from [`research/bridges-status.md`](bridges-status.md) (GROK-6). The official Cardano→Midnight NIGHT bridge ships with ledger 9 but is off pending a governance vote. A read-only check of the public Preview (testnet) RPC found it disabled (`Bridge.DataCheckpoint` empty, about 9:58 AM CT on 2026-11-24). The Mainnet switch was not verified, because the Mainnet RPC needs a Blockfrost token. VIA Labs' USDM Cardano↔Midnight route is the only cross-chain value route with public mainnet evidence: VIA's explorer, as cited in that file, showed 21 Cardano→Midnight and 11 Midnight→Cardano messages among the 50 latest mainnet VIA Scan messages, all delivered (2026-10-18 to 2026-11-23 CT). USDM is unshielded on Midnight. We did not test a transfer, because that needs wallet signatures, so this is "live per public evidence, not used by us," not a verified-usable live bridge. The route's trust model, per VIA as cited there, is a 2-of-3 signer set plus approved relayers. cNgD is a live DUST-mapping page, not a bridge (no tokens move). Pintent is a stale Preprod (testnet) demo. Sig Network is testnet / in development (Stagenet and Preview). LayerZero is announced only (approved Feb 2026; no Midnight deployment found). Wanchain carries cNIGHT between Cardano and BNB Chain, not onto Midnight.
 - **Games.** The official catalog includes gaming partners (for example PLAY NATION, Paima Studios, DEGA) but I did not find a playable Midnight game with a verified current-network deployment. Community game demos exist (see the demo table); on-chain function is unverified.
 - **NFT marketplaces.** NMKR and similar names appear as catalog partners. I did not open a live Midnight NFT marketplace. Official `example-kitties` is an example repo, not a production market.
 - **Consumer custodial wallets.** Official wallet docs still say there is no documented first-party consumer custodial Midnight wallet.
@@ -162,6 +163,7 @@ The official ecosystem catalog, opened on 2026-11-23, contains a long list of pa
 
 ## What I did not verify
 
+- The official NIGHT-bridge switch on Mainnet (needs a Blockfrost token), and any VIA USDM or other bridge transfer (needs wallet signatures). See [`research/bridges-status.md`](bridges-status.md).
 - Any wallet install, connector session, or transaction.
 - Any faucet disbursement or Blockfrost query (no keys, no sign-ups).
 - Compiler or SDK behavior beyond published version numbers.
