@@ -150,13 +150,16 @@ export function formatNight(stars, options) {
   return formatDecimal(stars, STARS_PER_NIGHT, options);
 }
 
-export function parseFixed(text, scale, label, maxFractionDigits) {
+export function parseFixed(text, scale, label, maxFractionDigits, emptyMessage) {
   const raw = String(text ?? "").trim();
   if (raw === "") {
-    throw new Error(`Enter a ${label}.`);
+    throw new Error(emptyMessage ?? `Enter a ${label}.`);
+  }
+  if (/^-\d+(\.\d+)?$/.test(raw)) {
+    throw new Error(`${label} must be a non-negative number.`);
   }
   if (!/^\d+(\.\d+)?$/.test(raw)) {
-    throw new Error(`${label} must be a non-negative number.`);
+    throw new Error(`${label} is not a valid number.`);
   }
   const [whole, fraction = ""] = raw.split(".");
   if (fraction.length > maxFractionDigits) {
@@ -175,19 +178,14 @@ export function parseDust(text) {
 }
 
 export function parseDaysToSeconds(text) {
-  const raw = String(text ?? "").trim();
-  if (raw === "") {
-    throw new Error("Enter days since registration.");
-  }
-  if (!/^\d+(\.\d+)?$/.test(raw)) {
-    throw new Error("Days since registration must be a non-negative number.");
-  }
-  const [whole, fraction = ""] = raw.split(".");
-  if (fraction.length > 9) {
-    throw new Error("Days since registration can have at most 9 decimal places.");
-  }
   const dayScale = 1_000_000_000n;
-  const daysScaled = parseFixed(raw, dayScale, "Days since registration", 9);
+  const daysScaled = parseFixed(
+    text,
+    dayScale,
+    "Days since registration",
+    9,
+    "Enter days since registration.",
+  );
   return (daysScaled * SECONDS_PER_DAY) / dayScale;
 }
 
@@ -203,5 +201,7 @@ export function formatSeconds(seconds) {
   if (hours > 0n) parts.push(`${hours} hour${hours === 1n ? "" : "s"}`);
   if (minutes > 0n) parts.push(`${minutes} minute${minutes === 1n ? "" : "s"}`);
   if (secs > 0n || parts.length === 0) parts.push(`${secs} second${secs === 1n ? "" : "s"}`);
-  return `${value.toString()} seconds (${parts.join(", ")})`;
+  const exact = `${value.toString()} second${value === 1n ? "" : "s"}`;
+  const readable = parts.join(", ");
+  return readable === exact ? exact : `${exact} (${readable})`;
 }

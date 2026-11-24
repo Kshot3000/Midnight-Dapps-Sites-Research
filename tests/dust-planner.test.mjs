@@ -21,7 +21,13 @@ import {
   parseDust,
   parseDaysToSeconds,
   formatDust,
+  formatSeconds,
 } from "../apps/dust-planner/dust-model.js";
+import {
+  OUTPUT_PLACEHOLDER,
+  showErrors,
+  resetOutputs,
+} from "../apps/dust-planner/planner.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -198,10 +204,113 @@ test("parsers accept official units and reject invalid input", () => {
   assert.equal(parseDaysToSeconds("7"), 604800n);
   assert.equal(parseDaysToSeconds("0"), 0n);
   assert.throws(() => parseNight(""), /Enter a NIGHT amount/);
-  assert.throws(() => parseNight("-1"), /non-negative/);
+  assert.throws(() => parseDaysToSeconds(""), /Enter days since registration/);
   assert.throws(() => parseNight("1.1234567"), /at most 6 decimal places/);
-  assert.throws(() => parseDust("1e2"), /non-negative number/);
 });
+
+test("parsers use a distinct message for malformed input vs a negative number", () => {
+  const negative = /must be a non-negative number/;
+  const malformed = /is not a valid number/;
+  assert.throws(() => parseNight("-1"), negative);
+  assert.throws(() => parseDust("-0.5"), negative);
+  assert.throws(() => parseDaysToSeconds("-1"), negative);
+  assert.throws(() => parseNight("1e2"), malformed);
+  assert.throws(() => parseDust("1e2"), malformed);
+  assert.throws(() => parseDaysToSeconds("1e2"), malformed);
+  assert.throws(() => parseNight("abc"), malformed);
+  const negativeMessage = (() => {
+    try {
+      parseNight("-1");
+    } catch (error) {
+      return error.message;
+    }
+  })();
+  const malformedMessage = (() => {
+    try {
+      parseNight("1e2");
+    } catch (error) {
+      return error.message;
+    }
+  })();
+  assert.notEqual(negativeMessage, malformedMessage);
+  assert.match(negativeMessage, /NIGHT amount must be a non-negative number/);
+  assert.match(malformedMessage, /NIGHT amount is not a valid number/);
+  assert.doesNotMatch(malformedMessage, /non-negative/);
+});
+
+test("formatSeconds omits a parenthetical that only repeats the same duration", () => {
+  assert.equal(formatSeconds(0n), "0 seconds");
+  assert.equal(formatSeconds(1n), "1 second");
+  assert.equal(formatSeconds(15n), "15 seconds");
+  assert.equal(formatSeconds(60n), "60 seconds (1 minute)");
+  assert.equal(formatSeconds(90n), "90 seconds (1 minute, 30 seconds)");
+  assert.equal(formatSeconds(86400n), "86400 seconds (1 day)");
+  assert.equal(formatSeconds(TIME_TO_CAP_SECONDS), "604815 seconds (7 days, 15 seconds)");
+  assert.doesNotMatch(formatSeconds(15n), /\(.*\)/);
+});
+
+test("showErrors builds the list with textContent, not innerHTML", () => {
+  assert.equal(script.includes("innerHTML"), false);
+  const created = [];
+  const element = (tag) => {
+    const node = {
+      tagName: tag,
+      textContent: "",
+      children: [],
+      append(child) {
+        this.children.push(child);
+      },
+    };
+    created.push(node);
+    return node;
+  };
+  const container = {
+    hidden: true,
+    className: "",
+    attrs: {},
+    children: [],
+    setAttribute(name, value) {
+      this.attrs[name] = value;
+    },
+    replaceChildren(...nodes) {
+      this.children = nodes;
+    },
+  };
+  const payload = "<img src=x onerror=alert(1)>";
+  showErrors(container, [payload, "Second message"], element);
+  assert.equal(container.hidden, false);
+  assert.equal(container.className, "error-list");
+  assert.equal(container.attrs.role, "alert");
+  assert.equal(created[0].tagName, "ul");
+  assert.equal(created[1].tagName, "li");
+  assert.equal(created[1].textContent, payload);
+  assert.equal(created[2].textContent, "Second message");
+  assert.equal(container.children[0], created[0]);
+  assert.equal(created[0].children[0].textContent, payload);
+  assert.equal(typeof container.innerHTML, "undefined");
+});
+
+test("invalid input resets estimate outputs to the placeholder", () => {
+  const ui = {
+    unregisteredAlert: { hidden: false },
+    outCurrent: { textContent: "500 DUST (modelled estimate)" },
+    outCap: { textContent: "500 DUST (modelled estimate)" },
+    outRate: { textContent: "0.0008267 DUST/s" },
+    outToCap: { textContent: "Already at cap (modelled estimate)" },
+    outRemaining: { textContent: "480 DUST (modelled estimate)" },
+    outDecay: { textContent: "604815 seconds (7 days, 15 seconds) to zero (modelled estimate)" },
+    outSummary: { textContent: "Every figure on this panel is a modelled estimate." },
+  };
+  resetOutputs(ui);
+  assert.equal(ui.unregisteredAlert.hidden, true);
+  for (const key of ["outCurrent", "outCap", "outRate", "outToCap", "outRemaining", "outDecay"]) {
+    assert.equal(ui[key].textContent, OUTPUT_PLACEHOLDER);
+  }
+  assert.equal(ui.outSummary.textContent, "");
+  assert.equal(page.includes(`>${OUTPUT_PLACEHOLDER}<`) || page.includes(">—</"), true);
+  assert.match(script, /resetOutputs\(ui\)/);
+});
+
 
 test("the planner is in the same visual family as the hub and stays keyboard-usable", () => {
   assert.match(css, /--background: #090b15;/);
