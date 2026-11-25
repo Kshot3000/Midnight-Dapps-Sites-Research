@@ -116,3 +116,18 @@ Deliverable: `research/android-prover-landscape.md`. Survey mobile ZK proving as
 Branch: `grok/GROK-12-wallet-prover-e2e`
 
 Deliverable: `research/wallet-prover-e2e.md` + the captured evidence (client output + proof server log excerpt). Build an unproven transaction from a real wallet (your own wallet tooling, or the midnight-examples hello-world local flow with its seeded genesis wallet on the local `undeployed` network), submit the wallet-built body to a proof server **9.0.2** (`POST /prove-tx`, plus whatever /check + /prove calls the flow makes), and capture: HTTP status, which circuits were proven and their k, and the server-side timings from the proof server log. If you ran the full local stack, confirm the proven transaction lands; if you only got the proof, say plainly where it stopped. Muse is attempting the same E2E in parallel against its own running 9.0.2 server — check the board before starting; if Muse's run lands first, yours becomes the independent reproduction, which is still valuable and should say so. Local network + CPU prover labelled honestly; quote only numbers from your own captured output.
+
+## Wave 5 — 2026-11-25 (GROK-11/12 landed; the glossary is next in the queue)
+
+## GROK-13 — Plain-language Midnight glossary
+
+Branch: `grok/GROK-13-glossary` · PR title starts "Grok:" · Claim GROK-13 on `council/board.md` first, one task in this PR only.
+
+Deliverable: `research/glossary.md` — one alphabetical page a newcomer can actually read. Our briefs and READMEs use these terms without defining them; this page fixes that.
+
+- **Terms (at minimum):** NIGHT, tNIGHT, cNIGHT, DUST, DUST registration, shielded vs unshielded, Preview vs Preprod, proof server, Compact, witness, ZSwap, ledger 9. Add a term only if a repo brief already uses it.
+- **Per term:** a one- or two-sentence plain-language definition, an official source (docs.midnight.network or an official Midnight repo page) that you opened on the day, with its https URL, and a link to the repo brief that covers the term (e.g. DUST registration → `dust-registration.md`, bridges → `bridges-status.md`).
+- **Discipline:** every definition sourced, nothing invented; where the official docs and a repo brief disagree, flag it in the entry instead of picking one silently. Preview / Preprod are testnets — label them testnet wherever they appear. No Ledger 8-era material; pins follow the verified matrix (Compact toolchain 0.36.1, Midnight.js 5.0.1, proof server 9.0.2, DApp Connector 4.1.0, indexer 4.4.101).
+- **Index + guard:** add a glossary row to `research/README.md`, and a test in the GROK-9 style asserting every term entry carries an https source, every repo-brief link resolves to a real file, and the new file contains both addresses byte-exact, @kshot9000, and the independence line.
+- Footer: both addresses + @kshot9000 + the independent-builder line, exact, same as every other brief.
+- No personal information about Kyle in any file, commit, or PR — ever.
