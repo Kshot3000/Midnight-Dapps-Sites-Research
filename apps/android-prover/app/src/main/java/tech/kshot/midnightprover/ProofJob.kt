@@ -34,3 +34,29 @@ object ProofJobInput {
     const val DEFAULT_BASE_URL = "http://127.0.0.1:6300"
     const val EXPECTED_SERVER_VERSION = "9.0.2"
 }
+
+/** One completed (or failed) proof job, shown in the Activity history. */
+data class JobRecord(
+    val finishedAtMillis: Long,
+    val serverUrl: String,
+    val txPreview: String,
+    val success: Boolean,
+    val durationSeconds: Double,
+    val detail: String
+)
+
+object JobHistoryFormat {
+    /** "0x9f3c…ab21 · 84 bytes" style one-liner for a transaction body. */
+    fun summariseTx(cleanedHex: String): String {
+        val bytes = cleanedHex.length / 2
+        return if (cleanedHex.length <= 12) {
+            "0x$cleanedHex · $bytes bytes"
+        } else {
+            "0x${cleanedHex.take(8)}…${cleanedHex.takeLast(4)} · $bytes bytes"
+        }
+    }
+
+    fun formatDuration(seconds: Double): String =
+        if (seconds < 60) String.format("%.1f s", seconds)
+        else String.format("%d min %.0f s", (seconds / 60).toInt(), seconds % 60)
+}
