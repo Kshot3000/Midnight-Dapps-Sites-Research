@@ -1,0 +1,53 @@
+# GROK-12 proof-server 9.0.2 container log excerpt — run 2 (successful). Timestamps are UTC (Z); CST = UTC-6.
+# Image midnightntwrk/proof-server:9.0.2 @ sha256:787ef99db4b4706eb14d94ad389ca45f1c09bcdf740afecb01899bfbda63dc64, command: midnight-proof-server --port 6301, host networking.
+# Trimmed: the 'Missing ... attempting to download' startup lines and GET /version healthcheck lines removed; every other line is verbatim (ANSI colour codes stripped). The logger line format does not include an HTTP status code.
+2026-11-25T16:47:17.258718Z  INFO midnight_proof_server: Ensuring zswap key material is available...
+2026-11-25T16:47:18.082251Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=11 - finished.
+2026-11-25T16:47:18.082276Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=11 - verified correct.
+2026-11-25T16:47:18.091410Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Dust spends - finished.
+2026-11-25T16:47:18.091427Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Dust spends - verified correct.
+2026-11-25T16:47:18.129480Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=14 - finished.
+2026-11-25T16:47:18.129495Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=14 - verified correct.
+2026-11-25T16:47:18.165787Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap outputs - finished.
+2026-11-25T16:47:18.165802Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap outputs - verified correct.
+2026-11-25T16:47:18.192353Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=10 - finished.
+2026-11-25T16:47:18.192369Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=10 - verified correct.
+2026-11-25T16:47:18.198638Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=15 - finished.
+2026-11-25T16:47:18.198653Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=15 - verified correct.
+2026-11-25T16:47:18.298773Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap inputs - finished.
+2026-11-25T16:47:18.298792Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap inputs - verified correct.
+2026-11-25T16:47:18.318775Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=12 - finished.
+2026-11-25T16:47:18.318786Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=12 - verified correct.
+2026-11-25T16:47:18.393953Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=13 - finished.
+2026-11-25T16:47:18.393982Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=13 - verified correct.
+2026-11-25T16:47:18.398468Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap signing operations - finished.
+2026-11-25T16:47:18.398483Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge proving key for Zswap signing operations - verified correct.
+2026-11-25T16:47:18.409343Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Dust spends - finished.
+2026-11-25T16:47:18.409352Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Dust spends - verified correct.
+2026-11-25T16:47:18.473007Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap outputs - finished.
+2026-11-25T16:47:18.473023Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap outputs - verified correct.
+2026-11-25T16:47:18.597161Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap inputs - finished.
+2026-11-25T16:47:18.597184Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap inputs - verified correct.
+2026-11-25T16:47:18.617855Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap outputs - finished.
+2026-11-25T16:47:18.617875Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap outputs - verified correct.
+2026-11-25T16:47:18.679716Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Dust spends - finished.
+2026-11-25T16:47:18.679730Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Dust spends - verified correct.
+2026-11-25T16:47:18.750486Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap signing operations - finished.
+2026-11-25T16:47:18.750506Z  INFO midnight_base_crypto::data_provider: Fetching zero-knowledge verifying key for Zswap signing operations - verified correct.
+2026-11-25T16:47:18.882365Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap inputs - finished.
+2026-11-25T16:47:18.882382Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap inputs - verified correct.
+2026-11-25T16:47:18.950531Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap signing operations - finished.
+2026-11-25T16:47:18.950549Z  INFO midnight_base_crypto::data_provider: Fetching ZKIR source for Zswap signing operations - verified correct.
+2026-11-25T16:47:18.952786Z  INFO actix_server::builder: starting 8 workers
+2026-11-25T16:47:18.952800Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
+2026-11-25T16:47:18.952806Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6301", workers: 8, listening on: 0.0.0.0:6301
+2026-11-25T16:48:18.158337Z  INFO midnight_proof_server::endpoints: Starting to process request for /prove...
+2026-11-25T16:48:18.894426Z  INFO actix_web::middleware::logger: 127.0.0.1 POST /prove HTTP/1.1; took 0.736448s
+2026-11-25T16:48:38.861235Z  INFO midnight_proof_server::endpoints: Starting to process request for /check...
+2026-11-25T16:48:38.862399Z  INFO actix_web::middleware::logger: 127.0.0.1 POST /check HTTP/1.1; took 0.001258s
+2026-11-25T16:48:38.867600Z  INFO midnight_proof_server::endpoints: Starting to process request for /prove...
+2026-11-25T16:48:39.408481Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=6 - finished.
+2026-11-25T16:48:39.408501Z  INFO midnight_base_crypto::data_provider: Fetching public parameters for k=6 - verified correct.
+2026-11-25T16:48:39.445751Z  INFO actix_web::middleware::logger: 127.0.0.1 POST /prove HTTP/1.1; took 0.578181s
+2026-11-25T16:48:39.478908Z  INFO midnight_proof_server::endpoints: Starting to process request for /prove...
+2026-11-25T16:48:40.056706Z  INFO actix_web::middleware::logger: 127.0.0.1 POST /prove HTTP/1.1; took 0.577842s

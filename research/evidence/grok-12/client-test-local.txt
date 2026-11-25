@@ -1,0 +1,41 @@
+# GROK-12 client output excerpt — run 2 (successful), npm run test:local, hello-world, local undeployed network
+# Captured on the Kshot box (Docker sandbox), 2026-11-25. Times are box-local (America/Chicago, CST).
+# MIDNIGHT_PROOF_SERVER=http://127.0.0.1:6301 (see compose override in wallet-prover-e2e.md). Wallet = the example's local genesis dev wallet; no seed is printed.
+start 2026-11-25 10:48:04 CST
+> @midnight-ntwrk/example-hello-world@0.1.0 wait:dust
+> vite-node scripts/wait-for-dust.ts
+[10:48:08.052] INFO (452957): Waiting for Alice to have ≥1 DUST coin(s) (timeout 180000ms)
+[10:48:08.291] INFO (452957): Wallet built from seed.
+[10:48:08.291] INFO (452957): Starting wallet...
+[10:48:08.326] INFO (452957): Syncing wallet...
+[10:48:08.940] INFO (452957): Wallet synced.
+[10:48:08.942] INFO (452957): Waiting for >=1 spendable DUST coin(s) (timeout 180000ms)...
+[10:48:08.944] INFO (452957): Waiting for >=60.000000 DUST at the latest block...
+[10:48:08.946] INFO (452957): DUST ready.
+exit=0
+end 2026-11-25 10:48:11 CST
+----
+start 2026-11-25 10:48:14 CST
+> @midnight-ntwrk/example-hello-world@0.1.0 test:local
+> MIDNIGHT_NETWORK=local npm test --
+> @midnight-ntwrk/example-hello-world@0.1.0 test
+> NODE_OPTIONS='--experimental-vm-modules' vitest run --exclude 'src/**/*.sim.test.ts'
+ RUN  v5.0.4 /workspace/grok12-e2e/midnight-examples/examples/hello-world
+[10:48:17.395] INFO (453386): Wallet built from seed.
+[10:48:17.395] INFO (453386): Starting wallet...
+[10:48:17.421] INFO (453386): Syncing wallet...
+[10:48:18.015] INFO (453386): Wallet synced.
+[10:48:18.019] INFO (453386): Providers initialized on 'local'. Ready to test!
+[10:48:18.021] INFO (453386): Creating private state...
+[10:48:38.782] INFO (453386): Setting the contract address...
+[10:48:38.782] INFO (453386): Contract deployed at: 433c4b813a333c23009a19e7083c468e9319e11779dcae4af66a093b678a50e2
+ ✓ src/test/hw.test.ts (2 tests) 38701ms
+   ✓ Hello World Contract (local) (2)
+     ✓ Deploys the contract 20774ms
+     ✓ Stores Hello World! 17075ms
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  10:48:14
+   Duration  41.13s (tests 94%, import 6%)
+exit=0
+end 2026-11-25 10:48:55 CST
