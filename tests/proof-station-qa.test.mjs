@@ -84,6 +84,8 @@ test("the QA brief names the proof-server parameter host as srs.midnight.network
   const content = brief();
   assert.match(content, /srs\.midnight\.network/);
   assert.doesNotMatch(content.split("\n").filter((l) => !l.includes("Host corrected 2026-11-25")).join("\n"), /srs\.midnight\.net(?!work)/);
+});
+
 test("the QA brief notes which fixes PR #47 already covered", () => {
   const content = brief();
   assert.match(content, /Status after PR #47/);
