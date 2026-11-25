@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.3)
+# Midnight Prover — Android app (v0.3.1)
 
 An Android client for proving Midnight transactions on the phone itself.
 Mission context: help take the Midnight ZK prover mobile, building on the
@@ -57,6 +57,15 @@ point at a LAN or cloud proof server.
   Server), a live server-status hero with pulsing orb, an elapsed-time
   proving state, and a session job history. Sol's improvement pass
   (SOL-AP-1) builds on this design when she returns.
+
+## Running the server on the phone
+
+`server-setup/` installs the official arm64 proof server inside a
+Termux/proot Debian environment — no Docker: the setup script pulls the
+official 9.0.2 image layers from Docker Hub and runs the genuine binary
+via its own staged loader. Verified end-to-end on amd64 (2026-11-25:
+fresh install → live server → real payload proven); the arm64 phone run
+is still the owner's supervised step. See `server-setup/README.md`.
 
 ## Build
 
