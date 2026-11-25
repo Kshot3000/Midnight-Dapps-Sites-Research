@@ -8,13 +8,13 @@ enum class JobState { IDLE, CHECKING, PROVING, DONE, FAILED }
  * unit-testable on the JVM.
  */
 object ProofJobInput {
-    /** A transaction body is submitted as hex. Returns null when valid. */
+    /** A proving payload is submitted as hex. Returns null when valid. */
     fun validationError(txHex: String): String? {
         val cleaned = txHex.trim().replace(" ", "").replace("\n", "")
-        if (cleaned.isEmpty()) return "Paste a transaction body (hex) first."
+        if (cleaned.isEmpty()) return "Paste a proving payload (hex) first."
         if (cleaned.length % 2 != 0) return "Hex must have an even number of characters."
         if (!cleaned.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) {
-            return "Transaction body must be hex (0-9, a-f)."
+            return "Proving payload must be hex (0-9, a-f)."
         }
         return null
     }
@@ -46,7 +46,7 @@ data class JobRecord(
 )
 
 object JobHistoryFormat {
-    /** "0x9f3c…ab21 · 84 bytes" style one-liner for a transaction body. */
+    /** "0x9f3c…ab21 · 84 bytes" style one-liner for a payload or proof. */
     fun summariseTx(cleanedHex: String): String {
         val bytes = cleanedHex.length / 2
         return if (cleanedHex.length <= 12) {
@@ -59,4 +59,57 @@ object JobHistoryFormat {
     fun formatDuration(seconds: Double): String =
         if (seconds < 60) String.format("%.1f s", seconds)
         else String.format("%d min %.0f s", (seconds / 60).toInt(), seconds % 60)
+}
+
+/** Hex codec for the binary payloads the proof server speaks. Pure + tested. */
+object HexCodec {
+    fun hexToBytes(cleanedHex: String): ByteArray {
+        require(cleanedHex.length % 2 == 0) { "Hex must have an even number of characters." }
+        return ByteArray(cleanedHex.length / 2) { i ->
+            val hi = Character.digit(cleanedHex[i * 2], 16)
+            val lo = Character.digit(cleanedHex[i * 2 + 1], 16)
+            require(hi >= 0 && lo >= 0) { "Proving payload must be hex (0-9, a-f)." }
+            ((hi shl 4) + lo).toByte()
+        }
+    }
+
+    fun bytesToHex(bytes: ByteArray): String =
+        bytes.joinToString("") { "%02x".format(it) }
+}
+
+/** Facts about a proof the server returned. Pure + tested. */
+object ProofFormat {
+    private val PROOF_HEADER = "midnight:proof-versioned:".toByteArray(Charsets.US_ASCII)
+
+    fun isProof(bytes: ByteArray): Boolean =
+        bytes.size > PROOF_HEADER.size &&
+            PROOF_HEADER.indices.all { bytes[it] == PROOF_HEADER[it] }
+
+    fun summarise(bytes: ByteArray): String =
+        if (isProof(bytes)) "Midnight proof · ${bytes.size} bytes"
+        else "Server response · ${bytes.size} bytes (unexpected header)"
+}
+
+/** The flat fields of GET /ready, parsed without a JSON library so the
+ *  parsing is unit-testable on the JVM. Pure + tested. */
+data class ReadyFields(
+    val status: String = "",
+    val jobsProcessing: Int = 0,
+    val jobsPending: Int = 0,
+    val jobCapacity: Int? = null
+) {
+    companion object {
+        fun parse(body: String): ReadyFields {
+            fun stringField(name: String): String? =
+                Regex("\"$name\"\\s*:\\s*\"([^\"]*)\"").find(body)?.groupValues?.get(1)
+            fun intField(name: String): Int? =
+                Regex("\"$name\"\\s*:\\s*(\\d+)").find(body)?.groupValues?.get(1)?.toIntOrNull()
+            return ReadyFields(
+                status = stringField("status") ?: "",
+                jobsProcessing = intField("jobsProcessing") ?: 0,
+                jobsPending = intField("jobsPending") ?: 0,
+                jobCapacity = intField("jobCapacity")
+            )
+        }
+    }
 }

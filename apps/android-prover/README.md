@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.2)
+# Midnight Prover — Android app (v0.3)
 
 An Android client for proving Midnight transactions on the phone itself.
 Mission context: help take the Midnight ZK prover mobile, building on the
@@ -13,7 +13,26 @@ official **midnight-proof-server 9.0.2** over its standard HTTP API:
 - `GET /version` — expect `9.0.2`
 - `GET /proof-versions` — `["V2","V3"]`
 - `GET /ready` — readiness + job capacity
-- `POST /prove-tx` — submit a transaction body for proving
+- `POST /prove` — prove one serialized proving payload (raw binary body)
+
+**Protocol correction (v0.3, CLAUDE-AP-4).** v0.1–v0.2 called
+`POST /prove-tx` with a JSON body — a format the server has never
+accepted; every prove attempt would have failed with HTTP 400. Verified
+live against the real 9.0.2 server (2026-11-25): proving is per-circuit
+via `POST /prove`, whose body is the raw serialized proving payload — a
+`(proof-preimage-versioned, option(proving-data), option(fr-bls))`
+tuple, exactly what Midnight.js and the wallet SDK send — and whose
+response is raw proof bytes headed `midnight:proof-versioned:`.
+Midnight's own local-proving guide marks `/prove-tx` "Deprecated.
+Midnight.js doesn't use it." In the verification run, a real 1,509-byte
+DUST-spend payload captured from a live wallet session was proven by
+the stock server in 2.56 s (sandbox CPU — not a phone measurement),
+returning a 2,940-byte proof. The app now speaks this protocol:
+payloads and proofs are handled as hex in the UI, proofs can be copied
+out, in-flight proves can be cancelled, failures are classified
+(unreachable / queue full 429 / busy 503 / server-rejected 400 with the
+server's own message), and the server URL + job history persist across
+launches.
 
 Per the CLAUDE-AP-1 feasibility verdict (`research/android-prover-feasibility.md`),
 the v1 deployment runs the official **arm64** proof-server build inside a

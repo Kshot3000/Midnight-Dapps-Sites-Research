@@ -36,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
@@ -209,8 +211,8 @@ private fun ProveScreen(state: ProverUiState, vm: ProverViewModel) {
         OutlinedTextField(
             value = state.txHex,
             onValueChange = vm::onTxHexChange,
-            label = { Text("Transaction body (hex)") },
-            placeholder = { Text("Paste the unproven transaction body…") },
+            label = { Text("Proving payload (hex)") },
+            placeholder = { Text("Paste the serialized proving payload a wallet or SDK would send the proof server…") },
             minLines = 4,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MidnightPalette.Violet,
@@ -227,6 +229,9 @@ private fun ProveScreen(state: ProverUiState, vm: ProverViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        if (state.warning.isNotEmpty()) {
+            Text(state.warning, color = MidnightPalette.WarningAmber, style = MaterialTheme.typography.bodyMedium)
+        }
         when (state.jobState) {
             JobState.PROVING -> {
                 Row(
@@ -241,13 +246,15 @@ private fun ProveScreen(state: ProverUiState, vm: ProverViewModel) {
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                GradientButton(
+                    text = "Cancel proof",
+                    enabled = true,
+                    onClick = vm::cancelProve,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             JobState.DONE -> {
-                ResultCard(
-                    title = "Proven in ${JobHistoryFormat.formatDuration(state.elapsedSeconds)}",
-                    body = state.result,
-                    accent = MidnightPalette.ProofGlow
-                )
+                ProofResultCard(state)
             }
             JobState.FAILED -> {
                 ResultCard(title = "Job failed", body = state.error, accent = MidnightPalette.ErrorRose)
@@ -388,6 +395,52 @@ private fun ServerScreen(state: ProverUiState, vm: ProverViewModel) {
 }
 
 @Composable
+private fun ProofResultCard(state: ProverUiState) {
+    val clipboard = LocalClipboardManager.current
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MidnightPalette.Nebula.copy(alpha = 0.9f)),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, MidnightPalette.ProofGlow.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                "Proven in ${JobHistoryFormat.formatDuration(state.elapsedSeconds)}",
+                color = MidnightPalette.ProofGlow,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(state.proofSummary, color = MidnightPalette.Starlight, style = MaterialTheme.typography.bodyMedium)
+            Text(state.result, color = MidnightPalette.Moonlight, style = MaterialTheme.typography.bodySmall)
+            if (state.proofHex.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MidnightPalette.Abyss.copy(alpha = 0.6f))
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        state.proofHex.take(240) + if (state.proofHex.length > 240) "…" else "",
+                        color = MidnightPalette.DimStar,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                GradientButton(
+                    text = "Copy proof (hex)",
+                    enabled = true,
+                    onClick = { clipboard.setText(AnnotatedString(state.proofHex)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun HonestyNote() {
     Box(
         modifier = Modifier
@@ -397,9 +450,11 @@ private fun HonestyNote() {
             .padding(12.dp)
     ) {
         Text(
-            "Honest status: on-device proving has not been benchmarked yet, and this app claims " +
-                "no phone proving times. The prover is Midnight's official arm64 proof server, " +
-                "unmodified — the first device measurements come from a supervised run on the owner's phone.",
+            "How proving works here: the app sends one serialized proving payload to the " +
+                "server's /prove endpoint — the per-circuit protocol Midnight.js and the wallet " +
+                "SDK use today (the older /prove-tx endpoint is deprecated). On-device proving " +
+                "has not been benchmarked yet and this app claims no phone proving times; the " +
+                "first device measurements come from a supervised run on the owner's phone.",
             color = MidnightPalette.Moonlight,
             style = MaterialTheme.typography.bodySmall
         )
