@@ -1,0 +1,28 @@
+# GROK-12 run 1 (FAILED) — default compose bridge networking on this box. Kept so the failure is documented.
+# Client (times CST):
+start 2026-11-25 10:36:06 CST
+[10:36:21.260] INFO (436837): Wallet built from seed.
+[10:36:21.260] INFO (436837): Starting wallet...
+[10:36:21.296] INFO (436837): Syncing wallet...
+Wallet.Sync: [object Object]
+  _tag: 'Wallet.Sync'
+Wallet.Sync: [object Object]
+  _tag: 'Wallet.Sync'
+Wallet.Sync: [object Object]
+  _tag: 'Wallet.Sync'
+Error: Wallet sync timeout after 600000ms
+ ❯ Observable.init [as _subscribe] ../../node_modules/rxjs/src/internal/observable/throwError.ts:123:68
+ Test Files  1 failed (1)
+      Tests  2 skipped (2)
+   Duration  614.15s (tests 99%, import 1%)
+exit=1
+end 2026-11-25 10:46:21 CST
+# Indexer (UTC):
+{"timestamp":"2026-11-25T16:44:32.214415+00:00","level":"ERROR","target":"indexer_standalone","file":"indexer-standalone/src/main.rs","line":278,"message":"chain-indexer exited with ERROR","kvs":{"backtrace":"disabled backtrace","error":"create SubxtNode: cannot create reconnecting subxt RPC client: Connection timeout exceeded: 10s"}}
+# Proof server, first attempt on the bridge network (UTC, container exited 1; copied from that container's log before it was recreated with host networking on port 6301):
+Error: Custom { kind: InvalidData, error: "Failed to fetch data from https://srs.midnight.network/bls_midnight_2p10 after 3 attempts. Giving up." }
+# Run 1 itself used: proof server on host networking (port 6301, healthy, 9.0.2), node + indexer still on the compose bridge network.
+# Probe from a throwaway curl container on the compose network grok12_default:
+curl https://srs.midnight.network/... -> curl: (6) Could not resolve host: srs.midnight.network
+curl http://node:9944 (system_health) -> curl: (28) Connection timed out after 8001 milliseconds
+curl http://172.18.0.3:9944 (node container IP) -> curl: (28) Connection timed out after 8001 milliseconds

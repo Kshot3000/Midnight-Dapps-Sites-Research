@@ -1,0 +1,14 @@
+# GROK-12 node + indexer excerpt — run 2. Node timestamps are UTC (container clock); indexer JSON timestamps carry +00:00.
+2026-11-25 16:47:17 Midnight Node    
+2026-11-25 16:47:17 ✌️  version 2.1.101-bbd616b1    
+2026-11-25 16:47:17 📋 Chain specification: undeployed1    
+2026-11-25 16:48:18 🏆 Imported #10 (0x117e…9533 → 0xc415…6094)    
+2026-11-25 16:48:24 🏆 Imported #11 (0xc415…6094 → 0x90cf…9951)    
+2026-11-25 16:48:30 🏆 Imported #12 (0x90cf…9951 → 0x9d8b…4482)    
+2026-11-25 16:48:36 🏆 Imported #13 (0x9d8b…4482 → 0x4a6c…9c3c)    
+2026-11-25 16:48:42 🏆 Imported #14 (0x4a6c…9c3c → 0x1cbf…875a)    
+2026-11-25 16:48:48 🏆 Imported #15 (0x1cbf…875a → 0xe262…ec5e)    
+2026-11-25 16:48:54 🏆 Imported #16 (0xe262…ec5e → 0x0af6…896b)    
+----
+# Indexer GraphQL query after the run (POST http://127.0.0.1:8088/api/v4/graphql): contractAction(address: <deployed address>)
+{"data":{"contractAction":{"__typename":"ContractCall","address":"433c4b813a333c23009a19e7083c468e9319e11779dcae4af66a093b678a50e2","transaction":{"hash":"1adc99242a7662a4a9f5f4e5da11632cff725e6527118f339b0cb4701954e35f","block":{"height":14}}}}}

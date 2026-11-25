@@ -1,0 +1,22 @@
+# GROK-12 local override (box only, not committed upstream).
+# On this box, Docker's user-defined bridge network does not pass traffic
+# between containers (indexer -> ws://node:9944 timed out) and its embedded DNS
+# cannot resolve external hosts, so all three pinned services use host
+# networking. Host port 6300 is already taken by another non-Docker proof server
+# on the box, so this run's proof server 9.0.2 listens on 6301.
+services:
+  proof-server:
+    network_mode: host
+    ports: !reset []
+    command: ['midnight-proof-server', '--port', '6301']
+    healthcheck:
+      test: ['CMD-SHELL', 'echo > /dev/tcp/127.0.0.1/6301']
+  node:
+    network_mode: host
+    ports: !reset []
+  indexer:
+    network_mode: host
+    ports: !reset []
+    environment:
+      APP__INFRA__NODE__URL: 'ws://127.0.0.1:9944'
+      APP__INFRA__SPO_NODE__URL: 'ws://127.0.0.1:9944'
