@@ -384,6 +384,17 @@ private fun ServerScreen(state: ProverUiState, vm: ProverViewModel) {
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+        Text("Run the server on this phone", style = MaterialTheme.typography.titleMedium, color = MidnightPalette.Starlight)
+        Text(
+            "Route 3 setup, in Termux with a proot Debian environment: install the official " +
+                "arm64 proof server with the project's setup script (apps/android-prover/server-setup " +
+                "in the repo — it pulls the official 9.0.2 image, no Docker needed), start it, " +
+                "then check the server here. First boot downloads ~35 MB of public parameters " +
+                "from srs.midnight.network. No phone install has been measured yet — the first " +
+                "supervised run sets the real numbers.",
+            color = MidnightPalette.Moonlight,
+            style = MaterialTheme.typography.bodyMedium
+        )
         HonestyNote()
         Text(
             "Independent builder — not affiliated with the Midnight Foundation or IOG. · @kshot9000\n" +
