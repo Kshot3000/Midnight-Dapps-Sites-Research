@@ -1,6 +1,6 @@
 # Research reading guide
 
-This folder holds nine sourced research briefs. Each row below lists the question the brief answers, the date it was checked (as written in the brief), the networks it covers, and the status labels it uses. Open the brief itself for the sources and evidence.
+This folder holds ten sourced research briefs. Each row below lists the question the brief answers, the date it was checked (as written in the brief), the networks it covers, and the status labels it uses. Open the brief itself for the sources and evidence.
 
 **Network labels:** Preview and Preprod are public **testnets**. Mainnet is production. Stagenet is a permissioned test network. `undeployed` is the local Docker devnet, not a public chain. A brief that never touched a chain says so.
 
@@ -19,6 +19,7 @@ This folder holds nine sourced research briefs. Each row below lists the questio
 | [`bridges-status.md`](bridges-status.md) (GROK-6) | What ways exist to move value onto or off Midnight, and which of them really work? | 2026-11-24 | Mainnet, Preview and Preprod (testnet), and Stagenet (permissioned test network). | **Live per public evidence, not used by me**, **Announced only**, **Testnet / in development**, **Testnet demo, stale**, **Not a bridge**, **No Midnight support found**. Nothing is labelled "live (verified usable)" because nothing was signed. |
 | [`catalog-partner-status.md`](catalog-partner-status.md) (GROK-7) | Which partner cards in the official ecosystem catalog are live Midnight products, and which are announcements only? | 2026-11-24 | Mainnet, Preview and Preprod (testnet), and Stagenet (permissioned test network). | **Live product**, **Live per public evidence, not used by me**, **Testnet demo**, **Opened, not independently verified**, **Announcement or partnership only**, **Opened empty or broken site**. Its corrections are suggestions only. |
 | [`qa-sweep-2026-11.md`](qa-sweep-2026-11.md) (GROK-3) | Are this repo's links, live hub, accessibility, mobile layout, attribution and stack pins in order? | 2026-11-23. Link and live-site fetches also ran around 04:30 UTC on 2026-11-24. | No chain interaction. Repo and hub QA only. | Fixed (with fix PRs #11 and #12), left as a judgement call for Muse, and "What I did not verify". It records the test command used at the time (`node --test tests/hub.test.mjs`). The full suite is now `npm test`. |
+| [`proof-station-qa.md`](proof-station-qa.md) (GROK-10) | Does the Proof Station README match the app code, its Compose pins and the live compatibility matrix, and do its Windows setup steps agree with HERMES-1 and HERMES-3? | 2026-11-24 | Midnight Preview (testnet), the app's only network. Cardano Preview (testnet) db-sync is a prerequisite. No chain was touched. | Each README item is marked **Matches** or **Issue**, and 13 numbered fixes are proposals only, not applied. Estimates are labelled as estimates. Has a "NOT verified" section (no Windows, GPU, Docker or running node). |
 
 ## How to read the labels
 
