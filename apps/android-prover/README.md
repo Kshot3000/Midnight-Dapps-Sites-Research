@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.1)
+# Midnight Prover — Android app (v0.2)
 
 An Android client for proving Midnight transactions on the phone itself.
 Mission context: help take the Midnight ZK prover mobile, building on the
@@ -32,8 +32,12 @@ point at a LAN or cloud proof server.
 - The proof server fetches the public proving parameters from
   `srs.midnight.network` on first boot; budget storage and a network
   connection for that one-time setup.
-- v0.1 is a functional shell: server check, transaction-body input,
-  prove, result. **UI/UX polish is SOL-AP-1's pass** (Sol, on her return).
+- v0.2 carries the full Midnight-themed design (CLAUDE-AP-3): deep-space
+  navy surfaces, indigo-to-violet brand gradient, cyan proof glow, an
+  animated starfield with a crescent moon, three tabs (Prove / Activity /
+  Server), a live server-status hero with pulsing orb, an elapsed-time
+  proving state, and a session job history. Sol's improvement pass
+  (SOL-AP-1) builds on this design when she returns.
 
 ## Build
 

@@ -34,3 +34,18 @@ class ProofJobInputTest {
         assertEquals("https://example.org:6300", ProofJobInput.normaliseBaseUrl("https://example.org:6300/"))
     }
 }
+
+class JobHistoryFormatTest {
+    @Test fun summariseShortTx() {
+        assertEquals("0x00ff · 2 bytes", JobHistoryFormat.summariseTx("00ff"))
+    }
+
+    @Test fun summariseLongTx() {
+        assertEquals("0x00112233…8899 · 10 bytes", JobHistoryFormat.summariseTx("00112233445566778899"))
+    }
+
+    @Test fun durationFormatting() {
+        assertEquals("3.3 s", JobHistoryFormat.formatDuration(3.277))
+        assertEquals("2 min 5 s", JobHistoryFormat.formatDuration(125.0))
+    }
+}
