@@ -93,3 +93,26 @@ Support — both addresses, character for character, alongside @kshot9000:
 - Check every command, path and version named in the README; check the Windows setup steps against `research/local-stack-verification.md` (HERMES-3) and `research/stack-versions.md`.
 - Output = findings + a fix list. Fixes are proposals for a later task — do not change the app or README in this PR.
 - **Honesty rule:** anything needing a GPU, a Windows machine, or a running node goes in a NOT-verified section. Claim first on the board, one PR, branch `grok/GROK-10-proof-station-qa`.
+
+## Wave 4 — 2026-11-24 (Kyle's order: take the Midnight prover to Android — the whole team's next mission)
+
+Context for all three tasks: Charles Hoskinson's GPU prover work (midnight-zk PR #667, which this team tested on the RTX 3090) takes proving off the CPU. The next frontier is the phone: a Midnight prover that runs **on an Android device**, so a wallet user never has to trust a server with their witness data. Kyle has made this the team's next mission for every seat — Sol designs the app (SOL-AP-1, on the board), Muse runs the technical feasibility spike (CLAUDE-AP-1, on the board), and the swarm takes the research sweep below plus the queued wallet E2E.
+
+## GROK-11 — Android prover research sweep
+
+Branch: `grok/GROK-11-android-prover-landscape`
+
+Deliverable: `research/android-prover-landscape.md`. Survey mobile ZK proving as it actually exists today:
+
+- The **Mopro** framework (mobile proving by the PSE ecosystem): which proving systems and curves it supports, its Android status, and whether Midnight's stack (ZKIR over BLS12-381, halo2-derived) fits it or not — with sources.
+- Any existing Midnight or Cardano mobile-proving efforts (apps, repos, announcements) — status labelled honestly (live / testnet / announced / unverified).
+- WASM proving on phones: any published benchmarks of halo2-class proving in mobile browsers/WebViews.
+- Rust-to-Android proving projects (NDK, `aarch64-linux-android`) outside crypto wallets, if any set a precedent.
+- Device reality: RAM and thermal limits for sustained proving, flagship vs mid-range, and any app-store or OS policy constraints on heavy background compute.
+- Discipline: every claim comes from a page you actually opened, with the check date. Close with an honest gaps section — what nobody has published yet. Footer: both addresses + @kshot9000 + the independent-builder line, exact.
+
+## GROK-12 — Wallet-built transaction body → real proof-server proof (E2E) — queued after GROK-11
+
+Branch: `grok/GROK-12-wallet-prover-e2e`
+
+Deliverable: `research/wallet-prover-e2e.md` + the captured evidence (client output + proof server log excerpt). Build an unproven transaction from a real wallet (your own wallet tooling, or the midnight-examples hello-world local flow with its seeded genesis wallet on the local `undeployed` network), submit the wallet-built body to a proof server **9.0.2** (`POST /prove-tx`, plus whatever /check + /prove calls the flow makes), and capture: HTTP status, which circuits were proven and their k, and the server-side timings from the proof server log. If you ran the full local stack, confirm the proven transaction lands; if you only got the proof, say plainly where it stopped. Muse is attempting the same E2E in parallel against its own running 9.0.2 server — check the board before starting; if Muse's run lands first, yours becomes the independent reproduction, which is still valuable and should say so. Local network + CPU prover labelled honestly; quote only numbers from your own captured output.
