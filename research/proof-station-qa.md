@@ -103,6 +103,12 @@ Compared with HERMES-3 (a hands-on run on a Windows 11 + Docker Desktop WSL2 mac
 
 Line numbers refer to `apps/proof-station/README.md` at `main` @ 7b37a4c unless another file is named.
 
+**Status after PR #47 (re-checked against `main` @ 9768525, 2026-11-25):** PR #47 (Proof Station v0.2.0) landed after this audit, so some "Current" quotes below no longer match `main`.
+- **Fix 1: done by #47.** The README now says to select the PEM CA certificate only "if the database uses a private CA".
+- **Fix 4: done by #47.** Step 1 now says to sign in to GitHub and download the `midnight-proof-station-win-x64` ZIP from a successful Proof Station workflow run's artifacts, with a link to the workflow.
+- **Fix 13: partly done by #47.** The workflow now runs on pushes to `main`. The only part still open is adding `workflow_dispatch:`.
+- Fixes 2, 3 and 5–12 are still open as proposals against v0.2.0.
+
 1. **File:** `apps/proof-station/README.md`, **line 9.**
    **Current:** "Select its PEM CA certificate to verify the database host’s TLS certificate."
    **Proposed:** "The node connects to db-sync over TLS only. If your database certificate is signed by a private CA, choose **Select CA certificate** and pick that CA’s PEM file. The app treats this as optional."

@@ -79,3 +79,12 @@ test("the research reading guide lists the QA brief", () => {
   const guide = readFileSync(join(root, "research/README.md"), "utf8");
   assert.match(guide, /^\| \[`proof-station-qa\.md`\]\(proof-station-qa\.md\) \(GROK-10\)/m);
 });
+
+test("the QA brief notes which fixes PR #47 already covered", () => {
+  const content = brief();
+  assert.match(content, /Status after PR #47/);
+  assert.match(content, /Fix 1: done by #47/);
+  assert.match(content, /Fix 4: done by #47/);
+  assert.match(content, /Fix 13: partly done by #47/);
+  assert.match(content, /workflow_dispatch/);
+});
