@@ -79,3 +79,9 @@ test("the research reading guide lists the QA brief", () => {
   const guide = readFileSync(join(root, "research/README.md"), "utf8");
   assert.match(guide, /^\| \[`proof-station-qa\.md`\]\(proof-station-qa\.md\) \(GROK-10\)/m);
 });
+
+test("the QA brief names the proof-server parameter host as srs.midnight.network", () => {
+  const content = brief();
+  assert.match(content, /srs\.midnight\.network/);
+  assert.doesNotMatch(content.split("\n").filter((l) => !l.includes("Host corrected 2026-11-25")).join("\n"), /srs\.midnight\.net(?!work)/);
+});

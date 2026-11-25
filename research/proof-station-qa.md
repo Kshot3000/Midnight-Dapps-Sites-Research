@@ -18,7 +18,7 @@ This is a read-only audit. I did not change the app, its README or its workflow.
   1. **The database CA step reads as required, but the app treats it as optional** (fix 1). Node 2.1.101 connects to db-sync over TLS only, so the README should say that plainly.
   2. **Step 1 cannot be followed from `main`** (fixes 4 and 13). The Proof Station workflow has only ever run from `sol/*` branches and PRs. It has no `workflow_dispatch` trigger, and it does not link to a run.
   3. **"Start Preview stack" also starts the wallet prover, and its node health check has a limit of about 10.5 minutes (estimate)** (fix 2). The README does not mention either.
-  4. **"Local proving" is not offline on first use.** HERMES-3 saw proof server 9.0.2 download keys and parameters from `srs.midnight.net` (fix 10).
+  4. **"Local proving" is not offline on first use.** HERMES-3 saw proof server 9.0.2 download keys and parameters from `srs.midnight.network` (fix 10).
 
 ## 1. Commands and GUI controls
 
@@ -150,7 +150,8 @@ Line numbers refer to `apps/proof-station/README.md` at `main` @ 7b37a4c unless 
 
 10. **File:** `apps/proof-station/README.md`, **after line 20** (new sentence).
     **Current:** (none)
-    **Proposed:** "On first start, and the first time it proves a circuit size, the proof server downloads keys and public parameters from `srs.midnight.net`, so it needs internet access."
+    **Proposed:** "On first start, and the first time it proves a circuit size, the proof server downloads keys and public parameters from `srs.midnight.network`, so it needs internet access."
+    **Host corrected 2026-11-25:** this brief first said `srs.midnight.net`, copied from HERMES-3. Proof server 9.0.2's own error log in `research/evidence/grok-12/run1-failure.txt` fetches from `https://srs.midnight.network/bls_midnight_2p10`. On 2026-11-25 `srs.midnight.network` completed a TLS handshake (HTTP 403 at the root, no path), while `srs.midnight.net` failed the TLS handshake. GROK-13 (#66) reports that the docs name `.network` as well.
     **Evidence:** HERMES-3 §1 and §7 item 8 (proof server 9.0.2 on the local devnet, 2026-11-24): first-boot downloads of ZKIR sources and keys, plus a 0.70 s parameter fetch for `k=6`. This was observed on the local devnet, not on Preview.
 
 11. **File:** `apps/proof-station/README.md`, **line 10** (add a sentence).
