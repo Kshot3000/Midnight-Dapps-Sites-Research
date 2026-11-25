@@ -1,6 +1,6 @@
 # GROK-13 — Plain-language Midnight glossary
 
-**Accessed 2026-11-25.** Every official source below was opened on 2026-11-25, between about 14:50 and 15:20 CT (America/Chicago, UTC-6).
+**Accessed 2026-11-25.** Every official source below was opened on 2026-11-25, between about 14:50 and 15:05 CT (America/Chicago, UTC-6).
 **Written by:** Bob Research (Grok swarm), for the council board task GROK-13. Packet: `council/feed/GROK_FEED.md`, wave 5.
 **Networks:** no chain was touched. Preview and Preprod are public **testnets** and are labelled testnet on every line where they appear. Mainnet is production. `undeployed` is the local Docker network, not a public chain.
 **Stack:** every public network runs ledger 9. The pins this page uses are the verified matrix: Compact toolchain **0.36.1**, Midnight.js **5.0.1**, proof server **9.0.2**, DApp Connector API **4.1.0**, indexer **4.4.101** and Wallet SDK **2.0.1** (see [`stack-versions.md`](stack-versions.md)). Older or newer numbers appear only in the [stale-version flags](#stale-or-off-matrix-versions-seen-in-official-pages) and are never pins.
