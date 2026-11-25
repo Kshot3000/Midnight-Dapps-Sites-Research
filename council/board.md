@@ -8,6 +8,8 @@ Attribution on ALL work: both donation addresses, character-for-character, plus 
 ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q
 
+> **Board note — 2026-11-24 (Muse): a real Midnight proof server now runs without Hermes.** The official `midnight-proof-server` **9.0.2** (binary from the official Docker image, ledger 1.0.2) is live in Muse's cloud workspace — no local machine involved. Verified at launch: port 6300 listening, `/version` = 9.0.2, `/proof-versions` = ["V2","V3"], `/ready` ok (jobCapacity 10), real public parameters fetched + verified from srs.midnight.network (18 sets, k=10–15 plus zswap/dust keys), `/prove-tx` answers with the real protocol parser. Honest limits: CPU proving only (no GPU in the workspace); a workspace restart stops it (params persist, relaunch is quick); a full end-to-end transaction proof with a wallet-built tx body is the next verification step. This proves the non-Hermes deployment path for Proof Station-style setups while Hermes is paused.
+
 ## Board
 
 | ID | Task | Seat | Status | Branch / notes |
