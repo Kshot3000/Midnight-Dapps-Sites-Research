@@ -14,6 +14,7 @@
     <SolidColorBrush x:Key="Muted" Color="#AEBBD1"/>
     <SolidColorBrush x:Key="Accent" Color="#A5BAFF"/>
     <SolidColorBrush x:Key="Success" Color="#A1E4D7"/>
+    <SolidColorBrush x:Key="Warning" Color="#FFD5A1"/>
 
     <Style TargetType="TextBlock">
       <Setter Property="TextWrapping" Value="Wrap"/>
@@ -195,7 +196,7 @@
               </Border>
               <TextBlock Text="Midnight Proof Station" FontSize="40" FontWeight="SemiBold" Margin="0,2,0,1"
                          AutomationProperties.HeadingLevel="Level1"/>
-              <TextBlock Text="Run a local Midnight node and verify sample proofs on CPU or NVIDIA CUDA."
+              <TextBlock Text="Run a local Preview node. Generate sample proofs on CPU or NVIDIA CUDA."
                          Foreground="#CDD8ED" FontSize="14"/>
             </StackPanel>
           </Border>
@@ -290,7 +291,8 @@
               </Border>
               <TextBlock Text="Proof Lab" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
             </DockPanel>
-            <TextBlock Text="Both modes prove the same synthetic circuit." Style="{StaticResource Secondary}" Margin="0,4,0,10"/>
+            <TextBlock Text="Both modes prove the same synthetic circuit. The stock CPU verifier checks each proof."
+                       Style="{StaticResource Secondary}" Margin="0,4,0,10"/>
 
             <Border x:Name="CpuCard" Style="{StaticResource InsetCard}" Padding="11,9" Margin="0,0,0,6">
               <StackPanel>
@@ -309,6 +311,7 @@
                   <TextBlock Text="NVIDIA device" FontWeight="SemiBold"/>
                   <TextBlock x:Name="GpuStatus" Text="GPU not checked" Foreground="{StaticResource Accent}"/>
                   <TextBlock x:Name="GpuDetail" Text="CUDA through your default WSL2 distribution" Style="{StaticResource Secondary}"/>
+                  <TextBlock x:Name="GpuReadiness" Style="{StaticResource ServiceDetail}"/>
                 </StackPanel>
               </DockPanel>
             </Border>
@@ -361,6 +364,37 @@
 
             <TextBlock Text="Preview wallet transactions use the released CPU prover."
                        Style="{StaticResource Secondary}" Margin="0,2,0,0"/>
+
+            <Border x:Name="CudaEvidence" Style="{StaticResource InsetCard}" Background="#151F34"
+                    BorderBrush="#41547E" Padding="11,9" Margin="0,11,0,0" Visibility="Collapsed">
+              <StackPanel>
+                <TextBlock Text="Measured on RTX 3090" Foreground="{StaticResource Accent}" FontWeight="SemiBold"/>
+                <TextBlock Text="Hermes · Nov 24, 2026 · sm_86 · Driver 610.60" Style="{StaticResource Secondary}"/>
+                <TextBlock Text="Synthetic k=16 · Upstream draft PR #667 · 6bcc6a5"
+                           Style="{StaticResource Secondary}" Margin="0,1,0,5"/>
+                <UniformGrid Columns="3" Margin="0,0,0,6">
+                  <StackPanel Margin="0,0,5,0">
+                    <TextBlock Text="Cold proof" Style="{StaticResource Secondary}"/>
+                    <TextBlock Text="1.168 s" Style="{StaticResource ProofMetricValue}"/>
+                  </StackPanel>
+                  <StackPanel Margin="0,0,5,0">
+                    <TextBlock Text="Warm proof" Style="{StaticResource Secondary}"/>
+                    <TextBlock Text="0.766 s" Style="{StaticResource ProofMetricValue}"/>
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="Warm verify" Style="{StaticResource Secondary}"/>
+                    <TextBlock Text="≈ 1.6 ms" Style="{StaticResource ProofMetricValue}"/>
+                  </StackPanel>
+                </UniformGrid>
+                <TextBlock Text="Both proofs passed stock CPU verification. 38 CUDA MSM calls, 0 fallbacks, 0 device errors."
+                           Style="{StaticResource Secondary}"/>
+                <TextBlock Margin="0,4,0,0" Style="{StaticResource Secondary}">
+                  <Hyperlink Foreground="{StaticResource Accent}"
+                             NavigateUri="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/pull/4#issuecomment-7125334907"
+                             RequestNavigate="OpenLink_RequestNavigate">View Hermes’s measured run</Hyperlink>
+                </TextBlock>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </Border>
       </Grid>
@@ -384,7 +418,8 @@
         <StackPanel>
           <TextBlock Text="Independent builder — not affiliated with the Midnight Foundation or IOG." Style="{StaticResource Secondary}"/>
           <TextBlock Margin="0,4,0,8">
-            Built by Kyle Cox · <Hyperlink Click="Profile_Click" Foreground="{StaticResource Accent}">@kshot9000</Hyperlink>
+            Built by Kyle Cox · <Hyperlink NavigateUri="https://x.com/kshot9000" RequestNavigate="OpenLink_RequestNavigate"
+                                            Foreground="{StaticResource Accent}">@kshot9000</Hyperlink>
           </TextBlock>
           <Label Target="{Binding ElementName=AdaAddress}" Content="Cardano donation address" FontWeight="SemiBold" Padding="0,0,0,4"/>
           <TextBox x:Name="AdaAddress" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas"

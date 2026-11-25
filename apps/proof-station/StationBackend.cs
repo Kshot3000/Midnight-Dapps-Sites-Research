@@ -9,7 +9,10 @@ namespace MidnightProofStation;
 
 internal sealed record ServiceStatus(string State, string Detail);
 internal sealed record StationStatus(string Docker, ServiceStatus Node, ServiceStatus Indexer, ServiceStatus ProofServer);
-internal sealed record GpuDevice(string Name, string Architecture, string FreeMemory, string TotalMemory, string Driver);
+internal sealed record GpuDevice(string Name, string Architecture, int FreeMiB, int TotalMiB, string Driver, int MinimumFreeMiB)
+{
+    public bool HasProvingMemory => FreeMiB >= MinimumFreeMiB;
+}
 internal enum ProofMode { Cpu, Cuda }
 internal sealed record SampleProofResult(int Count, decimal ColdSeconds, decimal WarmSeconds, decimal VerifySeconds,
     long DeviceCalls, long PeakBytes, long Fallbacks);
@@ -78,8 +81,7 @@ internal sealed class StationBackend : IDisposable
     {
         var result = await LabAsync("detect", index, TimeSpan.FromSeconds(40));
         result.RequireSuccess("Checking the WSL2 GPU");
-        string[] parts = ReadRecord(result.Output, "STATION_GPU", 6);
-        return new GpuDevice(parts[1], parts[2], parts[3], parts[4], parts[5]);
+        return ParseGpuDevice(ReadRecord(result.Output, "STATION_GPU", 7));
     }
 
     public async Task BuildProverAsync(ProofMode mode, int index, Action<string> progress)
@@ -90,10 +92,13 @@ internal sealed class StationBackend : IDisposable
         ReadRecord(result.Output, "STATION_READY", 2);
     }
 
-    public async Task<SampleProofResult> ProveAsync(ProofMode mode, int index, Action<string> progress)
+    public async Task<SampleProofResult> ProveAsync(ProofMode mode, int index, Action<string> progress,
+        Action<GpuDevice> showGpu)
     {
         string action = mode == ProofMode.Cpu ? "prove-cpu" : "prove";
         var result = await LabAsync(action, index, TimeSpan.FromMinutes(10), progress);
+        if (mode == ProofMode.Cuda && FindRecord(result.Output, "STATION_GPU", 7) is { } device)
+            showGpu(ParseGpuDevice(device));
         result.RequireSuccess("Generating the sample proofs");
         string[] parts = ReadRecord(result.Output, "STATION_PROOF", 8);
         return new SampleProofResult(int.Parse(parts[1], CultureInfo.InvariantCulture),
@@ -103,11 +108,19 @@ internal sealed class StationBackend : IDisposable
             long.Parse(parts[7], CultureInfo.InvariantCulture));
     }
 
-    private static string[] ReadRecord(string output, string prefix, int fields)
+    private static GpuDevice ParseGpuDevice(string[] parts) =>
+        new(parts[1], parts[2], int.Parse(parts[3], CultureInfo.InvariantCulture),
+            int.Parse(parts[4], CultureInfo.InvariantCulture), parts[5],
+            int.Parse(parts[6], CultureInfo.InvariantCulture));
+
+    private static string[] ReadRecord(string output, string prefix, int fields) =>
+        FindRecord(output, prefix, fields) ?? throw new InvalidOperationException("The Proof Lab did not return the expected result.");
+
+    private static string[]? FindRecord(string output, string prefix, int fields)
     {
         string? line = output.Split('\n').LastOrDefault(value => value.StartsWith(prefix + "\t", StringComparison.Ordinal));
         var parts = line?.TrimEnd('\r').Split('\t');
-        return parts?.Length == fields ? parts : throw new InvalidOperationException("The Proof Lab did not return the expected result.");
+        return parts?.Length == fields ? parts : null;
     }
 
     private async Task<CommandResult> LabAsync(string action, int index, TimeSpan timeout, Action<string>? progress = null)

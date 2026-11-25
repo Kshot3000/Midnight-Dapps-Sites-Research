@@ -21,6 +21,7 @@ public partial class App : Application
             {
                 try
                 {
+                    window.VerifyPreviewLayout(captureCuda);
                     var view = (FrameworkElement)window.Content;
                     var bitmap = new RenderTargetBitmap(
                         (int)Math.Ceiling(view.ActualWidth), (int)Math.Ceiling(view.ActualHeight),

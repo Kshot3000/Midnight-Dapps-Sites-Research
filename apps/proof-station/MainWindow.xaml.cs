@@ -5,6 +5,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
@@ -26,6 +28,7 @@ public partial class MainWindow : Window
     internal MainWindow(bool capturePreview, bool captureCuda = false)
     {
         InitializeComponent();
+        Title = $"Midnight Proof Station {typeof(MainWindow).Assembly.GetName().Version!.ToString(3)}";
         if (capturePreview)
         {
             if (captureCuda) CudaMode.IsChecked = true;
@@ -89,10 +92,10 @@ public partial class MainWindow : Window
 
     private void ProofMode_Changed(object sender, RoutedEventArgs e)
     {
-        if (BuildProver is null) return;
+        if (CudaEvidence is null) return;
         bool cuda = SelectedProofMode == ProofMode.Cuda;
         CpuCard.Visibility = cuda ? Visibility.Collapsed : Visibility.Visible;
-        GpuCard.Visibility = CheckGpu.Visibility = cuda ? Visibility.Visible : Visibility.Collapsed;
+        GpuCard.Visibility = CheckGpu.Visibility = CudaEvidence.Visibility = cuda ? Visibility.Visible : Visibility.Collapsed;
         BuildProver.Content = cuda ? "Build CUDA backend" : "Build CPU prover";
         SetProofState("No proof result", cuda
             ? "Detect the GPU and build the CUDA backend for its architecture."
@@ -101,19 +104,36 @@ public partial class MainWindow : Window
 
     private void DeviceIndex_Changed(object sender, TextChangedEventArgs e)
     {
-        if (GpuStatus is null || ProofMetrics is null) return;
+        if (GpuReadiness is null || ProofMetrics is null) return;
         GpuStatus.Text = "GPU not checked";
         GpuDetail.Text = "CUDA through your default WSL2 distribution";
+        GpuReadiness.Text = "";
         SetProofState("No proof result for this device", "Run sample proofs to check CUDA execution and stock verification.");
     }
 
     private async void CheckGpu_Click(object sender, RoutedEventArgs e) =>
         await RunProofAsync(ProofMode.Cuda, "Detecting the NVIDIA GPU", async index =>
         {
-            var device = await backend.DetectGpuAsync(index);
-            GpuStatus.Text = device.Name;
-            GpuDetail.Text = $"sm_{device.Architecture} · {device.FreeMemory} / {device.TotalMemory} MiB free · Driver {device.Driver}";
+            GpuStatus.Text = "Checking GPU";
+            GpuReadiness.Text = "";
+            try { ShowGpuDevice(await backend.DetectGpuAsync(index)); }
+            catch
+            {
+                GpuStatus.Text = "GPU unavailable";
+                GpuDetail.Text = "See the activity log for setup details.";
+                throw;
+            }
         });
+
+    private void ShowGpuDevice(GpuDevice device)
+    {
+        GpuStatus.Text = device.Name;
+        GpuDetail.Text = $"sm_{device.Architecture} · {device.FreeMiB:N0} / {device.TotalMiB:N0} MiB free · Driver {device.Driver}";
+        GpuReadiness.Foreground = (Brush)FindResource(device.HasProvingMemory ? "Success" : "Warning");
+        GpuReadiness.Text = device.HasProvingMemory
+            ? $"VRAM ready at last check · {device.MinimumFreeMiB:N0} MiB required"
+            : $"CUDA needs {device.MinimumFreeMiB:N0} MiB free. Free GPU memory or select CPU.";
+    }
 
     private async void BuildProver_Click(object sender, RoutedEventArgs e)
     {
@@ -135,7 +155,7 @@ public partial class MainWindow : Window
             SetProofState($"{label} proof job running", "Producing a cold and warm proof for the stock verifier.");
             try
             {
-                var result = await backend.ProveAsync(mode, index, Log);
+                var result = await backend.ProveAsync(mode, index, Log, ShowGpuDevice);
                 string verificationTime = $"{result.VerifySeconds * 1000:0.00} ms";
                 ProofResult.Text = $"{result.Count} {label} proofs verified";
                 WarmProofTime.Text = $"{result.WarmSeconds:0.000} s";
@@ -197,8 +217,23 @@ public partial class MainWindow : Window
         SetMessage(feedback);
     }
 
-    private void Profile_Click(object sender, RoutedEventArgs e) =>
-        Process.Start(new ProcessStartInfo("https://x.com/kshot9000") { UseShellExecute = true });
+    private void OpenLink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); }
+        catch (Win32Exception)
+        {
+            SetMessage($"Open this link in your browser: {e.Uri.AbsoluteUri}");
+        }
+        e.Handled = true;
+    }
+
+    internal void VerifyPreviewLayout(bool cuda)
+    {
+        if (CpuCard.IsVisible == cuda || GpuCard.IsVisible != cuda || CheckGpu.IsVisible != cuda ||
+            CudaEvidence.IsVisible != cuda || ProofMetrics.IsVisible ||
+            (cuda && CudaEvidence.ActualHeight <= 0))
+            throw new InvalidOperationException("The rendered Proof Lab does not match the selected mode.");
+    }
 
     private async Task RunServicesAsync(string title, Func<Task> operation)
     {
