@@ -24,7 +24,7 @@ npm run env:up                   # docker compose up -d --wait
 - Images, pinned in `toolchain.json` → `images`: `midnightntwrk/midnight-node:2.1.101` (node image digest `sha256:0c1ad548…8a`), `midnightntwrk/proof-server:9.0.2`, `midnightntwrk/indexer-standalone:4.4.101`.
 - Endpoints (from `toolchain.json` → `networks.local`): node WS `ws://127.0.0.1:9944`, indexer GraphQL `http://127.0.0.1:8088/api/v4/graphql`, proof server `127.0.0.1:6300`. `networkId` is `undeployed`; the node log calls the chain spec **`undeployed1`**, and wallet addresses carry that prefix (`mn_addr_undeployed1…`).
 - Block time: **6 s** (6-second slots observed continuously in the node log).
-- The "local" stack is **not offline**: on first boot the proof server downloads Zswap/Dust ZKIR sources and proving/verifying keys from `srs.midnight.net`, and the first `k=6` proof fetches public parameters from the same host (see §4).
+- The "local" stack is **not offline**: on first boot the proof server downloads Zswap/Dust ZKIR sources and proving/verifying keys from `srs.midnight.network`, and the first `k=6` proof fetches public parameters from the same host (see §4).
 
 ## 2. Compilation (toolchain 0.36.1 / language 0.28)
 
@@ -87,9 +87,11 @@ Proof-server log (UTC) for the state-changing call:
 
 ```
 12:09:08.469  Starting to process request for /check...      → took 0.001566s
-12:09:08.478  Starting to process request for /prove...       → took 1.125684s  (includes 0.70 s downloading k=6 public parameters from srs.midnight.net)
+12:09:08.478  Starting to process request for /prove...       → took 1.125684s  (includes 0.70 s downloading k=6 public parameters from srs.midnight.network)
 12:09:09.631  Starting to process request for /prove...       → took 0.498643s  (parameters cached)
 ```
+
+> **Host corrected 2026-11-25 (GROK-13-fixup, Bob Research):** this brief first named the parameter host `srs.midnight.net` here and in §1 and §7 item 8. All three are now `srs.midnight.network`. What was checked before editing the excerpt above: no raw HERMES-3 proof-server log exists anywhere in the repo (`research/evidence/` holds only GROK-12 files; `git log --all -p` shows this brief arrived whole in one commit, `32ab0b2`, with no log attachment). The excerpt is a hand-condensed summary (shortened timestamps, `→ took` arrows), and the host sits in the author's own parenthetical, not in a log field: proof server 9.0.2 does not print the host on a successful fetch (see the verbatim GROK-12 log, [`evidence/grok-12/proof-server-log.txt`](evidence/grok-12/proof-server-log.txt), "Fetching public parameters for k=6 - finished."). Only the parenthetical host was changed; the timings are untouched. Evidence for `.network`: the same 9.0.2 server's own error in [`evidence/grok-12/run1-failure.txt`](evidence/grok-12/run1-failure.txt) line 23 fetches `https://srs.midnight.network/bls_midnight_2p10`; the official [Run the proof server](https://docs.midnight.network/guides/run-proof-server) guide names `https://srs.midnight.network/`; and on 2026-11-25 `srs.midnight.network` completed a TLS handshake (HTTP 403 at the bare root) while `srs.midnight.net` failed the TLS handshake (`unexpected eof while reading`).
 
 **CPU proof generation time for the state-changing call (k=6): ~0.50 s warm; ~1.13 s cold including the one-time public-parameter fetch.** The 18.3 s wall time is the rest of the path: circuit evaluation in JS (midnight-js/wasm), wallet sync/sign, submission, and waiting on the indexer to confirm against 6 s blocks.
 
@@ -132,7 +134,7 @@ GPU (feed item 5, "report what you observe, not what you expect"): **no stack-at
 5. **"The counter example from midnight-examples" is a phantom.** No counter exists in the current tree (§2); guides and tasks that reference it point at the docs' inline contract, not a repo example.
 6. **Image tag ≠ binary banner.** `midnightntwrk/indexer-standalone:4.4.101` prints "Midnight Indexer **v3.0.15**" on boot — two different versioning schemes for the same artifact.
 7. **First-start flakiness has a second mode.** The docs' troubleshooting table lists `…-indexer-1 exited (1)` on first start (→ rerun `env:up`); this run hit a different first-start failure (node `txpool-background`, §3) that is not in the table. Same recovery.
-8. **The "local" stack phones home.** First-use SRS parameter/key downloads from `srs.midnight.net` (§1, §4) — worth stating explicitly in the docs for air-gapped expectations.
+8. **The "local" stack phones home.** First-use SRS parameter/key downloads from `srs.midnight.network` (§1, §4) — worth stating explicitly in the docs for air-gapped expectations.
 9. **Cosmetic stderr noise.** Wallet sync repeatedly logs `RPC-CORE: subscribeRuntimeVersion(): disconnected from ws://127.0.0.1:9944/: 1000:: Normal Closure` — harmless, but alarming in test output.
 10. **30-min launch stall, unexplained** (§5, calculator) — included for completeness; no stack-side cause found.
 
