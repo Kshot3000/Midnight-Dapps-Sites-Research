@@ -82,6 +82,8 @@ class ProveEngineTest {
         assertEquals(JobState.INTERRUPTED, s.state)
         assertEquals(Fixtures.dustSpendHex, s.payloadHex)
         assertEquals("Interrupted", s.failure?.kind)
+        assertTrue(revived.history.value.isNotEmpty())
+        assertEquals("INTERRUPTED", revived.history.value.first().outcome)
         engine.cancel()
     }
 

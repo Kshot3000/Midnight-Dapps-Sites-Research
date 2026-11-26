@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 class ProveService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var wakeLock: PowerManager.WakeLock? = null
+    private var watchJob: kotlinx.coroutines.Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -41,14 +42,22 @@ class ProveService : Service() {
             return START_NOT_STICKY
         }
         val session = app.engine.session.value
+        // A start while idle (or after the job already finished) must not
+        // post a spurious "Proof failed" notification.
+        if (!session.isRunning) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         startInForeground(ongoing(session))
         acquireWakeLock(app.store.loadSettings().proveTimeoutMinutes)
-        scope.launch {
-            val done = app.engine.session.first { !it.isRunning }
-            notifyFinished(done)
-            releaseWakeLock()
-            ServiceCompat.stopForeground(this@ProveService, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
+        if (watchJob?.isActive != true) {
+            watchJob = scope.launch {
+                val done = app.engine.session.first { !it.isRunning }
+                notifyFinished(done)
+                releaseWakeLock()
+                ServiceCompat.stopForeground(this@ProveService, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
         }
         return START_NOT_STICKY
     }
@@ -107,6 +116,8 @@ class ProveService : Service() {
     )
 
     private fun acquireWakeLock(timeoutMinutes: Int) {
+        if (wakeLock?.isHeld == true) return
+        releaseWakeLock()
         val pm = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MidnightProver:prove").apply {
             setReferenceCounted(false)

@@ -100,7 +100,8 @@ class ProverStore(context: Context) {
                 durationSeconds = o.optDouble("secs", 0.0),
                 detail = o.optString("detail"),
                 circuit = o.optString("circuit"),
-                cancelled = o.optBoolean("cancelled", false)
+                cancelled = o.optBoolean("cancelled", false),
+                interrupted = o.optBoolean("interrupted", false)
             )
         }
     }.getOrDefault(emptyList())
@@ -111,7 +112,7 @@ class ProverStore(context: Context) {
             arr.put(JSONObject().apply {
                 put("at", r.finishedAtMillis); put("server", r.serverUrl)
                 put("tx", r.txPreview); put("ok", r.success)
-                put("secs", r.durationSeconds); put("detail", r.detail); put("circuit", r.circuit); put("cancelled", r.cancelled)
+                put("secs", r.durationSeconds); put("detail", r.detail); put("circuit", r.circuit); put("cancelled", r.cancelled); put("interrupted", r.interrupted)
             })
         }
         prefs.edit().putString("history", arr.toString()).apply()
@@ -166,11 +167,11 @@ class ProveEngine(
     private val clientFactory: (String, ClientTimeouts) -> ProofServerClient = { url, t -> ProofServerClient(url, t) },
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) {
-    private val _session = MutableStateFlow(recover(store.loadSession()))
-    val session: StateFlow<ProveSession> = _session.asStateFlow()
-
     private val _history = MutableStateFlow(store.loadHistory())
     val history: StateFlow<List<JobRecord>> = _history.asStateFlow()
+
+    private val _session = MutableStateFlow(recover(store.loadSession()))
+    val session: StateFlow<ProveSession> = _session.asStateFlow()
 
     @Volatile private var job: Job? = null
     @Volatile private var client: ProofServerClient? = null
@@ -184,6 +185,7 @@ class ProveEngine(
                     "Interrupted", "Proof interrupted", Copy.ERR_INTERRUPTED
                 )
             )
+            recordHistory(r, success = false, detail = r.failure?.title ?: "Proof interrupted")
             store.saveSession(r)
             r
         } else s
@@ -254,6 +256,11 @@ class ProveEngine(
     @Synchronized
     private fun finish(s: ProveSession, success: Boolean, detail: String, cancelled: Boolean = false) {
         if (_session.value.state != JobState.PROVING) return // a cancel and a completion raced; first one wins
+        recordHistory(s, success, detail, cancelled)
+        set(s)
+    }
+
+    private fun recordHistory(s: ProveSession, success: Boolean, detail: String, cancelled: Boolean = false) {
         val rec = JobRecord(
             finishedAtMillis = s.finishedAtMillis,
             serverUrl = s.serverUrl,
@@ -262,10 +269,10 @@ class ProveEngine(
             durationSeconds = s.elapsedSeconds,
             detail = detail.take(160),
             circuit = s.info?.keyLocation ?: "",
-            cancelled = cancelled
+            cancelled = cancelled,
+            interrupted = s.state == JobState.INTERRUPTED
         )
         _history.update { (listOf(rec) + it).take(ProverStore.MAX_HISTORY) }
         store.saveHistory(_history.value)
-        set(s)
     }
 }

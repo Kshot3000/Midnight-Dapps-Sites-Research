@@ -55,14 +55,19 @@ object ProofJobInput {
     fun baseUrlError(raw: String, allowOffPhone: Boolean = false): String? {
         if (raw.isBlank()) return "Enter the proof server address, e.g. http://127.0.0.1:6300"
         if (raw.trim().contains(' ')) return "The address can't contain spaces."
+        // Inspect the typed URI first: normaliseBaseUrl drops path, query, fragment
+        // and userinfo, so checking the normalised form would silently accept them.
+        val typed = raw.trim().let { if (it.contains("://")) it else "http://$it" }
+        val typedUri = runCatching { URI(typed) }.getOrNull() ?: return "That doesn't look like a web address."
+        if (!typedUri.userInfo.isNullOrEmpty()) return "Leave off any username or password."
+        if (!typedUri.rawPath.isNullOrEmpty() && typedUri.rawPath != "/") return "Leave off any path — just scheme, host and port."
+        if (typedUri.rawQuery != null || typedUri.rawFragment != null) return "Leave off any ? or # part."
         val url = normaliseBaseUrl(raw)
         val uri = runCatching { URI(url) }.getOrNull() ?: return "That doesn't look like a web address."
         val scheme = uri.scheme?.lowercase(Locale.ROOT)
         if (scheme != "http" && scheme != "https") return "Use http:// or https://."
         if (uri.host.isNullOrBlank()) return "The address needs a host, e.g. 127.0.0.1."
         if (uri.port != -1 && uri.port !in 1..65535) return "The port must be between 1 and 65535."
-        if (!uri.rawPath.isNullOrEmpty() && uri.rawPath != "/") return "Leave off any path — just scheme, host and port."
-        if (uri.rawQuery != null || uri.rawFragment != null) return "Leave off any ? or # part."
         if (!isLocalhost(url)) {
             if (!allowOffPhone) return Copy.URL_OFF_PHONE_DISABLED
             if (scheme != "https") return Copy.URL_OFF_PHONE_NEEDS_HTTPS
@@ -99,11 +104,13 @@ data class JobRecord(
     val durationSeconds: Double,
     val detail: String,
     val circuit: String = "",
-    val cancelled: Boolean = false
+    val cancelled: Boolean = false,
+    val interrupted: Boolean = false
 ) {
     val outcome: String get() = when {
         success -> Copy.OUTCOME_PROVEN
         cancelled -> Copy.OUTCOME_CANCELLED
+        interrupted -> Copy.OUTCOME_INTERRUPTED
         else -> Copy.OUTCOME_FAILED
     }
 }

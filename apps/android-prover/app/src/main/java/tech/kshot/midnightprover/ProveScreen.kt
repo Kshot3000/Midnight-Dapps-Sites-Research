@@ -56,6 +56,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 
@@ -104,7 +106,7 @@ fun FlowSteps(current: Int) {
                     Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
                         .background(if (active || done) color else MidnightPalette.Hairline)
                 )
-                Text(label, style = MaterialTheme.typography.labelMedium, color = color)
+                Text(label, style = MaterialTheme.typography.labelMedium, color = color, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
         }
     }

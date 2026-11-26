@@ -12,9 +12,9 @@ object Copy {
     const val ONBOARD_WELCOME_TITLE = "Welcome to Midnight Prover"
     const val ONBOARD_WELCOME = "Midnight Prover makes zero-knowledge proofs for Midnight with the official proof server. You paste a proving payload, the server proves it, and you copy the proof back."
     const val ONBOARD_WHERE_TITLE = "Where the server runs"
-    const val ONBOARD_WHERE = "The proof server runs on this phone, inside Termux. Your private proof inputs never leave the phone. Running it on a phone is new and hasn't been measured yet."
+    const val ONBOARD_WHERE = "The proof server runs on this phone, inside Termux, by default. While you use that on-phone server, your private proof inputs stay on this device. A server off the phone is optional, needs an explicit opt-in in Settings, and must use https. Running the server on a phone is new and hasn't been measured yet."
     const val ONBOARD_TESTNET_TITLE = "Testnet only"
-    const val ONBOARD_TESTNET = "Testnet only for now. Use payloads from Preview or Preprod (both testnets) or a local devnet. This app never signs anything and never sends anything to a network."
+    const val ONBOARD_TESTNET = "Testnet only for now. Use payloads from Preview or Preprod (both testnets) or a local devnet. This app never signs anything and never submits anything to a Midnight network."
     const val ONBOARD_SETUP_TITLE = "Set up the server"
     const val ONBOARD_DATA_NOTE = "The first start downloads Midnight's public proving files. Use Wi-Fi."
     const val ONBOARD_KEEP_RUNNING = "Android may stop the server in the background. Exempt Termux from battery optimisation, and on Android 14 or later turn on Developer options → Disable child process restrictions."
@@ -47,7 +47,7 @@ object Copy {
     const val URL_OFF_PHONE_DISABLED = "Only this phone (127.0.0.1, localhost or ::1) is allowed. To use a server off this phone, turn on \"Allow a server off this phone\" in Settings first."
     const val URL_OFF_PHONE_NEEDS_HTTPS = "Servers off this phone must use https://. Android only allows plain http to this phone (127.0.0.1, localhost or ::1)."
     const val OFF_PHONE_WARNING = "A server off this phone receives your private proof inputs, which can include wallet secret keys. Midnight recommends proving only on your own device. Use only a server you run yourself, over https."
-    const val OPEN_PORT_NOTE = "Proof server 9.0.2 has no bind-address option and listens on every network interface, so other devices on the same Wi-Fi can reach port 6300. Use trusted networks and stop the server when you're done."
+    const val OPEN_PORT_NOTE = "Proof server 9.0.2 has no bind-address option and listens on every network interface, so other devices on the same Wi-Fi can reach the proof-server port (default 6300, or the port you passed with --port). Use trusted networks and stop the server when you're done."
     const val TESTNET_CHIP = "Testnet only · Preview / Preprod"
     const val TESTNET_NOTE = "Testnet only for now: use payloads from Preview or Preprod (both testnets) or a local devnet. The proof server itself doesn't connect to any network."
 
@@ -85,6 +85,7 @@ object Copy {
     const val OUTCOME_PROVEN = "PROVEN"
     const val OUTCOME_FAILED = "FAILED"
     const val OUTCOME_CANCELLED = "CANCELLED"
+    const val OUTCOME_INTERRUPTED = "INTERRUPTED"
 
     // About
     const val HONESTY_NOTE = "How it works: the app sends one proving payload to the server's /prove endpoint, the same per-circuit call Midnight.js uses today (the older /prove-tx is deprecated). No phone proving times are claimed yet. The first measurements will come from a supervised test on the developer's own phone."
