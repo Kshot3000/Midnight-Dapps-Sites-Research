@@ -147,3 +147,27 @@ Deliverable: `research/android-prover-qa.md` — the GROK-10 method applied to `
 - **Index + guard:** add an android-prover-qa row to `research/README.md`, and guard tests in the GROK-9 style asserting the new brief exists, is indexed, and contains both addresses byte-exact, @kshot9000, and the independence line.
 - Footer: both addresses + @kshot9000 + the independent-builder line, exact, same as every other brief.
 - No personal information about Kyle in any file, commit, or PR — ever.
+
+## Wave 7 — 2026-11-25 (Kyle's order: get this project DONE and ADVERTISED — launch push)
+
+### GROK-15 — Advertising asset pack for the launch
+
+Branch: `grok/GROK-15-launch-assets` · PR title starts "Grok:" · Claim GROK-15 on `council/board.md` first, one task in this PR only.
+
+Deliverable: `research/launch-assets.md` — ready-to-use copy the owner can post as-is. Drafts only; posting itself is the owner's/Muse's step, not yours.
+
+- **X posts (draft 4):** (1) Android prover works — v0.3.1, real per-circuit /prove protocol against official proof server 9.0.2, verified end-to-end with a real payload → real proof, no-Docker on-phone server installer; (2) Proof Station v0.2.0 — RTX 3090 measured k=16 cold 1.168 s / warm 0.766 s, 0 fallbacks, CPU-verifier passed; (3) the research library — glossary, DUST registration explainer, bridge status (VIA the only mainnet-evidenced route, official bridge off pending governance); (4) NightAttest first slice — Compact contract + simulator, honest scope. Each post ≤280 characters, tags @MidnightNtwrk and @IOHK_Charles, repo link https://github.com/Kshot3000/Midnight-Dapps-Sites-Research in at most two of them.
+- **One long-form draft** (~1,500–2,500 characters) telling the whole story for a thread or community post: hub, Proof Station, Android prover, research library, what's NOT done (no phone benchmarks yet; NightAttest UI + live testnet run still to come).
+- **Discipline:** verified milestones only — every number must trace to a merged brief or board entry; no phone performance claims; Preview/Preprod labelled testnet wherever named; no implied endorsement by the tagged accounts (credit/visibility only).
+- Footer: both addresses + @kshot9000 + the independent-builder line, exact. Index the brief in `research/README.md` with a GROK-9-style guard test. No personal information about Kyle — ever.
+
+### GROK-16 — Pre-launch audit of the whole repo
+
+Branch: `grok/GROK-16-launch-audit` · PR title starts "Grok:" · Claim GROK-16 on `council/board.md` first, one task in this PR only.
+
+Deliverable: `research/launch-audit.md` — the final sweep before the project is called done.
+
+- **Every public surface checked:** hub pages, all app READMEs (Proof Station, DUST Planner, Android prover + server-setup), every research brief. For each: donation addresses byte-exact + @kshot9000 + independence line present; stack pins on the verified matrix (Compact toolchain 0.36.1, Midnight.js 5.0.1, proof server 9.0.2, DApp Connector 4.1.0, indexer 4.4.101) with stale versions flagged as stale, never presented as current; Preview/Preprod labelled testnet; internal links resolve; no claim that exceeds its evidence (each claim cites the brief/board entry that backs it, or lands in a NOT-verified list).
+- **Known open items to record, not fix:** HERMES-3's `srs.midnight.net` lines (Hermes' observed record, correction waits for her return or an addendum); the hub's missing Android prover section (Sol's lane, due on her return); GROK-14's fix list if still open.
+- **Output = pass/fail per surface + a defect list.** Findings only — fixes land as follow-up tasks, not in this PR.
+- Footer + index + guard test, same as GROK-15. No personal information about Kyle — ever.
