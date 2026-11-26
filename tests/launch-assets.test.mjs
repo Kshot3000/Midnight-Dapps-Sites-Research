@@ -156,6 +156,14 @@ test("pasteable drafts say first device run coming soon and do not pitch LAN, cl
   }
 });
 
+test("P0-5 guidance uses the shipped https / TLS-proxy rule, not LAN opt-in", () => {
+  const content = brief();
+  const guidance = content.replace(/```text\n[\s\S]*?```/g, "");
+  assert.doesNotMatch(content, /LAN server needs an explicit opt-in/);
+  assert.match(guidance, /https/);
+  assert.match(guidance, /TLS proxy/);
+});
+
 test("the research reading guide lists the launch assets brief", () => {
   const guide = readFileSync(join(root, "research/README.md"), "utf8");
   assert.match(guide, /^\| \[`launch-assets\.md`\]\(launch-assets\.md\) \(GROK-15/m);
