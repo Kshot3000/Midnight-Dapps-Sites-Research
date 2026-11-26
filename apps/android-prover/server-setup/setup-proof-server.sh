@@ -11,6 +11,7 @@
 #
 # Usage:
 #   ./setup-proof-server.sh [--arch arm64|amd64] [--dir PATH] [--start]
+#   ./setup-proof-server.sh --check-exposure [PORT] [TCP_TABLE_FILE ...]
 #
 # Defaults: arch = arm64 (phones), dir = ~/.midnight-proof-server.
 # --start launches the server after install and verifies /version.
@@ -23,6 +24,100 @@
 # The arm64 path uses the same steps against the image's arm64 variant;
 # its first on-device run is the owner's supervised phone test.
 set -euo pipefail
+
+# --- Exposure check (Joe, GROK-17) --------------------------------------
+# Writes a small checker that reads /proc/net/tcp{,6} and reports where the
+# server's port is ACTUALLY listening. It is run after every start; anything
+# but loopback-only (or an unreadable table) prints a loud Wi-Fi warning, so
+# nothing can look safe without being verified. Test hook:
+#   ./setup-proof-server.sh --check-exposure [PORT] [TCP_TABLE_FILE ...]
+write_checker() {
+  cat > "$1" <<'CHECKER_EOF'
+#!/usr/bin/env bash
+# check-exposure.sh — where is the proof server actually listening?
+#
+# Usage: check-exposure.sh [PORT] [TCP_TABLE_FILE ...]
+#   PORT defaults to 6300; the tables default to /proc/net/tcp and /proc/net/tcp6.
+#
+# Prints one line per LISTEN socket on PORT ("127.0.0.1", "0.0.0.0", "::", ...)
+# and a verdict. Exit codes:
+#   0  listening ONLY on loopback (127.0.0.0/8, ::1, ::ffff:127.x)
+#   2  listening on any other address — reachable from your Wi-Fi (loud warning)
+#   3  the tables couldn't be read (Android often hides /proc/net) — treated as exposed
+#   1  nothing is listening on PORT, so nothing could be verified (loud warning)
+#
+# Proof server 9.0.2 has no bind-address option and listens on 0.0.0.0, so on a
+# stock install expect exit 2. This check exists so that nothing (a future option,
+# a shim, a firewall rule) can look safe without being verified.
+set -u
+PORT="${1:-6300}"
+shift || true
+if [ "$#" -eq 0 ]; then set -- /proc/net/tcp /proc/net/tcp6; fi
+PORT_HEX="$(printf '%04X' "$PORT")"
+
+WARNING="WARNING: the proof server on port $PORT is reachable from other devices on your network (Wi-Fi). Anyone on the same network can send it proving jobs. Use trusted networks only and stop the server (Ctrl-C) when you are done."
+
+readable=0
+addrs=""
+for f in "$@"; do
+  [ -r "$f" ] || continue
+  readable=1
+  # Columns: sl local_address rem_address st ...; st 0A = LISTEN. Hex is upper or lower case.
+  found="$(awk -v port="$PORT_HEX" '
+    NR > 1 {
+      split($2, a, ":"); st = toupper($4); p = toupper(a[2]); h = toupper(a[1])
+      if (st == "0A" && p == port) print h
+    }' "$f")"
+  [ -n "$found" ] && addrs="$addrs $found"
+done
+
+if [ "$readable" = 0 ]; then
+  echo "!! Could not read $* — can't verify where port $PORT listens."
+  echo "!! $WARNING"
+  exit 3
+fi
+if [ -z "$addrs" ]; then
+  echo "!! Nothing is listening on port $PORT yet, so where it listens can't be verified."
+  echo "!! $WARNING"
+  exit 1
+fi
+
+exposed=0
+for h in $addrs; do
+  case "$h" in
+    ????????)                                  # IPv4, little-endian: 0100007F = 127.0.0.1
+      b1="${h:6:2}"
+      ip="$((16#${h:6:2})).$((16#${h:4:2})).$((16#${h:2:2})).$((16#${h:0:2}))"
+      if [ "$b1" = "7F" ]; then echo "listening on $ip (loopback)"; else echo "listening on $ip"; exposed=1; fi ;;
+    00000000000000000000000001000000)
+      echo "listening on ::1 (loopback)" ;;
+    0000000000000000FFFF0000??????7F)
+      echo "listening on ::ffff:127.x (loopback)" ;;
+    00000000000000000000000000000000)
+      echo "listening on :: (every IPv6/IPv4 interface)"; exposed=1 ;;
+    *)
+      echo "listening on IPv6 $h"; exposed=1 ;;
+  esac
+done
+
+if [ "$exposed" = 1 ]; then
+  echo
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "!! $WARNING"
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  exit 2
+fi
+echo "OK: port $PORT is reachable only from this device (loopback)."
+exit 0
+CHECKER_EOF
+  chmod +x "$1"
+}
+
+if [ "${1:-}" = "--check-exposure" ]; then
+  shift
+  tmp="$(mktemp)"; write_checker "$tmp"
+  set +e; bash "$tmp" "$@"; rc=$?; rm -f "$tmp"; exit "$rc"
+fi
 
 REPO="midnightntwrk/proof-server"
 TAG="9.0.2"
@@ -103,7 +198,13 @@ done < "$IMG/layers.txt"
 # --- 4. Extract in order, honouring whiteouts ---------------------------
 while read -r dg; do
   fn="$IMG/layer_${dg#sha256:}.tar.gz"
-  tar -xzf "$fn" -C "$ROOTFS" 2>/dev/null || tar -xf "$fn" -C "$ROOTFS"
+  # The image's nix/store directories are read-only (0555). Without
+  # --delay-directory-restore, a non-root extract (no proot fake-root) fails
+  # with "Cannot mkdir: Permission denied" (GROK-17, reproduced on amd64).
+  chmod -R u+w "$ROOTFS" 2>/dev/null || true
+  tar --delay-directory-restore -xzf "$fn" -C "$ROOTFS" \
+    || { echo "failed to extract layer ${dg#sha256:}" >&2; exit 1; }
+  chmod -R u+w "$ROOTFS" 2>/dev/null || true
   find "$ROOTFS" -name '.wh.*' 2>/dev/null | while read -r wh; do
     base="$(basename "$wh")"; dir="$(dirname "$wh")"
     if [ "$base" != ".wh..wh..opq" ]; then rm -rf "$dir/${base#.wh.}"; fi
@@ -120,15 +221,31 @@ LIBPATH="$(find "$ROOTFS/nix/store" -maxdepth 2 -type d -name lib 2>/dev/null | 
 
 # --- 6. Write the launcher ----------------------------------------------
 LAUNCHER="$WORK/run-proof-server.sh"
+CHECKER="$WORK/check-exposure.sh"
+write_checker "$CHECKER"
 cat > "$LAUNCHER" <<EOF
 #!/usr/bin/env bash
 # Generated by setup-proof-server.sh — runs the official, unmodified
 # midnight-proof-server $TAG ($DOCKER_ARCH) via its staged loader.
+echo "NETWORK NOTE: proof server 9.0.2 has no bind-address option (--help lists only --port, --verbose, --job-capacity, --num-workers, --job-timeout, --no-fetch-params) and listens on 0.0.0.0, i.e. every interface. Anyone on the same Wi-Fi can reach the port and send it proving jobs. Use trusted networks only, and stop the server when you are done." >&2
+# Post-start check: once the port is listening, report where (see $CHECKER).
+PORT=6300
+prev=""
+for a in "\$@"; do [ "\$prev" = "--port" ] && PORT="\$a"; case "\$a" in --port=*) PORT="\${a#--port=}" ;; esac; prev="\$a"; done
+(
+  for i in \$(seq 1 60); do
+    sleep 2
+    "$CHECKER" "\$PORT" >/dev/null 2>&1; rc=\$?
+    if [ "\$rc" != 1 ]; then "$CHECKER" "\$PORT" >&2; exit 0; fi
+  done
+  "$CHECKER" "\$PORT" >&2  # never saw a listener: say it can't be verified
+) &
 exec "$LOADER" --library-path "$LIBPATH" "$BIN" "\$@"
 EOF
 chmod +x "$LAUNCHER"
 echo "== installed: $BIN"
 echo "== launcher:  $LAUNCHER"
+echo "== exposure check: $CHECKER [PORT]"
 
 # --- 7. Optionally start + verify ---------------------------------------
 if [ "$START" = "1" ]; then
@@ -141,6 +258,8 @@ if [ "$START" = "1" ]; then
       echo "== proof server is LIVE: /version = $V"
       curl -s -m 3 http://127.0.0.1:6300/ready || true
       echo
+      echo "== where is port 6300 listening? (reads /proc/net/tcp and tcp6)"
+      "$CHECKER" 6300 || true
       exit 0
     fi
   done

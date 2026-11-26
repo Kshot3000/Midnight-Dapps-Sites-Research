@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bob P0-4: dark window, no action bar, dark system bars, so there is no light
+         launch window or white flash before Compose draws. On Android 12+ the system
+         splash uses this background and the adaptive icon. (The core-splashscreen
+         library and enableEdgeToEdge() are GROK-18.) -->
+    <style name="Theme.MidnightProver" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/abyss</item>
+        <item name="android:statusBarColor">@color/abyss</item>
+        <item name="android:navigationBarColor">@color/abyss</item>
+    </style>
+</resources>
