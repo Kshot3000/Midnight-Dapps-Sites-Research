@@ -28,7 +28,9 @@ const ledger8Pins = ["8.1.3", "8.1.0", "8.0.3", "0.31.1", "0.30.0", "4.0.1", "1.
 const textBlocks = (content) =>
   [...content.matchAll(/```text\n([\s\S]*?)```/g)].map((m) => m[1].replace(/\n$/, ""));
 
-const xLength = (text) => text.replace(/https?:\/\/[^\s]+/g, "x".repeat(23)).length;
+// X's weighting: each URL counts as 23 characters, and the arrow → counts as 2.
+const xLength = (text) =>
+  text.replace(/https?:\/\/[^\s]+/g, "x".repeat(23)).replaceAll("\u2192", "xx").length;
 
 test("the launch assets brief exists", () => {
   assert.ok(existsSync(join(root, briefPath)), briefPath + " is missing");
@@ -64,19 +66,26 @@ test("the brief names the current pin sheet and carries no Ledger 8-era pins", (
   }
 });
 
-test("four X drafts each stay within 280 characters, tag both accounts, and use the repo link at most twice", () => {
+test("four X drafts each stay within 280 characters, tag @MidnightNtwrk, and use the repo link at most twice", () => {
   const blocks = textBlocks(brief());
   assert.ok(blocks.length >= 5, "expected four X drafts plus the long-form block");
   const posts = blocks.slice(0, 4);
   for (const [i, post] of posts.entries()) {
     const length = xLength(post);
-    assert.ok(length <= 280, "post " + (i + 1) + " is " + length + " characters (URL-weighted)");
+    assert.ok(length <= 280, "post " + (i + 1) + " is " + length + " characters (X-weighted)");
     assert.match(post, /@MidnightNtwrk\b/, "post " + (i + 1) + " must tag @MidnightNtwrk");
-    assert.match(post, /@IOHK_Charles\b/, "post " + (i + 1) + " must tag @IOHK_Charles");
   }
   const withRepo = posts.filter((post) => post.includes(repoUrl));
   assert.ok(withRepo.length <= 2, "the repo link may appear in at most two of the four posts");
   assert.equal(withRepo.length, 2, "the wave 7 packet puts the repo link in two of the four posts");
+});
+
+test("@IOHK_Charles appears in exactly one post draft, and that post links merged work", () => {
+  const posts = textBlocks(brief()).slice(0, 4);
+  const withCharles = posts.filter((post) => /@IOHK_Charles\b/.test(post));
+  assert.equal(withCharles.length, 1, "@IOHK_Charles must appear in exactly one of the four post drafts");
+  assert.ok(withCharles[0].includes(repoUrl), "the @IOHK_Charles post must link the merged repo");
+  assert.match(brief(), /at most one @IOHK_Charles tag a week/i);
 });
 
 test("the long-form draft is 1,500–2,500 characters and carries attribution", () => {
@@ -124,8 +133,25 @@ test("key verified figures and [CONFIRM AFTER GROK-17] notes are present", () =>
   assert.doesNotMatch(content, /\bAthena\b/);
 });
 
+test("pasteable drafts present proving on this phone and do not pitch LAN, cloud or remote proving", () => {
+  const blocks = textBlocks(brief());
+  const posts = blocks.slice(0, 4);
+  const longform = blocks[4];
+  assert.match(posts[0], /on this phone/);
+  assert.match(longform, /prove on this phone/);
+  assert.match(posts[0], /Muse \(AI seat on Kshot's multi-AI team; reviews and merges\)/);
+  assert.match(posts[1], /Hermes \(local AI seat on Kshot's multi-AI team\)/);
+  assert.match(longform, /Hermes \(a local AI seat on Kshot's multi-AI team\)/);
+  assert.match(longform, /Muse \(an AI seat on Kshot's multi-AI team that reviews and merges\)/);
+  for (const [i, draft] of [...posts, longform].entries()) {
+    assert.doesNotMatch(draft, /\bLAN\b/, "pasteable draft " + (i + 1) + " must not pitch LAN proving");
+    assert.doesNotMatch(draft, /\bcloud\b/i, "pasteable draft " + (i + 1) + " must not pitch cloud proving");
+    assert.doesNotMatch(draft, /\bremote\b/i, "pasteable draft " + (i + 1) + " must not pitch remote proving");
+  }
+});
+
 test("the research reading guide lists the launch assets brief", () => {
   const guide = readFileSync(join(root, "research/README.md"), "utf8");
-  assert.match(guide, /^\| \[`launch-assets\.md`\]\(launch-assets\.md\) \(GROK-15\)/m);
+  assert.match(guide, /^\| \[`launch-assets\.md`\]\(launch-assets\.md\) \(GROK-15/m);
   assert.match(guide, /fifteen sourced research briefs/);
 });
