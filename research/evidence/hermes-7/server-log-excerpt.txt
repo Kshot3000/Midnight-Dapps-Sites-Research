@@ -1,0 +1,34 @@
+# HERMES-7 server-side evidence — stock midnight-proof-server 9.0.2
+# Captured 2026-11-26 (UTC) from the server's own log + live endpoint responses.
+# Server: official midnight-proof-server 9.0.2, installed via
+# apps/android-prover/server-setup/setup-proof-server.sh (amd64, no Docker),
+# running in a WSL2 Linux environment on Hermes' Windows 11 machine,
+# --port 6300, job capacity 10. Reached from the emulator through
+# `adb reverse tcp:6300 tcp:6300` (the app calls http://127.0.0.1:6300).
+
+## Startup warning (server's own words, first lines of server.log)
+!! WARNING: the proof server on port 6300 is reachable from other devices on
+your network (Wi-Fi). Anyone on the same network can send it proving jobs.
+Use trusted networks only and stop the server (Ctrl-C) when you are done.
+2026-11-26T18:58:35.955790Z  INFO midnight_proof_server: Ensuring zswap key material is available...
+
+## The prove (the line this brief is about)
+2026-11-26T19:36:45.345221Z  INFO actix_web::middleware::logger: 127.0.0.1 POST /prove HTTP/1.1; took 1.035221s
+
+## Live endpoint responses (fetched from the same machine)
+GET /version        -> 9.0.2
+GET /proof-versions -> ["V2", "V3"]
+GET /ready          -> {"status":"ok","jobsProcessing":0,"jobsPending":0,"jobCapacity":10,"timestamp":"2026-11-26 19:45:19.079502328 +00:00:00"}
+
+## App polling cadence (from the same server.log, abridged)
+The app polls /version + /proof-versions + /ready roughly every 15 s while the
+main screen is visible, e.g.:
+2026-11-26T19:38:15.690422Z  INFO actix_web::middleware::logger: 127.0.0.1 GET /version HTTP/1.1; took 0.000086s
+2026-11-26T19:38:15.721353Z  INFO actix_web::middleware::logger: 127.0.0.1 GET /proof-versions HTTP/1.1; took 0.000064s
+2026-11-26T19:38:15.730303Z  INFO actix_web::middleware::logger: 127.0.0.1 GET /ready HTTP/1.1; took 0.000062s
+
+## Correlation
+App history entry "midnight/dust/spend · 1:36 PM · 1.1 s · PROVEN"
+(1:36 PM = 19:36 UTC) matches the POST /prove line above (19:36:45.345 UTC,
+server-side 1.035221 s; the app's own card says 1.1 s, network included,
+"not a benchmark").

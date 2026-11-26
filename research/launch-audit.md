@@ -102,8 +102,9 @@ Columns: **Addr** = both tip addresses byte-exact, with no other `addr1…` stri
 | `research/android-prover-landscape.md` (GROK-11) | pass | pass | pass | pass: third-party ledger-8 pins described as such | pass | pass (notes: D13) | pass: no phone numbers claimed | PASS (notes) |
 | `research/android-prover-qa.md` (GROK-14) | pass | pass | pass | pass | pass | pass | pass | PASS |
 | `research/launch-assets.md` (GROK-15) | pass | pass | pass | pass | pass | pass | **fail**: post 1 (D1); note D10 | FAIL (D1; note D10) |
+| `research/in-app-prove-verification.md` (HERMES-7) | pass | pass | pass | pass: 9.0.2, v0.7.1 and ledger 1.0.2 all live-verified 2026-11-26 | n/a (no chain interaction; payload labelled devnet-captured) | pass (release URL live-verified) | pass: every timing labelled EMULATOR, no phone figures claimed | PASS |
 
-Totals: 27 surfaces audited: **15 PASS, 7 PASS (notes), 5 FAIL**. The five FAILs are the hub (D6, D7), `server-setup/README.md` (D2), the Android app screen `MainActivity.kt` (D3), `dust-registration.md` (D4, D5) and `launch-assets.md` (D1).
+Totals: 28 surfaces audited: **16 PASS, 7 PASS (notes), 5 FAIL**. The five FAILs are the hub (D6, D7), `server-setup/README.md` (D2), the Android app screen `MainActivity.kt` (D3), `dust-registration.md` (D4, D5) and `launch-assets.md` (D1).
 
 ## 5. Claims traced to evidence, and links
 
