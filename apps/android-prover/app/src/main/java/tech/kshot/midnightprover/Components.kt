@@ -78,13 +78,13 @@ fun StarfieldBackground(modifier: Modifier = Modifier, animate: Boolean = true) 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(MidnightPalette.Abyss, MidnightPalette.DeepSpace, Color(0xFF0D1440))))
+            .background(Brush.verticalGradient(listOf(MidnightPalette.Abyss, MidnightPalette.DeepSpace, Color(0xFF111111))))
             .clearAndSetSemantics { }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             stars.forEachIndexed { i, (fx, fy, r) ->
-                val tw = 0.45f + 0.4f * sin(phase + i * 1.7f)
-                drawCircle(Color.White.copy(alpha = tw.coerceIn(0.08f, 0.9f)), r, Offset(fx * size.width, fy * size.height))
+                val tw = 0.22f + 0.25f * sin(phase + i * 1.7f)
+                drawCircle(Color.White.copy(alpha = tw.coerceIn(0.04f, 0.5f)), r, Offset(fx * size.width, fy * size.height))
             }
             // Wide (unfolded) windows: smaller moon tucked into the corner so it stays clear of the second pane.
             val wide = size.width > size.height
@@ -92,7 +92,7 @@ fun StarfieldBackground(modifier: Modifier = Modifier, animate: Boolean = true) 
             val cx = size.width * (if (wide) 0.955f else 0.88f)
             val cy = size.height * (if (wide) 0.035f else 0.07f)
             drawCircle(
-                brush = Brush.radialGradient(listOf(Color(0xFFF4F7FF), Color(0xFFC9D4FF)), center = Offset(cx, cy), radius = moonR),
+                brush = Brush.radialGradient(listOf(Color(0xFFFFFFFF), Color(0xFFBFBFBF)), center = Offset(cx, cy), radius = moonR),
                 radius = moonR, center = Offset(cx, cy)
             )
             drawCircle(MidnightPalette.Abyss, moonR * 0.88f, Offset(cx + moonR * 0.42f, cy - moonR * 0.18f))
@@ -100,7 +100,7 @@ fun StarfieldBackground(modifier: Modifier = Modifier, animate: Boolean = true) 
     }
 }
 
-/** Status orb: cyan when live, amber when degraded, rose on failure. Pulses unless reduced motion. */
+/** Status orb: white when live, gray steps for degraded/failure (icons and labels carry the meaning). Pulses unless reduced motion. */
 @Composable
 fun StatusOrb(color: Color, pulsing: Boolean, modifier: Modifier = Modifier) {
     val reduce = LocalReduceMotion.current
@@ -157,7 +157,7 @@ fun rememberTicker(running: Boolean, periodMs: Long = 250): Long {
     return now
 }
 
-/** Primary call-to-action in the brand gradient. At least 52dp tall. */
+/** Primary call-to-action: solid white, black text (monochrome system). At least 52dp tall. */
 @Composable
 fun GradientButton(
     text: String,
@@ -171,7 +171,7 @@ fun GradientButton(
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent, disabledContainerColor = Color.Transparent,
-            contentColor = Color.White, disabledContentColor = MidnightPalette.DimStar
+            contentColor = Color.Black, disabledContentColor = MidnightPalette.DimStar
         ),
         contentPadding = ButtonDefaults.ContentPadding,
         modifier = modifier
@@ -222,7 +222,7 @@ fun LinkButton(
     }
 }
 
-/** Translucent navy card with a hairline border. */
+/** Near-black card with a hairline border. */
 @Composable
 fun MidnightCard(
     modifier: Modifier = Modifier,
@@ -266,11 +266,23 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+/** The Midnight token mark: a white crescent (the NIGHT token symbol), drawn as a vector. */
+@Composable
+fun MidnightTokenMark(modifier: Modifier = Modifier, tint: Color = MidnightPalette.Starlight) {
+    Icon(
+        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_midnight_token),
+        contentDescription = null, tint = tint, modifier = modifier
+    )
+}
+
 /** Screen title block. */
 @Composable
 fun ScreenHeader(overline: String, title: String, subtitle: String? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        SectionLabel(overline)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MidnightTokenMark(Modifier.size(16.dp))
+            SectionLabel(overline)
+        }
         Text(title, style = MaterialTheme.typography.headlineLarge, color = MidnightPalette.Starlight,
             modifier = Modifier.semantics { heading() })
         if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MidnightPalette.Moonlight)

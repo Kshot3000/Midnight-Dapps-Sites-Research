@@ -255,18 +255,19 @@ class PaletteContrastTest {
         }
     }
 
-    /** Bob P1-14's exact hex values. */
-    @Test fun usesBobsValues() {
-        assertEquals(Color(0xFF4A67F4), MidnightPalette.ButtonStart)
-        assertEquals(Color(0xFF8457EA), MidnightPalette.ButtonEnd)
-        assertEquals(Color(0xFF818BBB), MidnightPalette.DimStar)
-        assertEquals(Color(0xFF5A6393), MidnightPalette.FieldBorder)
+    /** Pinned design values (CLAUDE-AP-8 monochrome system; were Bob P1-14's navy values). */
+    @Test fun usesPinnedValues() {
+        assertEquals(Color(0xFFFFFFFF), MidnightPalette.ButtonStart)
+        assertEquals(Color(0xFFE8E8E8), MidnightPalette.ButtonEnd)
+        assertEquals(Color(0xFFA3A3A3), MidnightPalette.DimStar)
+        assertEquals(Color(0xFF8A8A8A), MidnightPalette.FieldBorder)
         assertTrue(Contrast.ratio(MidnightPalette.FieldBorder, MidnightPalette.Nebula) >= 3.0)
     }
 
+    /** The primary button is white with black text in the monochrome system. */
     @Test fun buttonTextMeetsAA() {
-        assertTrue(Contrast.ratio(Color.White, MidnightPalette.ButtonStart) >= 4.5)
-        assertTrue(Contrast.ratio(Color.White, MidnightPalette.ButtonEnd) >= 4.5)
+        assertTrue(Contrast.ratio(Color.Black, MidnightPalette.ButtonStart) >= 4.5)
+        assertTrue(Contrast.ratio(Color.Black, MidnightPalette.ButtonEnd) >= 4.5)
     }
 }
 
