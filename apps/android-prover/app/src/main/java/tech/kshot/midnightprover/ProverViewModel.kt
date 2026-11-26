@@ -206,6 +206,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
     fun setProveTimeout(minutes: Int) = updateSettings { it.copy(proveTimeoutMinutes = minutes.coerceIn(1, 120)) }
     fun setReduceMotion(on: Boolean) = updateSettings { it.copy(reduceMotion = on) }
     fun setKeepScreenOn(on: Boolean) = updateSettings { it.copy(keepScreenOn = on) }
+    fun setPrivacyCloak(on: Boolean) = updateSettings { it.copy(privacyCloak = on) }
 
     /** P0-5 opt-in. Turning it off snaps the server back to this phone. */
     fun setAllowOffPhone(on: Boolean) {

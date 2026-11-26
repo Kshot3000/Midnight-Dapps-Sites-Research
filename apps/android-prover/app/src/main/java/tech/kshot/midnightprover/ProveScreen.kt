@@ -143,7 +143,7 @@ fun ProveScreen(state: ProverUiState, vm: ProverViewModel, onOpenServer: () -> U
             FlowSteps(flowStep(state))
             when (s.state) {
                 JobState.PROVING -> ProvingCard(s, vm::cancelProve)
-                JobState.DONE -> ResultCard(s, onNew = vm::dismissResult)
+                JobState.DONE -> ResultCard(s, cloaked = state.settings.privacyCloak, onNew = vm::dismissResult)
                 JobState.FAILED, JobState.CANCELLED, JobState.INTERRUPTED ->
                     FailureCard(s, state.settings.proveTimeoutMinutes, onRetry = startProve, onDismiss = vm::dismissResult, onOpenServer = onOpenServer)
                 JobState.IDLE -> {}
@@ -271,7 +271,7 @@ private fun ProvingCard(s: ProveSession, onCancel: () -> Unit) {
 }
 
 @Composable
-private fun ResultCard(s: ProveSession, onNew: () -> Unit) {
+private fun ResultCard(s: ProveSession, cloaked: Boolean, onNew: () -> Unit) {
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
     val snack = LocalSnackbar.current
@@ -304,7 +304,7 @@ private fun ResultCard(s: ProveSession, onNew: () -> Unit) {
         FactRow("Verification", "Not verified on this device — the network checks the proof when the transaction is submitted.", valueColor = MidnightPalette.Moonlight)
         FactRow("Server", s.serverUrl, mono = true)
         Text(
-            "0x" + s.proofHex.take(48) + "…" + s.proofHex.takeLast(8),
+            HexCloak.preview(s.proofHex, cloaked),
             style = MonoStyle, color = MidnightPalette.VioletText,
             modifier = Modifier.semantics { contentDescription = "Proof hex preview" }
         )

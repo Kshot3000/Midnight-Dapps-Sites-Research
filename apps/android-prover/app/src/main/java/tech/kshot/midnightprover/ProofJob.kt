@@ -305,3 +305,24 @@ object Attribution {
         "mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q"
     const val INDEPENDENCE = "Independent builder — not affiliated with the Midnight Foundation or IOG."
 }
+
+/**
+ * Privacy cloak (CLAUDE-AP-7, adopted from the UI v2 design package in
+ * design/ui-v2/): masks hex material wherever the app renders it
+ * read-only, so screenshots and screen shares do not leak payloads or
+ * proofs. Display only — copy, share and save always use the real bytes.
+ */
+object HexCloak {
+    const val MASK = "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
+
+    /** The result-card preview: the standard truncated form, or masked. */
+    fun preview(hex: String, cloaked: Boolean): String = when {
+        hex.isEmpty() -> hex
+        cloaked -> "0x$MASK"
+        else -> "0x" + hex.take(48) + "\u2026" + hex.takeLast(8)
+    }
+
+    /** Any short hex label (e.g. a history row's payload preview). */
+    fun label(text: String, cloaked: Boolean): String =
+        if (cloaked && text.isNotEmpty()) MASK else text
+}

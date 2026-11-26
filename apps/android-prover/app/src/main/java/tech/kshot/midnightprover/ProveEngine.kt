@@ -50,7 +50,8 @@ data class ProverSettings(
     val reduceMotion: Boolean = false,
     val keepScreenOn: Boolean = true,
     val onboardingDone: Boolean = false,
-    val allowOffPhone: Boolean = false
+    val allowOffPhone: Boolean = false,
+    val privacyCloak: Boolean = false
 ) {
     companion object {
         /** Just above proof server 9.0.2's own 600 s job timeout. */
@@ -71,7 +72,8 @@ class ProverStore(context: Context) {
         reduceMotion = prefs.getBoolean("reduceMotion", false),
         keepScreenOn = prefs.getBoolean("keepScreenOn", true),
         onboardingDone = prefs.getBoolean("onboardingDone", false),
-        allowOffPhone = prefs.getBoolean("allowOffPhone", false)
+        allowOffPhone = prefs.getBoolean("allowOffPhone", false),
+        privacyCloak = prefs.getBoolean("privacyCloak", false)
     ).let { s ->
         // A stored off-phone URL is only honoured while the opt-in is on (P0-5).
         if (ProofJobInput.baseUrlError(s.baseUrl, s.allowOffPhone) != null) s.copy(baseUrl = ProofJobInput.DEFAULT_BASE_URL) else s
@@ -85,6 +87,7 @@ class ProverStore(context: Context) {
             .putBoolean("keepScreenOn", s.keepScreenOn)
             .putBoolean("onboardingDone", s.onboardingDone)
             .putBoolean("allowOffPhone", s.allowOffPhone)
+            .putBoolean("privacyCloak", s.privacyCloak)
             .apply()
     }
 

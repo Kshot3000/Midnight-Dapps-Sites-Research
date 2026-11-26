@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.5.1)
+# Midnight Prover — Android app (v0.6.0)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -8,7 +8,7 @@ Mission context: help take the Midnight ZK prover mobile, building on the
 same proof-server line this team verified on Windows (Proof Station) and
 in the cloud.
 
-This is the Fold7 sideload build (versionCode 6). Sideloading and the
+This is the Fold7 sideload build (versionCode 8). Sideloading and the
 first on-device run stay the owner's supervised step.
 
 ## Design — Route 3 (CLAUDE-AP-1 verdict)
@@ -81,6 +81,15 @@ The app stores no cloud backup (`android:allowBackup="false"`, with
 - TalkBack labels on the tab icons, live announcements, a starfield that
   pauses during proofs, and "Check server" no longer hiding the proof.
 - Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
+
+## What v0.6.0 adds (CLAUDE-AP-7)
+
+Privacy cloak, adopted from the UI v2 design package (`design/ui-v2/`):
+a Settings toggle that masks proof and payload hex wherever the app
+renders it read-only — the result card's proof preview and the history
+rows — so screenshots and screen shares don't leak payload material.
+Display only: copy, share and save always use the real proof. The
+masking itself is a pure helper (`HexCloak`) with unit tests.
 
 ## What v0.5.1 fixes (GROK-20)
 
