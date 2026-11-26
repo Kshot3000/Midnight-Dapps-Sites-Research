@@ -9,13 +9,13 @@ Status words: **PASS** = every check on that surface passed. **PASS (notes)** = 
 
 ## 1. Verdict
 
-The repo is **not ready to advertise as-is, for three reasons**, none of which is a donation-address or pin problem:
+The repo is **not ready to advertise as-is, for three reasons**, none of which is a tip-address or pin problem:
 
 1. **One launch draft claims more than the evidence.** Post 1 of `launch-assets.md` says the Android prover "proves on this phone". Nobody has run it on a phone (D1).
 2. **The Android app on `main` still has the open v0.3.1 defects** (five P0s from Bob's UX review, Linda's 28 GROK-14 fixes) and the setup script starts a proof server that listens on every interface (D2, D3). GROK-17 is the fix path; the launch copy should wait for it.
 3. **The hub still labels Proof Station v0.1.2** (main is v0.2.0) and does not mention the Android prover at all (D6, D7).
 
-What passed cleanly: both donation addresses are byte-exact on every surface that shows them (26 of 27 surfaces; the 27th, the Android app screen, shows neither, see D3). `@kshot9000` is on all 27. The independence line is on 26 of 27 (D4). Every stack pin on the current-pin surfaces matches today's compatibility matrix. All 195 internal links resolve. No personal-information marker (home address, phone, email, ID, payout wallet) was found in any file.
+What passed cleanly: both tip addresses are byte-exact on every surface that shows them (26 of 27 surfaces; the 27th, the Android app screen, shows neither, see D3). `@kshot9000` is on all 27. The independence line is on 26 of 27 (D4). Every stack pin on the current-pin surfaces matches today's compatibility matrix. All 195 internal links resolve. No personal-information marker (home address, phone, email, ID, payout wallet) was found in any file.
 
 ## 2. Method and re-verified pins
 
@@ -71,7 +71,7 @@ Severity: **High** = blocks advertising or is a safety/accuracy problem a visito
 
 ## 4. Pass/fail per surface
 
-Columns: **Addr** = both donation addresses byte-exact, with no other `addr1…` string; **Tag** = `@kshot9000`; **Indep** = the independence line exactly; **Pins** = no stale pin presented as current; **Testnet** = Preview/Preprod labelled testnet; **Links** = internal links and repo paths resolve; **Claims** = headline claims trace to evidence or sit in section 5.
+Columns: **Addr** = both tip addresses byte-exact, with no other `addr1…` string; **Tag** = `@kshot9000`; **Indep** = the independence line exactly; **Pins** = no stale pin presented as current; **Testnet** = Preview/Preprod labelled testnet; **Links** = internal links and repo paths resolve; **Claims** = headline claims trace to evidence or sit in section 5.
 
 | Surface | Addr | Tag | Indep | Pins | Testnet | Links | Claims | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -159,7 +159,7 @@ Totals: 27 surfaces audited: **15 PASS, 7 PASS (notes), 5 FAIL**. The five FAILs
 
 ---
 
-Attribution on ALL work: both donation addresses, character-for-character, alongside @kshot9000.
+Attribution on ALL work: both tip addresses, character-for-character, alongside @kshot9000.
 
 - **Cardano (ADA):** addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 - **Midnight (shielded):** mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q
