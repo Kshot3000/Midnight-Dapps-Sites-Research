@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.5.0)
+# Midnight Prover — Android app (v0.5.1)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -55,7 +55,7 @@ The server listens on `0.0.0.0`; the app describes it as **reachable at**
 is allowed **only to this phone** (`127.0.0.1`, `localhost`, and `::1`,
 enforced by `res/xml/network_security_config.xml` in lockstep with the
 app's on-phone check). A server off the phone — **LAN included** — needs
-an explicit opt-in on the Server tab, behind a warning that private
+an explicit opt-in in Settings, behind a warning that private
 inputs leave the phone, and must use **https**. Proof server 9.0.2 only
 speaks plain http, so a LAN (or cloud) server must sit behind a TLS
 reverse proxy; there is no https mode in 9.0.2 itself.
@@ -81,6 +81,24 @@ The app stores no cloud backup (`android:allowBackup="false"`, with
 - TalkBack labels on the tab icons, live announcements, a starfield that
   pauses during proofs, and "Check server" no longer hiding the proof.
 - Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
+
+## What v0.5.1 fixes (GROK-20)
+
+Joe's PR #88 nits, in this order: the onboarding copy no longer says
+inputs "never leave the phone" or that the app "never sends anything to
+a network" (the default on-phone server keeps inputs on the device; an
+off-phone server is an explicit Settings opt-in and must use https);
+nav and step labels no longer break mid-word at 360 dp / font scale 2.0;
+the onboarding Skip control sits on a dark pill so it stays readable
+over the moon; a second start of the foreground service no longer leaks
+a wake lock or posts a "Proof failed" notification when nothing is
+running; typed server URLs with a path, query, fragment or userinfo are
+refused instead of being silently stripped; the README points the
+off-phone opt-in at Settings; the Wi-Fi exposure note is no longer
+hard-coded to port 6300; interrupted jobs are recorded in history;
+file imports run off the main thread and report an oversize file
+instead of ignoring it; `ACTION_VIEW` has an intent-filter so a payload
+file can open the app.
 
 ## Honest status
 

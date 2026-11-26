@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -70,7 +71,15 @@ fun OnboardingScreen(state: ProverUiState, vm: ProverViewModel, startPage: Int =
         Column(Modifier.widthIn(max = 640.dp).fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 SectionLabel("Midnight Prover · ${page + 1} of ${pages.size}")
-                if (page < last) LinkButton("Skip", onClick = { page = last })
+                if (page < last) LinkButton(
+                    "Skip",
+                    onClick = { page = last },
+                    color = MidnightPalette.Starlight,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MidnightPalette.Abyss.copy(alpha = 0.92f))
+                        .testTag("onboarding-skip")
+                )
             }
             PageDots(page, pages.size)
             AnimatedContent(

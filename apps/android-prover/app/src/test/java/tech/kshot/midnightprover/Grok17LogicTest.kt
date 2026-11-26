@@ -59,6 +59,22 @@ class BaseUrlValidationTest {
         assertNotNull(ProofJobInput.baseUrlError("http://host:6300?x=1"))
     }
 
+    /** Path, query, fragment and userinfo must be refused on the typed URL, not silently stripped. */
+    @Test fun refusesPathQueryUserinfoEvenOnLoopback() {
+        val path = ProofJobInput.baseUrlError("http://127.0.0.1:6300/prove")
+        assertNotNull(path); assertTrue(path!!.contains("path"))
+        val query = ProofJobInput.baseUrlError("http://127.0.0.1:6300?x=1")
+        assertNotNull(query)
+        val frag = ProofJobInput.baseUrlError("http://localhost:6300#f")
+        assertNotNull(frag)
+        val user = ProofJobInput.baseUrlError("http://user:pw@127.0.0.1:6300")
+        assertNotNull(user); assertTrue(user!!.contains("username") || user.contains("password"))
+        // A userinfo of "localhost" must not be rewritten into a trusted loopback host.
+        val sneak = ProofJobInput.baseUrlError("http://localhost@192.168.1.20:6300")
+        assertNotNull(sneak)
+        assertNull(ProofJobInput.baseUrlError("http://127.0.0.1:6300/"))
+    }
+
     @Test fun localhostDetection() {
         assertTrue(ProofJobInput.isLocalhost("http://127.0.0.1:6300"))
         assertTrue(ProofJobInput.isLocalhost("localhost:6300"))
@@ -317,6 +333,19 @@ class UrlNormalisationTest {
         assertEquals("http://localhost:6300", ProofJobInput.normaliseBaseUrl("HTTP://LocalHost:6300/"))
         assertEquals("https://prover.example.org", ProofJobInput.normaliseBaseUrl("HTTPS://Prover.Example.ORG"))
         assertEquals("http://[::1]:6300", ProofJobInput.normaliseBaseUrl("HTTP://[::1]:6300/"))
+    }
+}
+
+class HonestOffPhoneCopyTest {
+    @Test fun onboardingDoesNotClaimInputsNeverLeaveThePhone() {
+        assertFalse(Copy.ONBOARD_WHERE.contains("never leave the phone"))
+        assertTrue(Copy.ONBOARD_WHERE.contains("stay on this device"))
+        assertTrue(Copy.ONBOARD_WHERE.contains("opt-in"))
+        assertTrue(Copy.ONBOARD_WHERE.contains("https"))
+        assertFalse(Copy.ONBOARD_TESTNET.contains("never sends anything to a network"))
+        assertTrue(Copy.ONBOARD_TESTNET.contains("never submits anything to a Midnight network"))
+        assertTrue(Copy.OPEN_PORT_NOTE.contains("proof-server port"))
+        assertTrue(Copy.OPEN_PORT_NOTE.contains("default 6300"))
     }
 }
 

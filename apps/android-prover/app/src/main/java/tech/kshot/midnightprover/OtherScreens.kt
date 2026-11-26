@@ -99,13 +99,13 @@ private fun HistoryRow(r: JobRecord) {
         else (if (DateFormat.is24HourFormat(context)) "MMM d, HH:mm" else "MMM d, h:mm a")
         DateFormat.format(DateFormat.getBestDateTimePattern(java.util.Locale.getDefault(), pattern), r.finishedAtMillis).toString()
     }
-    val color = when { r.success -> MidnightPalette.ProofGlow; r.cancelled -> MidnightPalette.Moonlight; else -> MidnightPalette.ErrorRose }
+    val color = when { r.success -> MidnightPalette.ProofGlow; r.cancelled -> MidnightPalette.Moonlight; r.interrupted -> MidnightPalette.WarningAmber; else -> MidnightPalette.ErrorRose }
     MidnightCard(modifier = Modifier.semantics(mergeDescendants = true) {
         contentDescription = "${r.outcome}, ${r.circuit.ifEmpty { "unknown circuit" }}, $whenText, ${JobHistoryFormat.spokenDuration(r.durationSeconds)}. ${r.detail}"
     }) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(
-                when { r.success -> Icons.Filled.CheckCircle; r.cancelled -> Icons.Filled.Close; else -> Icons.Filled.Warning },
+                when { r.success -> Icons.Filled.CheckCircle; r.cancelled -> Icons.Filled.Close; r.interrupted -> Icons.Filled.Warning; else -> Icons.Filled.Warning },
                 contentDescription = null, tint = color, modifier = Modifier.size(24.dp)
             )
             Column(Modifier.weight(1f)) {
@@ -166,7 +166,7 @@ fun ServerScreen(state: ProverUiState, vm: ProverViewModel) {
                     color = if (!state.offPhone) MidnightPalette.Moonlight else MidnightPalette.WarningAmber
                 )
             }
-            StateMessage(Icons.Filled.Warning, "Port 6300 is open on your Wi-Fi", Copy.OPEN_PORT_NOTE, tone = Tone.WARN)
+            StateMessage(Icons.Filled.Warning, "The proof-server port is open on your Wi-Fi", Copy.OPEN_PORT_NOTE, tone = Tone.WARN)
             StateMessage(Icons.Filled.Info, "Testnet only", Copy.TESTNET_NOTE, tone = Tone.INFO)
         },
         secondary = { SetupGuideCard(onReplay = vm::reopenOnboarding) }

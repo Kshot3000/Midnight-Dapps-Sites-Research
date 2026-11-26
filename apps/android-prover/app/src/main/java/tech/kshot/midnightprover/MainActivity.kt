@@ -60,6 +60,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Midnight Prover — a client for Midnight's official proof server 9.0.2
@@ -113,16 +118,27 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun readUri(uri: Uri, source: String) {
-        runCatching {
-            contentResolver.openInputStream(uri)?.use { input ->
-                val bytes = input.readNBytesCompat(MAX_IMPORT_BYTES + 1)
-                if (bytes.size > MAX_IMPORT_BYTES) error("too large")
-                vm.importPayload(bytes, source)
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        input.readNBytesCompat(MAX_IMPORT_BYTES + 1)
+                    }
+                }
+            }
+            val bytes = result.getOrNull()
+            when {
+                result.isFailure -> vm.importFailed("Couldn't read $source.")
+                bytes == null -> vm.importFailed("Couldn't open $source.")
+                bytes.size > MAX_IMPORT_BYTES -> vm.importFailed(
+                    "That file from $source is larger than ${MAX_IMPORT_BYTES / (1024 * 1024)} MB, so it wasn't imported."
+                )
+                else -> vm.importPayload(bytes, source)
             }
         }
     }
 
-    companion object { const val MAX_IMPORT_BYTES = 32 * 1024 * 1024 }
+    companion object { const val MAX_IMPORT_BYTES = 2 * 1024 * 1024 }
 }
 
 internal fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
@@ -194,7 +210,7 @@ fun ProverApp(vm: ProverViewModel, state: ProverUiState, initialTab: Tab = Tab.P
                                     selected = tab == t,
                                     onClick = { tab = t },
                                     icon = { Icon(t.icon, contentDescription = t.description) },
-                                    label = { Text(t.label) },
+                                    label = { Text(t.label, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center) },
                                     modifier = Modifier.testTag("tab-${t.name}"),
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = MidnightPalette.ProofGlow,
@@ -220,7 +236,7 @@ fun ProverApp(vm: ProverViewModel, state: ProverUiState, initialTab: Tab = Tab.P
                                     selected = tab == t,
                                     onClick = { tab = t },
                                     icon = { Icon(t.icon, contentDescription = t.description) },
-                                    label = { Text(t.label) },
+                                    label = { Text(t.label, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center) },
                                     modifier = Modifier.testTag("tab-${t.name}"),
                                     colors = NavigationRailItemDefaults.colors(
                                         selectedIconColor = MidnightPalette.ProofGlow,

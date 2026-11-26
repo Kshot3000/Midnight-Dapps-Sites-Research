@@ -211,9 +211,14 @@ fun GhostButton(
 }
 
 @Composable
-fun LinkButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun LinkButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = MidnightPalette.VioletText
+) {
     TextButton(onClick = onClick, modifier = modifier.heightIn(min = 48.dp)) {
-        Text(text, color = MidnightPalette.VioletText, style = MaterialTheme.typography.labelLarge)
+        Text(text, color = color, style = MaterialTheme.typography.labelLarge)
     }
 }
 

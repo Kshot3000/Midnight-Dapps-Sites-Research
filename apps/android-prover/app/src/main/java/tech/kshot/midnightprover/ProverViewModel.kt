@@ -134,6 +134,10 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
         }
     }
 
+    fun importFailed(message: String) {
+        local.update { it.copy(importMessage = message) }
+    }
+
     fun loadSample() {
         val bytes = getApplication<Application>().assets.open(SAMPLE_ASSET).use { it.readBytes() }
         importPayload(bytes, "the bundled sample")
