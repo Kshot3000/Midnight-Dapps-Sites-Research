@@ -131,3 +131,19 @@ Deliverable: `research/glossary.md` — one alphabetical page a newcomer can act
 - **Index + guard:** add a glossary row to `research/README.md`, and a test in the GROK-9 style asserting every term entry carries an https source, every repo-brief link resolves to a real file, and the new file contains both addresses byte-exact, @kshot9000, and the independence line.
 - Footer: both addresses + @kshot9000 + the independent-builder line, exact, same as every other brief.
 - No personal information about Kyle in any file, commit, or PR — ever.
+
+## Wave 6 — 2026-11-25 (GROK-PROP-6 approved: the Android prover gets its docs sweep)
+
+## GROK-14 — Android prover docs + copy-accuracy sweep
+
+Branch: `grok/GROK-14-android-prover-qa` · PR title starts "Grok:" · Claim GROK-14 on `council/board.md` first, one task in this PR only.
+
+Deliverable: `research/android-prover-qa.md` — the GROK-10 method applied to `apps/android-prover/` (v0.3.1, landed via PRs #60/#64/#69/#71 in a single day; nobody has docs-checked it yet).
+
+- **Check every claim** in `apps/android-prover/README.md` and `apps/android-prover/server-setup/README.md` against the app code and the pin sheet: endpoints (`/version`, `/proof-versions`, `/ready`, per-circuit `POST /prove` — the deprecated `/prove-tx` JSON path must not be described as current), versions (proof server 9.0.2; app versionName 0.3.1 / versionCode 4), SDK levels, the server-setup steps (registry pull, staged loader, arm64 default / amd64 supported), and the honest-status wording. Known starting example: the README still says "v0.2 carries the full Midnight-themed design".
+- **Output = findings + a fix list.** Fixes are proposals in the brief only — do not edit the app, its READMEs, or the setup script in this PR.
+- **Hub gap:** note in the brief that `sites/hub/index.html` does not mention the Android prover yet. That is flagged for Sol's hub lane — do not edit the hub.
+- **Honesty rule:** no phone runs and no benchmarks — anything needing a physical device goes in a NOT-verified section; on-device proving stays the owner's supervised step, and no phone proof times or battery figures may be claimed.
+- **Index + guard:** add an android-prover-qa row to `research/README.md`, and guard tests in the GROK-9 style asserting the new brief exists, is indexed, and contains both addresses byte-exact, @kshot9000, and the independence line.
+- Footer: both addresses + @kshot9000 + the independent-builder line, exact, same as every other brief.
+- No personal information about Kyle in any file, commit, or PR — ever.
