@@ -36,12 +36,12 @@ its own image.
    `proof server is LIVE: /version = 9.0.2`, leave that Termux session
    running.
 
-3. Open **Midnight Prover**. The first-run walkthrough repeats these
-   steps and ends on a **Connect** page. Afterwards, the **Server** tab
-   (and the summary card on the **Prove** tab) shows the server status:
-   tap **Check server** — the URL should already read
-   `http://127.0.0.1:6300`. When the server answers, the card turns cyan
-   and reads *Proof server online*, with a `v9.0.2` chip.
+3. Open **Midnight Prover**. The status card on the **Prove** tab (and
+   on the **Server** tab) shows the server: tap **Check server** — the
+   address should already read `http://127.0.0.1:6300`. When the server
+   answers, the card turns cyan and reads *Proof server online*, with a
+   `v9.0.2` chip. If it reads *Proof server busy* (amber), the server is
+   up but working on other jobs.
 
 4. **Keep it running.** Android can stop the server while it runs.
    Since Android 12 the *phantom process killer* stops child processes
@@ -51,19 +51,32 @@ its own image.
    **Developer options → Disable child process restrictions**. Samsung phones may also slow Termux down; that is
    unverified on the Fold7.
 
-## Network exposure: port 6300 is open on your Wi-Fi
+## Wi-Fi warning: port 6300 is open to your network
 
-Proof server 9.0.2 has **no option to listen only on 127.0.0.1**. Its
-`--help` lists only `--port`, `--verbose`, `--job-capacity`,
-`--num-workers`, `--job-timeout` and `--no-fetch-params`, and no
-environment variable or doc covers a bind address. On the GROK-17 test
-box it listened on `0.0.0.0` (every interface, checked with `ss -ltn`).
+**Proof server 9.0.2 cannot be limited to 127.0.0.1.** It has no
+bind-address option: its `--help` lists only `--port`, `--verbose`,
+`--job-capacity`, `--num-workers`, `--job-timeout` and
+`--no-fetch-params`, and no environment variable or doc covers a bind
+address. It listens on `0.0.0.0` — every network interface. This
+script does **not** ship a bind shim; there is nothing to make it
+loopback-only yet.
 
-So while the server runs, **anyone on the same Wi-Fi can reach it and send it
-jobs, using your phone's CPU.** The launcher prints this warning every time
-it starts. Run it on trusted networks only (not café, hotel or office
-Wi-Fi), and stop it (Ctrl-C in Termux) when you are done. The app itself
-only ever talks to it over `127.0.0.1` on this phone.
+So while the server runs, **anyone on the same Wi-Fi can reach it and
+send it proving jobs, using your phone's CPU.** Run it on trusted
+networks only (not café, hotel or office Wi-Fi), and stop it (Ctrl-C in
+Termux) when you are done. The app itself only ever talks to it over
+`127.0.0.1` on this phone.
+
+**Post-start check.** After every start, the launcher reads
+`/proc/net/tcp` and `/proc/net/tcp6` to see where the port is actually
+listening (`check-exposure.sh` in the install folder; run it yourself
+any time with `~/.midnight-proof-server/check-exposure.sh 6300`).
+Anything other than loopback only (`127.0.0.1` / `::1`) prints a loud
+warning — and so does a table it can't read or a port it can't find, so
+a failed check can never look safe. Verified on the build box only (it
+correctly reported `0.0.0.0`); **not yet run on a phone**, where Android
+may hide `/proc/net` from apps — in that case it warns that it couldn't
+verify.
 
 ## On a desktop or server (advanced, off this phone)
 
@@ -73,8 +86,8 @@ only ever talks to it over `127.0.0.1` on this phone.
 
 Same flow, amd64 image. The app does **not** use a server off this phone
 by default, because the proving payload contains your private proof
-inputs. To use one anyway: in the app, **Settings → Allow a server off
-this phone** (read the warning), then enter an **https://** URL — the app
+inputs. To use one anyway: on the app's **Server** tab, turn on **Allow a
+server off this phone** (read the warning), then enter an **https://** URL — the app
 refuses plain http to anything except 127.0.0.1/localhost. Put the server
 behind a TLS reverse proxy you control; the proof server itself serves
 plain http only.
@@ -92,7 +105,9 @@ plain http only.
   directories made a non-root `tar -x` fail, and the old `|| tar -xf`
   fallback hid the error. The script now extracts with
   `--delay-directory-restore`, makes the tree writable, and stops on a
-  real failure.
+  real failure. Re-checked as uid 1000 after the exposure check was
+  added: install exit 0 with no tar errors, server live on a custom
+  port, and the post-start check printed the `0.0.0.0` warning.
 - arm64/phone: the script's steps are identical and the official image
   ships the arm64 variant, but **no phone run has happened yet** — the
   first on-device install + measurements will come from a supervised
@@ -107,7 +122,10 @@ plain http only.
 ## Files
 
 - `setup-proof-server.sh` — the installer/launcher generator
-  (`--arch`, `--dir`, `--start`).
+  (`--arch`, `--dir`, `--start`; `--check-exposure PORT [tables…]` runs
+  the listen-address check on its own, which the repo tests use).
+- The generated `check-exposure.sh` (in the install dir) — the
+  post-start listen-address check.
 - The generated `run-proof-server.sh` (in the install dir) starts the
   server again on later boots: `~/.midnight-proof-server/run-proof-server.sh`
 
