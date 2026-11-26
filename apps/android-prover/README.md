@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.7.0)
+# Midnight Prover — Android app (v0.7.1)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -8,7 +8,7 @@ Mission context: help take the Midnight ZK prover mobile, building on the
 same proof-server line this team verified on Windows (Proof Station) and
 in the cloud.
 
-This is the Fold7 sideload build (versionCode 9). Sideloading and the
+This is the Fold7 sideload build (versionCode 10). Sideloading and the
 first on-device run stay the owner's supervised step.
 
 ## Design — Route 3 (CLAUDE-AP-1 verdict)
@@ -82,15 +82,22 @@ The app stores no cloud backup (`android:allowBackup="false"`, with
   pauses during proofs, and "Check server" no longer hiding the proof.
 - Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
 
+## What v0.7.1 fixes (CLAUDE-AP-8 fixup)
+
+The app mark is now the actual Midnight token symbol — a white ring
+with three stacked squares on black — redrawn from the owner's
+reference image, replacing the crescent approximation that shipped in
+v0.7.0. Same vector everywhere: screen headers, the onboarding
+welcome, and the launcher icon.
+
 ## What v0.7.0 changes (CLAUDE-AP-8)
 
 A full visual redesign to a monochrome system, at the owner's
 direction: true black surfaces, white primary actions and text, a
 grayscale ramp for everything else — no hue anywhere; state is carried
-by icon, label and lightness. The Midnight token crescent becomes the
-app's mark: it leads every screen header, fronts the onboarding
-welcome, and is the launcher icon (white crescent + proof ring on
-black). The starfield stays but whispers — dimmer, grayscale, behind
+by icon, label and lightness. The Midnight token symbol (a ring with three
+stacked squares) is the app's mark: it leads every screen header,
+fronts the onboarding welcome, and is the launcher icon on black. The starfield stays but whispers — dimmer, grayscale, behind
 near-black cards with hairline borders. Every contrast invariant is
 unchanged and still test-enforced (all text AA on the card surface;
 the primary button is now white with black text at 16:1+). The design

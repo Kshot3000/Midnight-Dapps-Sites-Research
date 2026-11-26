@@ -266,7 +266,7 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** The Midnight token mark: a white crescent (the NIGHT token symbol), drawn as a vector. */
+/** The Midnight token symbol — a ring with three stacked squares — drawn as a vector. */
 @Composable
 fun MidnightTokenMark(modifier: Modifier = Modifier, tint: Color = MidnightPalette.Starlight) {
     Icon(
