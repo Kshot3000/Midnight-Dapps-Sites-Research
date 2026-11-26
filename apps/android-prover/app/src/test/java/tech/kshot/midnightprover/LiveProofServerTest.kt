@@ -24,7 +24,7 @@ class LiveProofServerTest {
         val log = StringBuilder()
 
         val t0 = System.nanoTime()
-        val status = client.status()
+        val status = client.statusWithRetry()
         val statusMs = (System.nanoTime() - t0) / 1_000_000
         log.appendLine("server=$url version=${status.version} proofVersions=${status.proofVersions} ready=${status.readyStatus} capacity=${status.jobCapacity} statusSweepMs=$statusMs")
         assertTrue(status.reachable)

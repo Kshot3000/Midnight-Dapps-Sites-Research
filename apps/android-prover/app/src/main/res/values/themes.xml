@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Bob P0-4: dark window, no action bar, dark system bars, so there is no light
-         launch window or white flash before Compose draws. On Android 12+ the system
-         splash uses this background and the adaptive icon. (The core-splashscreen
-         library and enableEdgeToEdge() are GROK-18.) -->
+    <!-- Dark window, no action bar, transparent system bars: no white flash before Compose draws. -->
     <style name="Theme.MidnightProver" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/abyss</item>
-        <item name="android:statusBarColor">@color/abyss</item>
-        <item name="android:navigationBarColor">@color/abyss</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Launch theme for androidx core-splashscreen: Midnight icon on the abyss background. -->
+    <style name="Theme.MidnightProver.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/abyss</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.MidnightProver</item>
     </style>
 </resources>

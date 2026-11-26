@@ -3,8 +3,8 @@ package tech.kshot.midnightprover
 import java.net.URI
 import java.util.Locale
 
-/** Lifecycle of one proof job. */
-enum class JobState { IDLE, PROVING, DONE, FAILED, CANCELLED }
+/** Lifecycle of one proof job. INTERRUPTED = the system killed the app mid-prove. */
+enum class JobState { IDLE, PROVING, DONE, FAILED, CANCELLED, INTERRUPTED }
 
 /**
  * Pure helpers for proof-job input. Kept free of Android APIs so they are
@@ -106,13 +106,9 @@ object JobHistoryFormat {
         else -> String.format(Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0))
     }
 
-    /** Joe P2-1: round to a tenth first, then split, so 119.7 s never reads "1 min 60 s". */
-    fun formatDuration(seconds: Double): String {
-        val tenths = Math.round(seconds.coerceAtLeast(0.0) * 10) / 10.0
-        if (tenths < 60) return String.format(Locale.ROOT, "%.1f s", tenths)
-        val whole = tenths.toInt()
-        return String.format(Locale.ROOT, "%d min %02d s", whole / 60, whole % 60)
-    }
+    fun formatDuration(seconds: Double): String =
+        if (seconds < 60) String.format(Locale.ROOT, "%.1f s", seconds)
+        else String.format(Locale.ROOT, "%d min %02d s", (seconds / 60).toInt(), (seconds % 60).toInt())
 
     /** TalkBack-friendly duration: "1 minute 5 seconds". */
     fun spokenDuration(seconds: Double): String {
@@ -251,6 +247,22 @@ data class ReadyFields(
                 jobCapacity = intField("jobCapacity")
             )
         }
+    }
+}
+
+/** Exponential backoff for health checks: 1 s, 2 s, 4 s … capped. Pure + tested. */
+data class RetryPolicy(
+    val maxAttempts: Int = 4,
+    val initialDelayMs: Long = 1_000,
+    val maxDelayMs: Long = 8_000,
+    val factor: Double = 2.0
+) {
+    /** Delay before attempt [attempt] (1-based; attempt 1 has no delay). */
+    fun delayBefore(attempt: Int): Long {
+        if (attempt <= 1) return 0
+        var d = initialDelayMs.toDouble()
+        repeat(attempt - 2) { d *= factor }
+        return d.toLong().coerceAtMost(maxDelayMs)
     }
 }
 

@@ -1,6 +1,7 @@
 package tech.kshot.midnightprover
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -56,13 +57,10 @@ sealed class ProveException(val title: String, message: String) : Exception(mess
 }
 
 /** Timeouts in milliseconds; prove is long because phone proving is unmeasured. */
-const val PROVE_TIMEOUT_MINUTES = 11
-
 data class ClientTimeouts(
     val connectMs: Int = 5_000,
     val statusReadMs: Int = 8_000,
-    /** 11 min: just above the proof server's own 600 s job timeout, so a dropped job surfaces as Timeout. */
-    val proveReadMs: Int = PROVE_TIMEOUT_MINUTES * 60_000
+    val proveReadMs: Int = 15 * 60_000
 )
 
 /**
@@ -73,7 +71,7 @@ data class ClientTimeouts(
  * is configurable so the same app can point at a LAN or cloud server.
  *
  * Protocol (verified live against the real 9.0.2 server, 2026-11-25, and
- * again by GROK-17 with a payload captured from the official hello-world
+ * again by GROK-15 with a payload captured from the official hello-world
  * flow): proving is PER-CIRCUIT via POST /prove with a raw binary body — a
  * (proof-preimage-versioned, option(proving-data), option(fr-bls)) tuple —
  * and returns raw proof bytes headed `midnight:proof-versioned:`. The older
@@ -119,6 +117,27 @@ class ProofServerClient(
         } catch (e: IOException) {
             ServerStatus(reachable = false, failure = classifyIo(e, "the status check", timeouts.statusReadMs))
         }
+    }
+
+    /**
+     * Status with retry + exponential backoff while the server is unreachable,
+     * timing out, or answering /ready as busy. [onAttempt] reports progress.
+     */
+    suspend fun statusWithRetry(
+        policy: RetryPolicy = RetryPolicy(),
+        onAttempt: (attempt: Int, nextDelayMs: Long) -> Unit = { _, _ -> }
+    ): ServerStatus {
+        var last: ServerStatus? = null
+        for (attempt in 1..policy.maxAttempts) {
+            val wait = policy.delayBefore(attempt)
+            onAttempt(attempt, wait)
+            if (wait > 0) delay(wait)
+            val s = status()
+            last = s
+            if (s.reachable && s.failure == null && s.readyStatus != "busy") return s
+            if (s.failure is ProveException.Http || s.failure is ProveException.BadResponse) return s
+        }
+        return last!!
     }
 
     /**
