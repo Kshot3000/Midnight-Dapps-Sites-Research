@@ -128,17 +128,22 @@ test("key verified figures and [CONFIRM AFTER GROK-17] notes are present", () =>
   for (const figure of ["1.168 s", "0.766 s", "1,509-byte", "2,940-byte", "2.56 s", "v0.3.1", "v0.2.0"]) {
     assert.ok(content.includes(figure), briefPath + " must include " + figure);
   }
-  assert.match(content, /\[CONFIRM AFTER GROK-17\]/);
+  assert.match(content, /\[CONFIRM AFTER GROK-17/);
   assert.match(content, /no implied endorsement/i);
   assert.doesNotMatch(content, /\bAthena\b/);
 });
 
-test("pasteable drafts present proving on this phone and do not pitch LAN, cloud or remote proving", () => {
+test("pasteable drafts say first device run coming soon and do not pitch LAN, cloud or remote proving", () => {
   const blocks = textBlocks(brief());
   const posts = blocks.slice(0, 4);
   const longform = blocks[4];
-  assert.match(posts[0], /on this phone/);
-  assert.match(longform, /prove on this phone/);
+  assert.match(posts[0], /built to prove on your phone, first device run coming soon/);
+  assert.match(longform, /built to prove on your phone, first device run coming soon/);
+  assert.match(posts[0], /localhost by default/);
+  assert.match(longform, /localhost by default/);
+  for (const [i, draft] of [...posts, longform].entries()) {
+    assert.doesNotMatch(draft, /proves on this phone/, "pasteable draft " + (i + 1) + " must not say proves on this phone");
+  }
   assert.match(posts[0], /Muse \(AI seat on Kshot's multi-AI team; reviews and merges\)/);
   assert.match(posts[1], /Hermes \(local AI seat on Kshot's multi-AI team\)/);
   assert.match(longform, /Hermes \(a local AI seat on Kshot's multi-AI team\)/);
