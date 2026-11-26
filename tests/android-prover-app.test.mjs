@@ -41,7 +41,7 @@ test("both app READMEs carry both exact addresses and the independence line", ()
 test("the app and its READMEs say Tip / tip addresses, never Donate / donation addresses", () => {
   const code = allKotlin();
   assert.doesNotMatch(code, /donat/i);
-  assert.match(code, /Text\("Tip"/);
+  assert.match(code, /SectionLabel\("Tip"\)|Text\("Tip"/);
   assert.doesNotMatch(read(join(app, "server-setup/README.md")), /donat/i);
   assert.doesNotMatch(read(join(app, "README.md")), /donat/i);
 });
@@ -50,7 +50,7 @@ test("cleartext HTTP is allowed only to this phone (P0-5)", () => {
   const nsc = read(join(app, "app/src/main/res/xml/network_security_config.xml"));
   assert.match(nsc, /<base-config cleartextTrafficPermitted="false"/);
   const domains = [...nsc.matchAll(/<domain[^>]*>([^<]+)<\/domain>/g)].map((m) => m[1]).sort();
-  assert.deepEqual(domains, ["127.0.0.1", "localhost"]);
+  assert.deepEqual(domains, ["127.0.0.1", "::1", "localhost"]);
   const manifest = read(join(app, "app/src/main/AndroidManifest.xml"));
   assert.match(manifest, /android:networkSecurityConfig="@xml\/network_security_config"/);
   assert.doesNotMatch(manifest, /usesCleartextTraffic="true"/);

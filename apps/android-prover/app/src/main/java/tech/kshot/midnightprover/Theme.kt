@@ -5,6 +5,8 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -22,9 +24,10 @@ import kotlin.math.pow
  * single cyan "proof glow" reserved for live status and success. Dark
  * only: a prover that runs at midnight should look like it.
  *
- * GROK-17 contrast pass, using the hex values from Bob's UX review
- * (P1-14): text colours meet WCAG AA (4.5:1) and input borders 3:1;
- * `PaletteContrastTest` enforces it.
+ * GROK-15 contrast pass: every text colour below meets WCAG AA (4.5:1) on
+ * the card surface [Nebula]; `PaletteContrastTest` enforces it. DimStar and
+ * the button gradient were darkened/lightened from v0.3.1 (3.99:1 and
+ * 4.2:1 before).
  */
 object MidnightPalette {
     val Abyss = Color(0xFF05070F)        // app background, deepest layer
@@ -43,7 +46,7 @@ object MidnightPalette {
     val WarningAmber = Color(0xFFFFC24D)
     val ErrorRose = Color(0xFFFF6B81)
     val Hairline = Color(0xFF232C5E)     // decorative card borders on navy
-    val FieldBorder = Color(0xFF5A6393)  // input borders (Bob P1-14: 3.07:1 on card, WCAG 1.4.11)
+    val FieldBorder = Color(0xFF5A6393)  // input borders, ≥ 3:1 (WCAG 1.4.11; Bob P1-14)
 
     val BrandGradient = Brush.linearGradient(listOf(ButtonStart, ButtonEnd))
     val GlowGradient = Brush.linearGradient(listOf(ProofGlow, Indigo))
@@ -99,9 +102,12 @@ private val MidnightTypography = Typography(
 /** Monospace style for hex, addresses and URLs. */
 val MonoStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 18.sp)
 
+/** True when animations should be reduced (system "remove animations" or the in-app switch). */
+val LocalReduceMotion = staticCompositionLocalOf { false }
+
 @Composable
-fun MidnightProverTheme(content: @Composable () -> Unit) {
-    run {
+fun MidnightProverTheme(reduceMotion: Boolean = false, content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalReduceMotion provides reduceMotion) {
         MaterialTheme(
             colorScheme = MidnightScheme,
             typography = MidnightTypography,

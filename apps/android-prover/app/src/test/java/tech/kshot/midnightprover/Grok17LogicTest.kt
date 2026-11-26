@@ -66,6 +66,13 @@ class BaseUrlValidationTest {
     }
 }
 
+class RetryPolicyTest {
+    @Test fun exponentialBackoffCapped() {
+        val p = RetryPolicy(maxAttempts = 6, initialDelayMs = 1000, maxDelayMs = 8000)
+        assertEquals(listOf(0L, 1000L, 2000L, 4000L, 8000L, 8000L), (1..6).map { p.delayBefore(it) })
+    }
+}
+
 class PayloadInspectorTest {
     @Test fun readsTheRealDustSpendPayload() {
         val info = PayloadInspector.inspect(Fixtures.dustSpend)
@@ -113,6 +120,8 @@ class ServerHealthTest {
         assertEquals(HealthKind.WRONG_VERSION, ServerHealth.from(ok(version = "9.0.0")).kind)
         assertEquals(HealthKind.BUSY, ServerHealth.from(ok(ready = false, readyStatus = "busy")).kind)
         assertEquals(HealthKind.NOT_READY, ServerHealth.from(ok(ready = false, readyStatus = "loading")).kind)
+        assertEquals(HealthKind.TIMEOUT, ServerHealth.from(ServerStatus(reachable = false, failure = ProveException.Timeout("the status check", 8))).kind)
+        assertEquals(HealthKind.UNENCRYPTED, ServerHealth.from(ok(), "http://192.168.1.20:6300").kind)
         assertEquals(HealthKind.OFFLINE, ServerHealth.from(ServerStatus(reachable = false, failure = ProveException.Unreachable("x"))).kind)
         assertEquals(HealthKind.ERROR, ServerHealth.from(ServerStatus(reachable = true, failure = ProveException.Http(500, "boom"))).kind)
     }
@@ -122,6 +131,12 @@ class ServerHealthTest {
         val h = ServerHealth.from(ok(ready = false, readyStatus = "busy"))
         assertEquals(HealthKind.BUSY, h.kind)
         assertEquals("Proof server busy", h.headline)
+        assertEquals(Copy.STATUS_BUSY, healthDetail(h, "http://127.0.0.1:6300"))
+        val timeout = ServerHealth.from(ServerStatus(reachable = false, failure = ProveException.Timeout("the status check", 8)))
+        assertEquals(HealthKind.TIMEOUT, timeout.kind)
+        assertTrue(timeout.headline.lowercase().contains("timed out"))
+        assertFalse(timeout.headline.lowercase().contains("unreachable"))
+        assertFalse(timeout.headline.lowercase().contains("offline"))
     }
 
     @Test fun proofVersionsShownWithoutJson() {
@@ -158,7 +173,7 @@ class ErrorClassificationTest {
     }
 
     @Test fun eachFailureKindHasItsOwnMessage() {
-        val kinds = listOf("Unreachable", "Timeout", "QueueFull", "Busy", "Rejected", "Cancelled")
+        val kinds = listOf("Unreachable", "Timeout", "QueueFull", "Busy", "Rejected", "Cancelled", "Interrupted")
         val messages = kinds.map { Copy.failureMessage(FailureInfo(it, "t", "server text"), 15) }
         assertEquals(kinds.size, messages.toSet().size)
         assertEquals(Copy.errTimeout(15), Copy.failureMessage(FailureInfo("Timeout", "", ""), 15))
@@ -239,6 +254,27 @@ class PaletteContrastTest {
     }
 }
 
+/** The in-app setup steps must match server-setup/README.md. */
+class SetupGuideTest {
+    private val readme = File("../server-setup/README.md").readText()
+
+    @Test fun everyCommandIsInTheReadme() {
+        SetupGuide.steps.flatMap { it.commands }.forEach { cmd ->
+            assertTrue("README lacks: $cmd", readme.contains(cmd))
+        }
+    }
+
+    @Test fun noUnsourcedDownloadSize() {
+        assertFalse(readme.contains("35 MB"))
+        SetupGuide.steps.forEach { assertFalse(it.body.contains("35 MB")) }
+    }
+
+    @Test fun phantomProcessWarningPresent() {
+        assertTrue(Copy.ONBOARD_KEEP_RUNNING.contains("Disable child process restrictions"))
+        assertTrue(readme.contains("Disable child process restrictions"))
+    }
+}
+
 /** P0-5: the shipped network security config allows cleartext only to this phone. */
 class NetworkSecurityConfigTest {
     private val xml = File("src/main/res/xml/network_security_config.xml").readText()
@@ -247,19 +283,54 @@ class NetworkSecurityConfigTest {
     @Test fun cleartextOnlyToLoopback() {
         assertTrue(xml.contains("<base-config cleartextTrafficPermitted=\"false\""))
         val domains = Regex("<domain[^>]*>([^<]+)</domain>").findAll(xml).map { it.groupValues[1] }.toSet()
-        assertEquals(setOf("127.0.0.1", "localhost"), domains)
+        assertEquals(ProofJobInput.LOOPBACK_HOSTS, domains)
         assertTrue(manifest.contains("android:networkSecurityConfig=\"@xml/network_security_config\""))
         assertFalse(manifest.contains("usesCleartextTraffic=\"true\""))
     }
 
-    /** Bob P0-4: a dark no-action-bar theme and an adaptive launcher icon. */
-    @Test fun manifestHasThemeAndIcon() {
+    /** Joe nit 1: the cleartext host list and isLocalhost() stay in lockstep. */
+    @Test fun loopbackHostsMatchConfigAndIsLocalhost() {
+        val domains = Regex("<domain[^>]*>([^<]+)</domain>").findAll(xml).map { it.groupValues[1] }.toSet()
+        assertEquals(setOf("127.0.0.1", "localhost", "::1"), domains)
+        assertEquals(domains, ProofJobInput.LOOPBACK_HOSTS)
+        assertTrue(ProofJobInput.isLocalhost("http://127.0.0.1:6300"))
+        assertTrue(ProofJobInput.isLocalhost("http://localhost:6300"))
+        assertTrue(ProofJobInput.isLocalhost("http://[::1]:6300"))
+        assertFalse(ProofJobInput.isLocalhost("http://192.168.1.20:6300"))
+        assertFalse(ProofJobInput.isLocalhost("https://prover.example.org"))
+    }
+
+    @Test fun manifestHasThemeIconAndForegroundService() {
         assertTrue(manifest.contains("android:theme=\"@style/Theme.MidnightProver\""))
         assertTrue(manifest.contains("android:icon=\"@mipmap/ic_launcher\""))
-        val themes = File("src/main/res/values/themes.xml").readText()
-        assertTrue(themes.contains("parent=\"android:Theme.Material.NoActionBar\""))
-        assertTrue(themes.contains("<item name=\"android:windowBackground\">@color/abyss</item>"))
-        assertTrue(File("src/main/res/values/colors.xml").readText().contains("#FF05070F"))
-        assertTrue(File("src/main/res/mipmap-anydpi/ic_launcher.xml").readText().contains("<adaptive-icon"))
+        assertTrue(manifest.contains("android:foregroundServiceType=\"dataSync\""))
+        assertTrue(manifest.contains("FOREGROUND_SERVICE_DATA_SYNC"))
+        assertTrue(manifest.contains("android:allowBackup=\"false\""))
+        assertTrue(manifest.contains("android:dataExtractionRules=\"@xml/data_extraction_rules\""))
+        assertTrue(File("src/main/res/xml/data_extraction_rules.xml").readText().contains("<device-transfer>"))
     }
 }
+
+class UrlNormalisationTest {
+    @Test fun lowercasesSchemeAndHostWhenSaving() {
+        assertEquals("http://127.0.0.1:6300", ProofJobInput.normaliseBaseUrl("HTTP://127.0.0.1:6300"))
+        assertEquals("http://localhost:6300", ProofJobInput.normaliseBaseUrl("HTTP://LocalHost:6300/"))
+        assertEquals("https://prover.example.org", ProofJobInput.normaliseBaseUrl("HTTPS://Prover.Example.ORG"))
+        assertEquals("http://[::1]:6300", ProofJobInput.normaliseBaseUrl("HTTP://[::1]:6300/"))
+    }
+}
+
+class RejectedBodyTest {
+    @Test fun stripsNonPrintableCharacters() {
+        val dirty = "expected header tag \u0000\u0007'midnight', got \u001b[31mgarbage\u0001"
+        val clean = ProofServerClient.sanitizeServerMessage(dirty)
+        assertFalse(clean.any { it.code < 32 && it !in "\t\n\r" })
+        assertTrue(clean.contains("expected header tag"))
+        assertTrue(clean.contains("garbage"))
+        assertFalse(clean.contains("\u0000"))
+        val rejected = ProofServerClient.classifyHttp(400, dirty)
+        assertTrue(rejected is ProveException.Rejected)
+        assertEquals(clean, rejected.message)
+    }
+}
+

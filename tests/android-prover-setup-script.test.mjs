@@ -76,5 +76,15 @@ test("the setup script extracts layers safely as a non-root user and runs the ch
   assert.match(s, /tar --delay-directory-restore -xzf/);
   assert.match(s, /chmod -R u\+w "\$ROOTFS"/);
   assert.doesNotMatch(s, /\|\| tar -xf/, "the old fallback hid extraction failures");
-  assert.match(s, /"\$CHECKER" 6300/);
+  assert.match(s, /"\$CHECKER" "\$PORT"/);
+  assert.match(s, /--port\) PORT=/);
+  assert.match(s, /"\$LAUNCHER" --port "\$PORT"/);
+});
+
+test("if tcp6 can't be read but tcp shows loopback, the check reports can't verify, not OK", () => {
+  const r = check("6300", table("tcp", v4("0100007F:189C")), join(dir, "missing-tcp6"));
+  assert.equal(r.status, 3, r.stdout + r.stderr);
+  assert.match(r.stdout, /can't verify/);
+  assert.match(r.stdout, /!! WARNING/);
+  assert.doesNotMatch(r.stdout, /OK: port/);
 });

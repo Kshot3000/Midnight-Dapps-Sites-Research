@@ -3,8 +3,8 @@ package tech.kshot.midnightprover
 import java.net.URI
 import java.util.Locale
 
-/** Lifecycle of one proof job. */
-enum class JobState { IDLE, PROVING, DONE, FAILED, CANCELLED }
+/** Lifecycle of one proof job. INTERRUPTED = the system killed the app mid-prove. */
+enum class JobState { IDLE, PROVING, DONE, FAILED, CANCELLED, INTERRUPTED }
 
 /**
  * Pure helpers for proof-job input. Kept free of Android APIs so they are
@@ -31,11 +31,20 @@ object ProofJobInput {
         return null
     }
 
-    /** Normalises a user-entered server base URL: adds http:// when no scheme, no trailing slash. */
+    /**
+     * Normalises a user-entered server base URL: adds http:// when no scheme,
+     * lower-cases the scheme and host (Joe nit 5), drops a trailing slash.
+     */
     fun normaliseBaseUrl(raw: String): String {
         var url = raw.trim()
         if (!url.contains("://")) url = "http://$url"
-        return url.trimEnd('/')
+        url = url.trimEnd('/')
+        val uri = runCatching { URI(url) }.getOrNull() ?: return url
+        val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: return url
+        val host = uri.host?.lowercase(Locale.ROOT)?.removePrefix("[")?.removeSuffix("]") ?: return url
+        val port = if (uri.port != -1) ":${uri.port}" else ""
+        val hostPart = if (host.contains(':')) "[$host]" else host
+        return "$scheme://$hostPart$port"
     }
 
     /**
@@ -61,10 +70,20 @@ object ProofJobInput {
         return null
     }
 
+    /**
+     * Hosts this phone answers on. Must stay in lockstep with the cleartext
+     * exceptions in `res/xml/network_security_config.xml` (Joe nit 1).
+     * `URI.host` returns `::1` without brackets; we strip them just in case.
+     */
+    val LOOPBACK_HOSTS = setOf("127.0.0.1", "localhost", "::1")
+
     /** True when the URL points at this device (Route 3). */
     fun isLocalhost(url: String): Boolean {
-        val host = runCatching { URI(normaliseBaseUrl(url)).host }.getOrNull()?.lowercase(Locale.ROOT)
-        return host == "127.0.0.1" || host == "localhost" || host == "::1" || host == "[::1]"
+        val host = runCatching { URI(normaliseBaseUrl(url)).host }.getOrNull()
+            ?.lowercase(Locale.ROOT)
+            ?.removePrefix("[")
+            ?.removeSuffix("]")
+        return host in LOOPBACK_HOSTS
     }
 
     const val DEFAULT_BASE_URL = "http://127.0.0.1:6300"
@@ -251,6 +270,22 @@ data class ReadyFields(
                 jobCapacity = intField("jobCapacity")
             )
         }
+    }
+}
+
+/** Exponential backoff for health checks: 1 s, 2 s, 4 s … capped. Pure + tested. */
+data class RetryPolicy(
+    val maxAttempts: Int = 4,
+    val initialDelayMs: Long = 1_000,
+    val maxDelayMs: Long = 8_000,
+    val factor: Double = 2.0
+) {
+    /** Delay before attempt [attempt] (1-based; attempt 1 has no delay). */
+    fun delayBefore(attempt: Int): Long {
+        if (attempt <= 1) return 0
+        var d = initialDelayMs.toDouble()
+        repeat(attempt - 2) { d *= factor }
+        return d.toLong().coerceAtMost(maxDelayMs)
     }
 }
 
