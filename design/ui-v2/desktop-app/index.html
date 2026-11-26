@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight Command — PC Desktop Application GUI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/midnight-tokens.css" />
+</head>
+<body class="midnight-mesh h-screen overflow-hidden flex flex-col text-slate-100 select-none">
+
+  <!-- Native Desktop Window Titlebar -->
+  <header class="h-12 shrink-0 border-b border-slate-800/80 bg-[#05070e]/95 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+        <span class="w-3 h-3 rounded-full bg-amber-400/80"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-400/80"></span>
+      </div>
+      <div class="h-4 w-px bg-slate-800 mx-1"></div>
+      <span class="font-display font-bold text-sm tracking-tight">MIDNIGHT <span class="text-indigo-400">COMMAND</span></span>
+      <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono-code bg-slate-900 border border-slate-800 text-slate-400">Desktop v2.6.0 &bull; Local WASM Prover</span>
+    </div>
+
+    <!-- Command Palette Trigger -->
+    <button type="button" id="openCmdBtn" class="hidden md:flex items-center gap-3 px-3.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:border-indigo-500/40 text-xs text-slate-400 transition">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span>Search contracts, proofs, or actions...</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono-code text-slate-300">Ctrl K</kbd>
+    </button>
+
+    <div class="flex items-center gap-2.5">
+      <button type="button" id="pcCloakBtn" class="px-3 py-1 rounded-lg text-[11px] font-mono-code bg-emerald-500/10 text-emerald-300 border border-emerald-500/25 hover:bg-emerald-500/20 transition flex items-center gap-1.5" title="Shortcut: Shift+P">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span id="pcCloakText">Cloak: OFF</span>
+      </button>
+      <a href="../index.html" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code bg-slate-900 text-slate-300 border border-slate-800 hover:text-white transition">Hub</a>
+    </div>
+  </header>
+
+  <!-- Main Desktop Application Shell -->
+  <div class="flex-1 flex min-h-0">
+    <!-- Left Navigation Rail -->
+    <aside class="w-60 shrink-0 border-r border-slate-800/80 bg-[#070a14]/90 p-3.5 flex flex-col justify-between">
+      <div class="space-y-1">
+        <div class="px-3 py-1.5 text-[10px] font-mono-code uppercase tracking-widest text-slate-500">Workspace</div>
+        <button type="button" data-tab="vault" class="rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-indigo-500/15 text-white border border-indigo-400/30">
+          <span class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-indigo-400"></span>Dual-Surface Vault</span>
+          <span class="text-[10px] font-mono-code text-slate-400">1</span>
+        </button>
+        <button type="button" data-tab="lending" class="rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900/70 transition">
+          <span class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Private Lending</span>
+          <span class="text-[10px] font-mono-code text-emerald-400">ZK</span>
+        </button>
+        <button type="button" data-tab="zswap" class="rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900/70 transition">
+          <span class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Zswap Offer Desk</span>
+          <span class="text-[10px] font-mono-code text-slate-500">3</span>
+        </button>
+        <button type="button" data-tab="passport" class="rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900/70 transition">
+          <span class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-violet-400"></span>Passport &amp; AI Agents</span>
+          <span class="text-[10px] font-mono-code text-violet-300">2 Active</span>
+        </button>
+      </div>
+
+      <!-- Bottom Status Cards: DUST Capacitor + Local Prover -->
+      <div class="space-y-3">
+        <div class="p-3.5 rounded-2xl bg-gradient-to-b from-amber-500/10 to-slate-950/90 border border-amber-500/20">
+          <div class="flex items-center justify-between text-[11px] font-mono-code mb-1.5">
+            <span class="text-amber-300 font-semibold">DUST Capacitor</span>
+            <span class="text-amber-200" id="pcDustPct">86%</span>
+          </div>
+          <div class="h-1.5 w-full rounded-full bg-slate-900 overflow-hidden">
+            <div id="pcDustBar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-500" style="width:86%"></div>
+          </div>
+          <div class="mt-2 flex justify-between text-[10px] font-mono-code text-slate-400">
+            <span id="pcDustNum">10,750 / 12,500</span>
+            <span class="text-emerald-400">Recharging</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-[11px] font-mono-code flex items-center justify-between">
+          <span class="text-slate-400">Local Prover</span>
+          <span id="proverState" class="text-emerald-400">IDLE &bull; 12 Threads</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Scrollable Viewport -->
+    <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 select-text">
+
+      <!-- TAB 1: DUAL-SURFACE VAULT -->
+      <section id="tab-vault" class="pc-tab space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 class="font-display text-2xl font-bold text-white">Dual-Surface Portfolio</h1>
+            <p class="text-xs text-slate-400 mt-0.5">Connected via Gero v2.7.1 / Midnight Passport &bull; Sponsored DUST fallback enabled</p>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button type="button" id="runZkProofBtn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg transition">
+              Execute Shielded Transfer (-115 DUST)
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="surface-card rounded-2xl p-5 border-t-2 border-t-indigo-400">
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-mono-code text-slate-400">UNSHIELDED CAPITAL</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono-code bg-indigo-500/15 text-indigo-300">PUBLIC</span>
+            </div>
+            <div class="mt-3 font-display text-3xl font-bold text-white">5,000.00 <span class="text-sm font-mono-code text-indigo-300">NIGHT</span></div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Generating DUST for 2 wallets</span>
+              <span class="text-emerald-400 font-mono-code">+4.2% APY</span>
+            </div>
+          </div>
+
+          <div class="surface-card rounded-2xl p-5 border-t-2 border-t-emerald-400">
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-mono-code text-slate-400">SHIELDED UTXO POOL</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono-code bg-emerald-500/15 text-emerald-300">ZK-PRIVATE</span>
+            </div>
+            <div class="mt-3 font-display text-3xl font-bold text-white cloakable">24,480.00 <span class="text-sm font-mono-code text-emerald-300">USDM</span></div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Zero-knowledge commitment tree</span>
+              <span class="text-emerald-400 font-mono-code">Hidden</span>
+            </div>
+          </div>
+
+          <div class="surface-card rounded-2xl p-5 border-t-2 border-t-amber-400">
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-mono-code text-slate-400">ACTIVE DUST FUEL</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono-code bg-amber-500/15 text-amber-300">RENEWABLE</span>
+            </div>
+            <div class="mt-3 font-display text-3xl font-bold text-amber-300" id="kpiDust">10,750 <span class="text-sm font-mono-code">DUST</span></div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>~93 private Compact txns ready</span>
+              <span class="text-sky-300 font-mono-code">Relay Backup</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prover Progress Banner (Hidden until triggered) -->
+        <div id="proverBanner" class="hidden surface-card rounded-2xl p-4 border-indigo-500/40 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-mono-code text-xs font-bold animate-pulse">ZK</div>
+            <div>
+              <div class="text-xs font-semibold text-white" id="proverTitle">Synthesizing Compact ZK-SNARK Witness locally...</div>
+              <div class="text-[11px] font-mono-code text-slate-400" id="proverSub">Zero sensitive data leaves this machine</div>
+            </div>
+          </div>
+          <div class="w-40 h-2 rounded-full bg-slate-900 overflow-hidden">
+            <div id="proverProgress" class="h-full bg-gradient-to-r from-indigo-400 to-emerald-400 transition-all duration-300" style="width: 10%"></div>
+          </div>
+        </div>
+
+        <!-- Activity Ledger Table -->
+        <div class="surface-card rounded-2xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 flex items-center justify-between">
+            <span class="text-xs font-mono-code uppercase tracking-wider text-slate-300">Cryptographic Ledger Feed</span>
+            <span class="text-[11px] font-mono-code text-slate-400">Filter: All Surfaces</span>
+          </div>
+          <div id="pcLedgerBody" class="divide-y divide-slate-800/70 text-xs">
+            <div class="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-900/40">
+              <div class="flex items-center gap-3">
+                <span class="px-2 py-1 rounded bg-emerald-500/15 text-emerald-300 font-mono-code text-[10px]">ZSWAP</span>
+                <div>
+                  <div class="font-medium text-white">Shielded Offer File Settled (Celestia Namespace #0x4A)</div>
+                  <div class="text-[11px] font-mono-code text-slate-500">Proof Hash: 0x8a91...c40e &bull; Verified in 410ms</div>
+                </div>
+              </div>
+              <div class="text-right font-mono-code">
+                <div class="text-emerald-400 cloakable">+2,400.00 sNIGHT</div>
+                <div class="text-[10px] text-slate-500">112 DUST</div>
+              </div>
+            </div>
+            <div class="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-900/40">
+              <div class="flex items-center gap-3">
+                <span class="px-2 py-1 rounded bg-sky-500/15 text-sky-300 font-mono-code text-[10px]">BRIDGE</span>
+                <div>
+                  <div class="font-medium text-white">VIA Labs Native USDM Bridge (Cardano &rarr; Midnight)</div>
+                  <div class="text-[11px] font-mono-code text-slate-500">State-Proof Settlement &bull; Zero Wrapped Custody</div>
+                </div>
+              </div>
+              <div class="text-right font-mono-code">
+                <div class="text-white cloakable">+10,000.00 USDM</div>
+                <div class="text-[10px] text-slate-500">Sponsored</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: PRIVATE LENDING -->
+      <section id="tab-lending" class="pc-tab hidden space-y-6">
+        <div>
+          <h1 class="font-display text-2xl font-bold text-white">Confidential Lending Vault</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Collateral size and liquidation threshold stay encrypted inside Compact ZK proofs—immune to stop-hunting.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 surface-card rounded-2xl p-6 space-y-5">
+            <div>
+              <div class="flex justify-between text-xs font-mono-code mb-2">
+                <span class="text-slate-400">SHIELDED COLLATERAL (sNIGHT)</span>
+                <span class="text-white font-bold cloakable" id="lendColLabel">12,000 sNIGHT ($18,000)</span>
+              </div>
+              <input type="range" id="lendColSlider" min="2000" max="50000" step="1000" value="12000" class="w-full accent-indigo-500" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono-code mb-2">
+                <span class="text-slate-400">TARGET BORROW LTV</span>
+                <span class="text-emerald-400 font-bold" id="lendLtvLabel">45% LTV (Safe)</span>
+              </div>
+              <input type="range" id="lendLtvSlider" min="15" max="75" step="5" value="45" class="w-full accent-emerald-400" />
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4 pt-2">
+              <div class="surface-inset rounded-xl p-4">
+                <span class="text-[10px] font-mono-code text-slate-400">CONFIDENTIAL CREDIT LINE</span>
+                <div class="mt-1 font-display text-2xl font-bold text-white cloakable" id="lendBorrowVal">$8,100 USDM</div>
+              </div>
+              <div class="surface-inset rounded-xl p-4 border-emerald-500/25">
+                <span class="text-[10px] font-mono-code text-emerald-300">LIQUIDATION PRICE (ENCRYPTED)</span>
+                <div class="mt-1 font-display text-2xl font-bold text-emerald-400 cloakable" id="lendLiqVal">$0.84 / NIGHT</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 surface-card rounded-2xl p-6 flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="text-xs font-mono-code uppercase text-indigo-300">On-Chain Visibility Audit</div>
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs flex justify-between">
+                <span class="text-slate-400">Collateral Balance</span>
+                <span class="text-emerald-400 font-mono-code">HIDDEN (ZK)</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs flex justify-between">
+                <span class="text-slate-400">Liquidation Price</span>
+                <span class="text-emerald-400 font-mono-code">HIDDEN (ZK)</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs flex justify-between">
+                <span class="text-slate-400">Protocol Solvency Proof</span>
+                <span class="text-sky-300 font-mono-code">PUBLICLY VERIFIED</span>
+              </div>
+            </div>
+            <button type="button" onclick="triggerProof('Open Confidential Loan Vault', 135)" class="mt-6 w-full py-3 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition">
+              Generate Solvency Proof &amp; Draw USDM
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ZSWAP OFFER DESK -->
+      <section id="tab-zswap" class="pc-tab hidden space-y-6">
+        <div>
+          <h1 class="font-display text-2xl font-bold text-white">Zswap Shielded Offer Desk</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Publish or fill atomic Zswap Offer Files across Midnight dApps with zero front-running.</p>
+        </div>
+        <div class="max-w-xl surface-card rounded-2xl p-6 space-y-4">
+          <div class="surface-inset rounded-xl p-4">
+            <div class="flex justify-between text-[11px] font-mono-code text-slate-400 mb-1">
+              <span>SELL (SHIELDED)</span>
+              <span class="cloakable">Avail: 24,480 USDM</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <input type="number" id="pcSwapIn" value="1000" class="bg-transparent text-2xl font-mono-code font-bold text-white focus:outline-none w-full" />
+              <span class="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-mono-code text-xs font-bold">USDM</span>
+            </div>
+          </div>
+          <div class="surface-inset rounded-xl p-4 border-emerald-500/25">
+            <div class="flex justify-between text-[11px] font-mono-code text-slate-400 mb-1">
+              <span>RECEIVE (ATOMIC UTXO)</span>
+              <span>Offer File Discovery: Celestia</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div id="pcSwapOut" class="text-2xl font-mono-code font-bold text-emerald-300">666.67</div>
+              <span class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono-code text-xs font-bold">sNIGHT</span>
+            </div>
+          </div>
+          <button type="button" onclick="triggerProof('Zswap Atomic Settlement', 110)" class="w-full py-3 rounded-xl text-xs font-semibold bg-indigo-500 hover:bg-indigo-400 text-white transition">
+            Prove &amp; Broadcast Zswap Offer File
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 4: PASSPORT & AI AGENTS -->
+      <section id="tab-passport" class="pc-tab hidden space-y-6">
+        <div>
+          <h1 class="font-display text-2xl font-bold text-white">Midnight Passport &amp; Companion Delegation</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Seedless passkey custody with strict cryptographic guardrails for delegated autonomous AI agents.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="surface-card rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold text-white">Yield Companion Agent #01</div>
+                <div class="text-[11px] font-mono-code text-slate-400">Alias: @abyssal-router.mn</div>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="accent-emerald-400 w-4 h-4" />
+              </label>
+            </div>
+            <div class="text-xs text-slate-400">Allowed Scope: <span class="text-slate-200">Zswap Rebalance &le; 500 USDM/day &bull; No Withdrawals</span></div>
+          </div>
+
+          <div class="surface-card rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold text-white">Compliance Attestor Agent</div>
+                <div class="text-[11px] font-mono-code text-slate-400">Scope: Selective Disclosure Only</div>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="accent-emerald-400 w-4 h-4" />
+              </label>
+            </div>
+            <div class="text-xs text-slate-400">Allowed Scope: <span class="text-slate-200">Prove Jurisdiction &amp; Solvency Thresholds (Read-Only)</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- COMMAND PALETTE MODAL (Ctrl+K) -->
+  <div id="cmdModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-24 px-4">
+    <div class="w-full max-w-lg surface-card rounded-2xl overflow-hidden border border-indigo-400/35">
+      <div class="px-4 py-3 border-b border-slate-800 flex items-center gap-3">
+        <span class="text-indigo-400 font-mono-code text-xs">&gt;_</span>
+        <input id="cmdInput" type="text" placeholder="Jump to module or run action..." class="w-full bg-transparent text-sm text-white focus:outline-none" />
+        <button type="button" id="closeCmdBtn" class="text-[10px] font-mono-code text-slate-400 px-2 py-1 rounded bg-slate-900">ESC</button>
+      </div>
+      <div class="p-2 text-xs space-y-1">
+        <button type="button" onclick="jumpTab('vault')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-500/20 text-slate-200">Go to Dual-Surface Vault</button>
+        <button type="button" onclick="jumpTab('lending')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-500/20 text-slate-200">Open Confidential Private Lending</button>
+        <button type="button" onclick="jumpTab('zswap')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-500/20 text-slate-200">Open Zswap Shielded Offer Desk</button>
+        <button type="button" onclick="jumpTab('passport')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-500/20 text-slate-200">Manage Midnight Passport &amp; AI Agents</button>
+        <button type="button" onclick="toggleCloak(); closeCmd();" class="w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-500/20 text-emerald-300">Toggle Privacy Shield Cloak (Shift+P)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navigation
+    function jumpTab(tabId) {
+      document.querySelectorAll('.pc-tab').forEach(t => t.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      document.querySelectorAll('.rail-btn').forEach(b => {
+        const active = b.dataset.tab === tabId;
+        b.className = active
+          ? 'rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-indigo-500/15 text-white border border-indigo-400/30'
+          : 'rail-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900/70 transition';
+      });
+      closeCmd();
+    }
+    document.querySelectorAll('.rail-btn').forEach(b => b.addEventListener('click', () => jumpTab(b.dataset.tab)));
+
+    // Privacy Cloak
+    let cloaked = false;
+    function toggleCloak() {
+      cloaked = !cloaked;
+      document.body.classList.toggle('cloaked', cloaked);
+      document.getElementById('pcCloakText').textContent = cloaked ? 'Cloak: ON' : 'Cloak: OFF';
+    }
+    document.getElementById('pcCloakBtn').addEventListener('click', toggleCloak);
+
+    // Command Palette
+    const cmdModal = document.getElementById('cmdModal');
+    const cmdInput = document.getElementById('cmdInput');
+    function openCmd() { cmdModal.classList.remove('hidden'); cmdInput.focus(); }
+    function closeCmd() { cmdModal.classList.add('hidden'); }
+    document.getElementById('openCmdBtn').addEventListener('click', openCmd);
+    document.getElementById('closeCmdBtn').addEventListener('click', closeCmd);
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmd(); }
+      if (e.key === 'Escape') closeCmd();
+      if (e.shiftKey && e.key.toLowerCase() === 'p') toggleCloak();
+    });
+
+    // DUST & Local ZK Prover Simulation
+    let dust = 10750;
+    const maxDust = 12500;
+    function renderDust() {
+      const pct = Math.round((dust / maxDust) * 100);
+      document.getElementById('pcDustPct').textContent = pct + '%';
+      document.getElementById('pcDustBar').style.width = pct + '%';
+      document.getElementById('pcDustNum').textContent = `${dust.toLocaleString()} / ${maxDust.toLocaleString()}`;
+      document.getElementById('kpiDust').innerHTML = `${dust.toLocaleString()} <span class="text-sm font-mono-code">DUST</span>`;
+    }
+
+    function triggerProof(label, cost) {
+      jumpTab('vault');
+      const banner = document.getElementById('proverBanner');
+      const bar = document.getElementById('proverProgress');
+      const title = document.getElementById('proverTitle');
+      const state = document.getElementById('proverState');
+      banner.classList.remove('hidden');
+      title.textContent = `Proving "${label}" locally...`;
+      state.textContent = 'PROVING • 12 Threads';
+      state.className = 'text-amber-300';
+      bar.style.width = '25%';
+      setTimeout(() => { bar.style.width = '78%'; }, 350);
+      setTimeout(() => {
+        bar.style.width = '100%';
+        dust = Math.max(0, dust - cost);
+        renderDust();
+        title.textContent = `Verified & Settled: ${label} (-${cost} DUST)`;
+        state.textContent = 'IDLE • 12 Threads';
+        state.className = 'text-emerald-400';
+
+        const row = document.createElement('div');
+        row.className = 'px-5 py-3.5 flex items-center justify-between gap-4 bg-indigo-500/5';
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 font-mono-code text-[10px]">ZK-TX</span>
+            <div>
+              <div class="font-medium text-white">${label}</div>
+              <div class="text-[11px] font-mono-code text-slate-500">Just now &bull; Local WASM Proof Verified</div>
+            </div>
+          </div>
+          <div class="text-right font-mono-code">
+            <div class="text-emerald-400">CONFIRMED</div>
+            <div class="text-[10px] text-slate-500">${cost} DUST</div>
+          </div>`;
+        document.getElementById('pcLedgerBody').prepend(row);
+      }, 950);
+    }
+    document.getElementById('runZkProofBtn').addEventListener('click', () => triggerProof('Shielded Zswap Transfer', 115));
+
+    // Passive DUST recharge
+    setInterval(() => { if (dust < maxDust) { dust = Math.min(maxDust, dust + 4); renderDust(); } }, 3500);
+
+    // Lending Calc
+    const lendCol = document.getElementById('lendColSlider');
+    const lendLtv = document.getElementById('lendLtvSlider');
+    function updateLending() {
+      const col = parseInt(lendCol.value, 10);
+      const ltv = parseInt(lendLtv.value, 10);
+      const usdCol = col * 1.5;
+      const borrow = Math.round(usdCol * (ltv / 100));
+      const liq = (borrow / (col * 0.80)).toFixed(2);
+      document.getElementById('lendColLabel').textContent = `${col.toLocaleString()} sNIGHT ($${usdCol.toLocaleString()})`;
+      document.getElementById('lendLtvLabel').textContent = `${ltv}% LTV (${ltv <= 50 ? 'Safe' : 'Moderate'})`;
+      document.getElementById('lendBorrowVal').textContent = `$${borrow.toLocaleString()} USDM`;
+      document.getElementById('lendLiqVal').textContent = `$${liq} / NIGHT`;
+    }
+    lendCol.addEventListener('input', updateLending);
+    lendLtv.addEventListener('input', updateLending);
+
+    // Zswap Calc
+    document.getElementById('pcSwapIn').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value) || 0;
+      document.getElementById('pcSwapOut').textContent = (v / 1.5).toFixed(2);
+    });
+  </script>
+</body>
+</html>
