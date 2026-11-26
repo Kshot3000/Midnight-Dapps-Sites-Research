@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight-Dapps-Sites-Research — UI/UX Design Suite v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/midnight-tokens.css" />
+</head>
+<body class="midnight-mesh bg-hairline-grid min-h-screen flex flex-col text-slate-100">
+  <header class="border-b border-slate-800/80 bg-[#05070e]/90 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-sky-400 flex items-center justify-center text-slate-950 font-display font-bold text-sm">M</div>
+        <div>
+          <div class="font-display font-bold text-sm sm:text-base">MIDNIGHT UI/UX SUITE <span class="text-indigo-400">v2</span></div>
+          <div class="text-[11px] font-mono-code text-slate-400">Kshot3000/Midnight-Dapps-Sites-Research</div>
+        </div>
+      </div>
+
+      <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium">
+        <button type="button" data-src="website/index.html" class="hub-tab px-3.5 py-1.5 rounded-lg bg-indigo-500 text-white transition">Website Portal</button>
+        <button type="button" data-src="desktop-app/index.html" class="hub-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">PC Desktop App</button>
+        <button type="button" data-src="mobile-app/index.html" class="hub-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Mobile App</button>
+      </div>
+
+      <a id="openDirectLink" href="website/index.html" target="_blank" class="px-3.5 py-1.5 rounded-lg text-xs font-mono-code bg-slate-900 border border-slate-700 hover:border-indigo-400 text-slate-200 transition">
+        Open Standalone &nearr;
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto flex flex-col">
+    <div class="flex-1 surface-card rounded-3xl overflow-hidden border border-indigo-500/25 min-h-[78vh]">
+      <iframe id="previewFrame" src="website/index.html" class="w-full h-full min-h-[78vh] border-0 bg-[#05070e]"></iframe>
+    </div>
+  </main>
+
+  <script>
+    const frame = document.getElementById('previewFrame');
+    const direct = document.getElementById('openDirectLink');
+    document.querySelectorAll('.hub-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.hub-tab').forEach(b => {
+          b.className = 'hub-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+        });
+        btn.className = 'hub-tab px-3.5 py-1.5 rounded-lg bg-indigo-500 text-white transition';
+        frame.src = btn.dataset.src;
+        direct.href = btn.dataset.src;
+      });
+    });
+  </script>
+</body>
+</html>

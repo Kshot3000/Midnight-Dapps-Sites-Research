@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Midnight Pocket — Native Mobile App GUI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/midnight-tokens.css" />
+  <style>
+    .phone-shell {
+      width: 390px;
+      height: 820px;
+      max-width: 100vw;
+      max-height: 94vh;
+      border-radius: 48px;
+      box-shadow: 0 0 0 11px #0d111e, 0 0 0 13px rgba(99, 102, 241, 0.28), 0 36px 90px -10px rgba(0, 0, 0, 0.95);
+    }
+    @media (max-width: 460px) {
+      .phone-shell { width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; box-shadow: none; }
+      body { padding: 0 !important; }
+    }
+  </style>
+</head>
+<body class="midnight-mesh min-h-screen flex flex-col items-center justify-center p-4 text-slate-100">
+
+  <!-- External Desktop Helper Link -->
+  <div class="hidden sm:flex items-center gap-4 mb-4 text-xs font-mono-code text-slate-400">
+    <a href="../index.html" class="hover:text-white">&larr; Suite Hub</a>
+    <span>&bull;</span>
+    <span>Midnight Mobile SDK Prototype (On-Device Proving)</span>
+  </div>
+
+  <!-- Native Mobile Viewport -->
+  <div class="phone-shell bg-[#060913] overflow-hidden flex flex-col relative border border-slate-800/80">
+    <!-- iOS/Android Status Bar -->
+    <div class="px-7 pt-3.5 pb-2 flex items-center justify-between text-[11px] font-mono-code text-slate-300 shrink-0">
+      <span>9:41</span>
+      <div class="w-24 h-5 rounded-full bg-black border border-slate-800/90 flex items-center justify-end px-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+      </div>
+      <span>5G &bull; 98%</span>
+    </div>
+
+    <!-- App Header -->
+    <div class="px-5 py-2.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-sky-400 flex items-center justify-center text-slate-950 font-display font-bold text-xs">MP</div>
+        <div>
+          <div class="text-[10px] font-mono-code text-indigo-300">MIDNIGHT PASSPORT</div>
+          <div class="text-xs font-semibold text-white">@kshot.mn &bull; Passkey</div>
+        </div>
+      </div>
+      <button type="button" id="mobCloakBtn" class="px-2.5 py-1 rounded-full text-[10px] font-mono-code bg-emerald-500/12 text-emerald-300 border border-emerald-500/30">
+        HIDE $
+      </button>
+    </div>
+
+    <!-- Scrollable Screen Area -->
+    <div class="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+
+      <!-- SCREEN 1: VAULT -->
+      <div id="m-vault" class="m-screen space-y-4">
+        <!-- Premium Dual-Surface Card -->
+        <div class="p-5 rounded-3xl bg-gradient-to-br from-[#161e3a] via-[#0d1328] to-[#080c18] border border-indigo-400/25 shadow-xl">
+          <div class="flex items-center justify-between text-[10px] font-mono-code text-indigo-200/80">
+            <span>COMBINED VALUE</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">SHIELDED ON</span>
+          </div>
+          <div class="mt-2 font-display text-3xl font-bold tracking-tight text-white cloakable">$31,980.00</div>
+
+          <div class="mt-4 grid grid-cols-2 gap-2.5">
+            <div class="p-3 rounded-2xl bg-[#060913]/80 border border-indigo-500/20">
+              <div class="text-[9px] font-mono-code text-slate-400">PUBLIC NIGHT</div>
+              <div class="mt-0.5 text-sm font-mono-code font-bold text-white">5,000</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-[#060913]/80 border border-emerald-500/25">
+              <div class="text-[9px] font-mono-code text-emerald-300">SHIELDED USDM</div>
+              <div class="mt-0.5 text-sm font-mono-code font-bold text-emerald-300 cloakable">24,480</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thumb-Zone Action Row -->
+        <div class="grid grid-cols-4 gap-2 text-center text-[11px] font-medium">
+          <button type="button" onclick="openMobileTab('swap')" class="py-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-400/40 flex flex-col items-center gap-1.5">
+            <span class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold">&harr;</span>
+            <span>Zswap</span>
+          </button>
+          <button type="button" onclick="runMobileProof()" class="py-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-emerald-400/40 flex flex-col items-center gap-1.5">
+            <span class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">&#9733;</span>
+            <span>Prove</span>
+          </button>
+          <button type="button" onclick="openMobileTab('passport')" class="py-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-sky-400/40 flex flex-col items-center gap-1.5">
+            <span class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold">ID</span>
+            <span>Passport</span>
+          </button>
+          <button type="button" onclick="openMobileTab('dapps')" class="py-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-400/40 flex flex-col items-center gap-1.5">
+            <span class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">&#9672;</span>
+            <span>dApps</span>
+          </button>
+        </div>
+
+        <!-- Renewable DUST Pill -->
+        <div class="p-4 rounded-2xl bg-slate-900/75 border border-amber-500/20">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="font-mono-code text-amber-300 font-semibold">DUST Execution Fuel</span>
+            <span class="font-mono-code text-[11px] text-amber-200" id="mobDustVal">10,750 DUST</span>
+          </div>
+          <div class="h-2 rounded-full bg-slate-950 overflow-hidden">
+            <div id="mobDustBar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all" style="width:86%"></div>
+          </div>
+          <div class="mt-2 flex justify-between text-[10px] font-mono-code text-slate-400">
+            <span>Local Mobile SDK Prover</span>
+            <span class="text-emerald-400">0 Bytes Leaked</span>
+          </div>
+        </div>
+
+        <!-- On-Device Prover Toast -->
+        <div id="mobProofToast" class="hidden p-3.5 rounded-2xl bg-indigo-500/15 border border-indigo-400/35 text-xs font-mono-code text-indigo-200"></div>
+
+        <!-- Recent Activity List -->
+        <div class="space-y-2">
+          <div class="px-1 text-[10px] font-mono-code uppercase tracking-wider text-slate-500">Recent Proofs</div>
+          <div class="p-3.5 rounded-2xl bg-slate-900/65 border border-slate-800/80 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-semibold text-white">Zswap Shielded Settlement</div>
+              <div class="text-[10px] font-mono-code text-slate-400">On-device proof &bull; 110 DUST</div>
+            </div>
+            <div class="text-xs font-mono-code text-emerald-400 cloakable">+420 sNIGHT</div>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-slate-900/65 border border-slate-800/80 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-semibold text-white">Age &amp; Jurisdiction Attestation</div>
+              <div class="text-[10px] font-mono-code text-slate-400">Selective Disclosure &bull; Sponsored</div>
+            </div>
+            <div class="text-xs font-mono-code text-sky-300">VERIFIED</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: MOBILE ZSWAP -->
+      <div id="m-swap" class="m-screen hidden space-y-3.5">
+        <div class="text-sm font-display font-bold text-white px-1">Zswap Shielded Trade</div>
+        <div class="p-4 rounded-2xl bg-slate-900/85 border border-slate-800">
+          <div class="text-[10px] font-mono-code text-slate-400 mb-1">PAY (SHIELDED)</div>
+          <div class="flex items-center justify-between">
+            <input type="number" id="mobSwapIn" value="250" class="bg-transparent text-2xl font-mono-code font-bold text-white w-full focus:outline-none" />
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-mono-code">USDM</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/85 border border-emerald-500/25">
+          <div class="text-[10px] font-mono-code text-emerald-300 mb-1">RECEIVE (PRIVATE UTXO)</div>
+          <div class="flex items-center justify-between">
+            <div id="mobSwapOut" class="text-2xl font-mono-code font-bold text-emerald-300">166.67</div>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-mono-code">sNIGHT</span>
+          </div>
+        </div>
+        <button type="button" onclick="runMobileProof('Zswap Offer Settled on Device!')" class="w-full py-3.5 rounded-2xl text-xs font-semibold bg-indigo-500 text-white shadow-lg">
+          Prove Locally &amp; Swap
+        </button>
+      </div>
+
+      <!-- SCREEN 3: PASSPORT & AGENTS -->
+      <div id="m-passport" class="m-screen hidden space-y-3">
+        <div class="text-sm font-display font-bold text-white px-1">Passport &amp; AI Companions</div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-white">Seedless Passkey Recovery</div>
+            <div class="text-[10px] text-slate-400">Hardware enclave active</div>
+          </div>
+          <span class="text-[10px] font-mono-code text-emerald-400">ACTIVE</span>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-white">Yield Companion Agent</div>
+            <div class="text-[10px] text-slate-400">Cap: 500 USDM/day</div>
+          </div>
+          <input type="checkbox" checked class="accent-emerald-400 w-4 h-4" />
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-white">Hide PII on KYC Checks</div>
+            <div class="text-[10px] text-slate-400">Boolean ZK proofs only</div>
+          </div>
+          <input type="checkbox" checked class="accent-indigo-400 w-4 h-4" />
+        </div>
+      </div>
+
+      <!-- SCREEN 4: DAPPS -->
+      <div id="m-dapps" class="m-screen hidden space-y-2.5">
+        <div class="text-sm font-display font-bold text-white px-1">Midnight Mobile dApps</div>
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+          <div><div class="text-xs font-semibold text-white">Private Lending</div><div class="text-[10px] text-slate-400">Hidden liquidation price</div></div>
+          <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono-code bg-indigo-500/20 text-indigo-300">Open</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+          <div><div class="text-xs font-semibold text-white">Noctis DarkVeil</div><div class="text-[10px] text-slate-400">Bot-shielded launches</div></div>
+          <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono-code bg-emerald-500/20 text-emerald-300">Open</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+          <div><div class="text-xs font-semibold text-white">Ascend ZK Perps</div><div class="text-[10px] text-slate-400">Private cross-chain margin</div></div>
+          <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono-code bg-sky-500/20 text-sky-300">Open</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Native Bottom Navigation Bar -->
+    <nav class="px-4 py-3 bg-[#080c18] border-t border-slate-800/80 grid grid-cols-4 text-[10px] font-mono-code shrink-0">
+      <button type="button" data-mtab="vault" class="m-nav-btn text-indigo-400 font-bold flex flex-col items-center gap-1"><span>&#9679;</span>Vault</button>
+      <button type="button" data-mtab="swap" class="m-nav-btn text-slate-500 flex flex-col items-center gap-1"><span>&#8646;</span>Zswap</button>
+      <button type="button" data-mtab="passport" class="m-nav-btn text-slate-500 flex flex-col items-center gap-1"><span>&#9670;</span>Passport</button>
+      <button type="button" data-mtab="dapps" class="m-nav-btn text-slate-500 flex flex-col items-center gap-1"><span>&#9638;</span>dApps</button>
+    </nav>
+  </div>
+
+  <script>
+    function openMobileTab(id) {
+      document.querySelectorAll('.m-screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('m-' + id).classList.remove('hidden');
+      document.querySelectorAll('.m-nav-btn').forEach(b => {
+        b.className = b.dataset.mtab === id
+          ? 'm-nav-btn text-indigo-400 font-bold flex flex-col items-center gap-1'
+          : 'm-nav-btn text-slate-500 flex flex-col items-center gap-1';
+      });
+    }
+    document.querySelectorAll('.m-nav-btn').forEach(b => b.addEventListener('click', () => openMobileTab(b.dataset.mtab)));
+
+    let mobCloaked = false;
+    document.getElementById('mobCloakBtn').addEventListener('click', (e) => {
+      mobCloaked = !mobCloaked;
+      document.body.classList.toggle('cloaked', mobCloaked);
+      e.currentTarget.textContent = mobCloaked ? 'SHOW $' : 'HIDE $';
+    });
+
+    let mDust = 10750;
+    function runMobileProof(msg) {
+      openMobileTab('vault');
+      const toast = document.getElementById('mobProofToast');
+      toast.classList.remove('hidden');
+      toast.textContent = 'Generating ZK-SNARK locally on device...';
+      setTimeout(() => {
+        mDust = Math.max(0, mDust - 110);
+        document.getElementById('mobDustVal').textContent = mDust.toLocaleString() + ' DUST';
+        document.getElementById('mobDustBar').style.width = Math.round((mDust / 12500) * 100) + '%';
+        toast.textContent = msg || 'Proof verified locally! (-110 DUST, 0 external servers)';
+      }, 750);
+    }
+
+    document.getElementById('mobSwapIn').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value) || 0;
+      document.getElementById('mobSwapOut').textContent = (v / 1.5).toFixed(2);
+    });
+  </script>
+</body>
+</html>
