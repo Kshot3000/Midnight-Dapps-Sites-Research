@@ -73,7 +73,7 @@ fun ActivityScreen(state: ProverUiState, vm: ProverViewModel) {
                     MidnightChip("$proven proven", MidnightPalette.ProofGlow)
                     MidnightChip("${state.history.size - proven} not proven", MidnightPalette.Moonlight)
                 }
-                state.history.forEach { HistoryRow(it) }
+                state.history.forEach { HistoryRow(it, state.settings.privacyCloak) }
                 GhostButton("Clear history", onClick = { confirmClear = true }, icon = Icons.Filled.Delete, accent = MidnightPalette.ErrorRose)
             }
         },
@@ -92,7 +92,7 @@ fun ActivityScreen(state: ProverUiState, vm: ProverViewModel) {
 }
 
 @Composable
-private fun HistoryRow(r: JobRecord) {
+private fun HistoryRow(r: JobRecord, cloaked: Boolean) {
     val context = LocalContext.current
     val whenText = remember(r.finishedAtMillis) {
         val pattern = if (DateUtils.isToday(r.finishedAtMillis)) (if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a")
@@ -109,7 +109,7 @@ private fun HistoryRow(r: JobRecord) {
                 contentDescription = null, tint = color, modifier = Modifier.size(24.dp)
             )
             Column(Modifier.weight(1f)) {
-                Text(r.circuit.ifEmpty { r.txPreview }, style = MaterialTheme.typography.titleMedium, color = MidnightPalette.Starlight)
+                Text(r.circuit.ifEmpty { HexCloak.label(r.txPreview, cloaked) }, style = MaterialTheme.typography.titleMedium, color = MidnightPalette.Starlight)
                 Text("$whenText · ${JobHistoryFormat.formatDuration(r.durationSeconds)}", style = MaterialTheme.typography.bodySmall, color = MidnightPalette.Moonlight)
             }
             MidnightChip(r.outcome, color)
@@ -237,6 +237,7 @@ fun SettingsScreen(state: ProverUiState, vm: ProverViewModel) {
                 HorizontalDivider(color = MidnightPalette.Hairline)
                 SwitchRow("Keep screen on while proving", "Stops the screen from sleeping during a proof.", state.settings.keepScreenOn, vm::setKeepScreenOn)
                 SwitchRow("Reduce motion", "Freezes the starfield and pulsing animations. The system's \"Remove animations\" setting also does this.", state.settings.reduceMotion, vm::setReduceMotion)
+                SwitchRow("Privacy cloak", "Masks proof and payload hex on screen — for screenshots and screen sharing. Copy, share and save still use the real proof.", state.settings.privacyCloak, vm::setPrivacyCloak)
             }
             OffPhoneCard(state, vm)
         },
