@@ -57,7 +57,9 @@ its own image.
 bind-address option: its `--help` lists only `--port`, `--verbose`,
 `--job-capacity`, `--num-workers`, `--job-timeout` and
 `--no-fetch-params`, and no environment variable or doc covers a bind
-address. It listens on `0.0.0.0` — every network interface. This
+address. Its source binds `0.0.0.0` — every network interface
+([`lib.rs:54`](https://github.com/midnightntwrk/midnight-ledger/blob/proof-server-9.0.2/proof-server/src/lib.rs#L54)),
+with no authentication and no TLS (Bob's GROK-16 audit, D2). This
 script does **not** ship a bind shim; there is nothing to make it
 loopback-only yet.
 

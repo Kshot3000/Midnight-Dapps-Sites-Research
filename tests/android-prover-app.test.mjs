@@ -56,12 +56,11 @@ test("cleartext HTTP is allowed only to this phone (P0-5)", () => {
   assert.doesNotMatch(manifest, /usesCleartextTraffic="true"/);
 });
 
-test("the app expects proof server 9.0.2 and the bundled sample payload is the real 1,509-byte fixture", () => {
+test("the app expects proof server 9.0.2 and the test fixture is the real 1,509-byte DUST payload", () => {
   assert.match(read(join(app, "app/src/main/java/tech/kshot/midnightprover/ProofJob.kt")), /EXPECTED_SERVER_VERSION = "9\.0\.2"/);
-  const hex = read(join(app, "app/src/main/assets/sample-dust-spend-payload.hex")).trim();
+  const hex = read(join(app, "app/src/test/resources/fixtures/dust-spend-payload.hex")).trim();
   assert.equal(hex.length / 2, 1509);
   assert.ok(Buffer.from(hex, "hex").toString("latin1").includes("midnight/dust/spend"));
-  assert.equal(hex, read(join(app, "app/src/test/resources/fixtures/dust-spend-payload.hex")).trim());
 });
 
 test("the app is labelled testnet only and doesn't overclaim (GROK-17)", () => {
