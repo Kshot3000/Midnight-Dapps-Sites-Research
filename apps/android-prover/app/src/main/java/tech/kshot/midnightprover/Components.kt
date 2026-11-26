@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -268,6 +269,7 @@ fun ScreenHeader(overline: String, title: String, subtitle: String? = null) {
         Text(title, style = MaterialTheme.typography.headlineLarge, color = MidnightPalette.Starlight,
             modifier = Modifier.semantics { heading() })
         if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MidnightPalette.Moonlight)
+        MidnightChip(Copy.TESTNET_CHIP, MidnightPalette.WarningAmber, Modifier.testTag("testnet-chip"))
     }
 }
 

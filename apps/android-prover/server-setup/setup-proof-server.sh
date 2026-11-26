@@ -10,11 +10,11 @@
 # amd64 — the flow is identical, only the image architecture differs.
 #
 # Usage:
-#   ./setup-proof-server.sh [--arch arm64|amd64] [--dir PATH] [--start]
+#   ./setup-proof-server.sh [--arch arm64|amd64] [--dir PATH] [--port N] [--start]
 #   ./setup-proof-server.sh --check-exposure [PORT] [TCP_TABLE_FILE ...]
 #
-# Defaults: arch = arm64 (phones), dir = ~/.midnight-proof-server.
-# --start launches the server after install and verifies /version.
+# Defaults: arch = arm64 (phones), dir = ~/.midnight-proof-server, port = 6300.
+# --start launches the server after install and verifies /version on --port.
 #
 # Provenance: every byte comes from the official Docker Hub image
 # midnightntwrk/proof-server:9.0.2. Nothing is rebuilt or patched; the
@@ -59,9 +59,15 @@ WARNING="WARNING: the proof server on port $PORT is reachable from other devices
 
 readable=0
 addrs=""
+need_tcp6=0
+tcp6_readable=0
 for f in "$@"; do
-  [ -r "$f" ] || continue
+  case "$f" in *tcp6*|*TCP6*) need_tcp6=1 ;; esac
+  if [ ! -r "$f" ]; then
+    continue
+  fi
   readable=1
+  case "$f" in *tcp6*|*TCP6*) tcp6_readable=1 ;; esac
   # Columns: sl local_address rem_address st ...; st 0A = LISTEN. Hex is upper or lower case.
   found="$(awk -v port="$PORT_HEX" '
     NR > 1 {
@@ -73,6 +79,13 @@ done
 
 if [ "$readable" = 0 ]; then
   echo "!! Could not read $* — can't verify where port $PORT listens."
+  echo "!! $WARNING"
+  exit 3
+fi
+# Joe nit 8: a missing IPv6 table can hide a listener on ::, so loopback on
+# IPv4 alone is never enough to say OK when tcp6 was requested but unreadable.
+if [ "$need_tcp6" = 1 ] && [ "$tcp6_readable" = 0 ]; then
+  echo "!! Could not read the IPv6 table (tcp6) — can't verify where port $PORT listens."
   echo "!! $WARNING"
   exit 3
 fi
@@ -124,15 +137,23 @@ TAG="9.0.2"
 ARCH="arm64"
 WORK="$HOME/.midnight-proof-server"
 START=0
+PORT=6300
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --arch) ARCH="$2"; shift 2 ;;
     --dir) WORK="$2"; shift 2 ;;
+    --port) PORT="$2"; shift 2 ;;
     --start) START=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+case "$PORT" in
+  ''|*[!0-9]*) echo "invalid --port: $PORT" >&2; exit 2 ;;
+esac
+if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+  echo "invalid --port: $PORT" >&2; exit 2
+fi
 
 case "$ARCH" in
   arm64) DOCKER_ARCH="arm64"; LOADER_NAME="ld-linux-aarch64.so.1" ;;
@@ -249,17 +270,17 @@ echo "== exposure check: $CHECKER [PORT]"
 
 # --- 7. Optionally start + verify ---------------------------------------
 if [ "$START" = "1" ]; then
-  echo "== starting server on port 6300 (log: $WORK/server.log)..."
-  setsid nohup "$LAUNCHER" > "$WORK/server.log" 2>&1 < /dev/null &
+  echo "== starting server on port $PORT (log: $WORK/server.log)..."
+  setsid nohup "$LAUNCHER" --port "$PORT" > "$WORK/server.log" 2>&1 < /dev/null &
   for i in $(seq 1 30); do
     sleep 2
-    V="$(curl -s -m 3 http://127.0.0.1:6300/version || true)"
+    V="$(curl -s -m 3 "http://127.0.0.1:${PORT}/version" || true)"
     if [ "$V" = "$TAG" ]; then
       echo "== proof server is LIVE: /version = $V"
-      curl -s -m 3 http://127.0.0.1:6300/ready || true
+      curl -s -m 3 "http://127.0.0.1:${PORT}/ready" || true
       echo
-      echo "== where is port 6300 listening? (reads /proc/net/tcp and tcp6)"
-      "$CHECKER" 6300 || true
+      echo "== where is port $PORT listening? (reads /proc/net/tcp and tcp6)"
+      "$CHECKER" "$PORT" || true
       exit 0
     fi
   done

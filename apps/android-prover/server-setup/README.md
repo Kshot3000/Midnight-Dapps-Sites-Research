@@ -75,7 +75,7 @@ listening (`check-exposure.sh` in the install folder; run it yourself
 any time with `~/.midnight-proof-server/check-exposure.sh 6300`).
 Anything other than loopback only (`127.0.0.1` / `::1`) prints a loud
 warning — and so does a table it can't read or a port it can't find, so
-a failed check can never look safe. Verified on the build box only (it
+a failed check can never look safe — including when `/proc/net/tcp6` can't be read even if IPv4 looks like loopback. Verified on the build box only (it
 correctly reported `0.0.0.0`); **not yet run on a phone**, where Android
 may hide `/proc/net` from apps — in that case it warns that it couldn't
 verify.
@@ -86,13 +86,19 @@ verify.
 ./setup-proof-server.sh --arch amd64 --start
 ```
 
-Same flow, amd64 image. The app does **not** use a server off this phone
-by default, because the proving payload contains your private proof
-inputs. To use one anyway: on the app's **Server** tab, turn on **Allow a
-server off this phone** (read the warning), then enter an **https://** URL — the app
-refuses plain http to anything except 127.0.0.1/localhost. Put the server
-behind a TLS reverse proxy you control; the proof server itself serves
-plain http only.
+Same flow, amd64 image. The installer also accepts `--port N` (default
+6300); `--start` launches on that port and runs the listen-address check
+against it.
+
+The app does **not** use a server off this phone by default, because
+the proving payload contains your private proof inputs. Kyle's rule:
+**https is required for every server off the phone, LAN included.** To
+use one: on the app's **Server** tab, turn on **Allow a server off this
+phone** (read the warning), then enter an **https://** URL — the app
+refuses plain http to anything except 127.0.0.1, localhost and ::1.
+Proof server 9.0.2 only speaks plain http, so a LAN (or cloud) server
+must sit behind a TLS reverse proxy you control; there is no https
+option on the proof server itself.
 
 ## Verified status
 

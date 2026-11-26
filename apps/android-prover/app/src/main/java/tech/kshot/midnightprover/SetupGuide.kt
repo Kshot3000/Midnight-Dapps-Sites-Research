@@ -37,7 +37,7 @@ object SetupGuide {
         ),
         Step(
             "Connect this app",
-            "The app looks for the server at http://127.0.0.1:6300 on this phone. Open the Server tab and tap Check server."
+            "The app looks for the server reachable at http://127.0.0.1:6300 on this phone (the server itself listens on every interface). Open the Server tab and tap Check server."
         )
     )
 

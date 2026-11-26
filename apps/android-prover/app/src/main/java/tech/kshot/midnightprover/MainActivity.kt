@@ -193,7 +193,7 @@ fun ProverApp(vm: ProverViewModel, state: ProverUiState, initialTab: Tab = Tab.P
                                 NavigationBarItem(
                                     selected = tab == t,
                                     onClick = { tab = t },
-                                    icon = { Icon(t.icon, contentDescription = null) },
+                                    icon = { Icon(t.icon, contentDescription = t.description) },
                                     label = { Text(t.label) },
                                     modifier = Modifier.testTag("tab-${t.name}"),
                                     colors = NavigationBarItemDefaults.colors(
@@ -219,7 +219,7 @@ fun ProverApp(vm: ProverViewModel, state: ProverUiState, initialTab: Tab = Tab.P
                                 NavigationRailItem(
                                     selected = tab == t,
                                     onClick = { tab = t },
-                                    icon = { Icon(t.icon, contentDescription = null) },
+                                    icon = { Icon(t.icon, contentDescription = t.description) },
                                     label = { Text(t.label) },
                                     modifier = Modifier.testTag("tab-${t.name}"),
                                     colors = NavigationRailItemDefaults.colors(

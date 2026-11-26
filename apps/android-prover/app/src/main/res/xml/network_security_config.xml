@@ -4,11 +4,15 @@
   witness data. Plain http is allowed ONLY to this phone, where the Route 3
   proof server runs. Any server off the phone must use https (and the user
   must opt in on the Server tab).
+
+  Joe nit 1: the host list here must stay in lockstep with
+  ProofJobInput.LOOPBACK_HOSTS (127.0.0.1, localhost, ::1).
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false" />
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">127.0.0.1</domain>
         <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">::1</domain>
     </domain-config>
 </network-security-config>

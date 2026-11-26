@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.4.0)
+# Midnight Prover — Android app (v0.5.0)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -7,6 +7,9 @@ that server on the phone itself; that phone run hasn't happened yet.
 Mission context: help take the Midnight ZK prover mobile, building on the
 same proof-server line this team verified on Windows (Proof Station) and
 in the cloud.
+
+This is the Fold7 sideload build (versionCode 6). Sideloading and the
+first on-device run stay the owner's supervised step.
 
 ## Design — Route 3 (CLAUDE-AP-1 verdict)
 
@@ -28,15 +31,12 @@ via `POST /prove`, whose body is the raw serialized proving payload — a
 tuple, exactly what Midnight.js and the wallet SDK send — and whose
 response is raw proof bytes headed `midnight:proof-versioned:`.
 Midnight's own local-proving guide marks `/prove-tx` "Deprecated.
-Midnight.js doesn't use it." In the verification run, a real 1,509-byte
-DUST-spend payload captured from a live wallet session was proven by
-the stock server in 2.56 s (sandbox CPU — not a phone measurement),
-returning a 2,940-byte proof. The app now speaks this protocol:
-payloads and proofs are handled as hex in the UI, proofs can be copied
-out, in-flight proves can be cancelled, failures are classified
+Midnight.js doesn't use it." The app speaks this protocol: payloads and
+proofs are handled as hex in the UI, proofs can be copied, shared or
+saved, in-flight proves can be cancelled, and failures are classified
 (unreachable / timed out / queue full 429 / busy 503 / server-rejected
-400 with the server's own message / cancelled), and the server URL, the
-off-phone opt-in and the last 50 jobs are kept between launches.
+400 with the server's own message, stripped of non-printable characters /
+cancelled).
 
 GROK-17 ships a real proving payload as the test fixture
 (`app/src/test/resources/fixtures/dust-spend-payload.hex`, 1,509 bytes,
@@ -48,37 +48,77 @@ the v1 deployment runs the official **arm64** proof-server build inside a
 Linux environment on the phone (e.g. a Termux/proot Debian), reached by
 this app at `http://127.0.0.1:6300`. The engine behind that interface is
 swappable — a future native route can replace it without changing the app.
+The server listens on `0.0.0.0`; the app describes it as **reachable at**
+`127.0.0.1`, not as starting only on loopback.
 
-**Privacy (v0.4.0).** Proving payloads carry private witness data, so
-plain http is allowed **only to this phone** (`127.0.0.1` / `localhost`,
-enforced by `res/xml/network_security_config.xml`). A server off the
-phone needs an explicit opt-in on the Server tab, behind a warning that
-private inputs leave the phone, and must use **https**.
+**Privacy.** Proving payloads carry private witness data, so plain http
+is allowed **only to this phone** (`127.0.0.1`, `localhost`, and `::1`,
+enforced by `res/xml/network_security_config.xml` in lockstep with the
+app's on-phone check). A server off the phone — **LAN included** — needs
+an explicit opt-in on the Server tab, behind a warning that private
+inputs leave the phone, and must use **https**. Proof server 9.0.2 only
+speaks plain http, so a LAN (or cloud) server must sit behind a TLS
+reverse proxy; there is no https mode in 9.0.2 itself.
+
+The app stores no cloud backup (`android:allowBackup="false"`, with
+`dataExtractionRules` / `fullBackupContent` excluding app data).
+
+## What v0.5.0 adds (GROK-18)
+
+- Job flow: Paste or Open file, a payload summary, a progress track, and
+  a result card with Copy, Share and Save.
+- Fold7 two-pane layout with a navigation rail (window size classes).
+- First-run onboarding that walks through server-setup.
+- Auto-polling server status card: Online, Busy, Wrong version,
+  Unencrypted, Timeout, and Unreachable (a timed-out check is a timeout,
+  not unreachable).
+- Foreground service with a notification and a Cancel action while
+  proving; the job is restored after process death.
+- Splash screen API, edge-to-edge, and motion that respects
+  reduced-motion.
+- About / Tip sheet with both tip addresses exact, the Tip wording,
+  @kshot9000, and the independence line.
+- TalkBack labels on the tab icons, live announcements, a starfield that
+  pauses during proofs, and "Check server" no longer hiding the proof.
+- Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
 
 ## Honest status
 
 - **Not yet benchmarked on a phone.** No proving-time, thermal, or battery
   numbers exist for on-device proving, and this app claims none. The first
   device measurements will come from a supervised run on the owner's
-  phone (a later, owner-gated step).
+  phone (a later, owner-gated step). Timings below are from the build box.
 - The proof server fetches the public proving parameters from
-  `srs.midnight.network` on first boot (the k=10–15 files alone are about
-  12.4 MB; the full download hasn't been measured). Use Wi-Fi.
-- **Wi-Fi warning: port 6300 is open to your network.** Proof server
-  9.0.2 has no bind-address option and listens on `0.0.0.0` (every
+  `srs.midnight.network` on first boot. On this build box a first start
+  of 9.0.2 landed about 33 MB in the params cache (k=10–15, plus proving
+  and verifying keys and ZKIR sources). Use Wi-Fi. A phone's first-boot
+  download has not been measured.
+- **Wi-Fi warning: the proof-server port is open to your network.** Proof
+  server 9.0.2 has no bind-address option and listens on `0.0.0.0` (every
   interface), so anyone on the same Wi-Fi can reach it and send it
   proving jobs. There is no bind shim. The setup script's post-start
   check reads `/proc/net/tcp{,6}` and warns loudly unless the port is
-  loopback-only; that check is verified on the build box only, not yet
-  on a phone. Use trusted networks and stop the server when you're done.
-  Details: `server-setup/README.md`.
-- v0.4.0 (GROK-17) keeps the Midnight-themed design (CLAUDE-AP-3): three
-  tabs (Prove / Activity / Server), a server-status card (online, busy,
-  not ready, wrong version, unreachable), a "Testnet only" label, a Tip
-  card with both addresses, a dark launch theme and adaptive icon, and an
-  accessible palette (Bob's P1-14 hex values; 52 dp primary buttons). The
-  bigger redesign (job flow, two-pane foldable layout, splash screen,
-  edge-to-edge) is GROK-18.
+  loopback-only; if `/proc/net/tcp6` can't be read, the check reports
+  "can't verify", never OK, even when IPv4 looks like loopback. That
+  check is verified on the build box only, not yet on a phone. Use
+  trusted networks and stop the server when you're done. The installer
+  accepts `--port N` (default 6300) and passes it through to the listen
+  check. Details: `server-setup/README.md`.
+- v0.4.0 (GROK-17) was the safe working build: three tabs, the classified
+  failure modes, "Testnet only", Tip with both addresses, and Bob's
+  accessible palette (exact hex values; 52 dp primary buttons). v0.5.0
+  is the redesign plus the nits from that review.
+
+**Live check (build box, 2026-11-25, America/Chicago).** The app's own
+client was run again against official proof server 9.0.2 on
+`http://127.0.0.1:6301` (this box's 9.0.2 port; do not assume port 6300
+is 9.0.2). Status sweep 23 ms, version `9.0.2`, proof versions
+`["V2","V3"]`, `/ready` ok, capacity 10. The 1,509-byte DUST-spend
+fixture was proven twice: 708 ms then 473 ms, each returning a 2,940-byte
+proof headed `midnight:proof-versioned:`. A garbage body was rejected
+with the server's own header-tag message. These are sandbox CPU times,
+not a phone measurement. Parameters had already been fetched in that
+server process before the first prove.
 
 ## Running the server on the phone
 
@@ -94,15 +134,21 @@ is still the owner's supervised step. See `server-setup/README.md`.
 CI builds every change (`.github/workflows/android-prover.yml`):
 `gradle testDebugUnitTest assembleDebug` — the debug APK is uploaded as a
 workflow artifact. Locally: Android Studio, JDK 17, Gradle 8.9,
-compileSdk 35, targetSdk 35, minSdk 26.
+Android Gradle Plugin 8.7.3, compileSdk 35, targetSdk 35, minSdk 26.
 
 Unit tests run on the JVM (Robolectric pinned to `sdk=34` so JDK 17
-works). An optional live check runs the app's client against a real
-proof server:
+works). Screenshot fixtures for five configurations (411 dp, 360 dp,
+360 dp at font scale 2.0, 884 dp unfolded, landscape) are recorded into
+`docs/screenshots/`. An optional live check runs the app's client against
+a real 9.0.2 proof server:
 
 ```sh
-PROOF_SERVER_URL=http://127.0.0.1:6300 gradle testDebugUnitTest --tests '*LiveProofServerTest*'
+PROOF_SERVER_URL=http://127.0.0.1:6301 gradle testDebugUnitTest --tests '*LiveProofServerTest*'
 ```
+
+Point `PROOF_SERVER_URL` at a 9.0.2 server. On the QA box used for this
+release that is port 6301; port 6300 may be an older 9.0.0 and must not
+be used for this check.
 
 ## Attribution
 

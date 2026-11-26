@@ -91,16 +91,34 @@ class ScreenshotTest {
     @Test fun s16c_off_phone_enabled() = shoot("16c-server-off-phone-opt-in", ProverUiState(
         settings = settings.copy(allowOffPhone = true, baseUrl = "https://prover.example.org"), urlDraft = "https://prover.example.org"), Tab.SERVER)
 
-    @Config(qualifiers = "w900dp-h840dp-xhdpi")
+    @Config(qualifiers = "w884dp-h841dp-xhdpi")
     @Test fun s17_unfolded_prove() = shoot("17-unfolded-prove-inspected", ProverUiState(settings = settings, health = online, draft = Fixtures.dustSpendHex))
 
-    @Config(qualifiers = "w900dp-h840dp-xhdpi")
+    @Config(qualifiers = "w884dp-h841dp-xhdpi")
     @Test fun s18_unfolded_done() = shoot("18-unfolded-proof-ready", ProverUiState(settings = settings, health = online,
         session = ProveSession(JobState.DONE, Fixtures.dustSpendHex, "http://127.0.0.1:6300", now - 722, now, proofHex)))
 
-    @Config(qualifiers = "w900dp-h840dp-xhdpi")
+    @Config(qualifiers = "w884dp-h841dp-xhdpi")
     @Test fun s19_unfolded_settings() = shoot("19-unfolded-settings-tip", ProverUiState(settings = settings, health = online), Tab.SETTINGS)
 
     @Config(qualifiers = "w411dp-h891dp-xxhdpi", fontScale = 1.6f)
     @Test fun s20_large_font() = shoot("20-large-font-prove", ProverUiState(settings = settings, health = online, draft = Fixtures.dustSpendHex))
+
+    // Joe's 5 configs: 411 (above), 360, 360@font 2.0, 884 unfolded (above), landscape.
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi")
+    @Test fun s21_small360_prove() = shoot("21-small360-prove-inspected", ProverUiState(settings = settings, health = online, draft = Fixtures.dustSpendHex))
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi")
+    @Test fun s22_small360_server() = shoot("22-small360-server-online", ProverUiState(settings = settings, health = online), Tab.SERVER)
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi", fontScale = 2.0f)
+    @Test fun s23_small360_font2_prove() = shoot("23-small360-font2-prove", ProverUiState(settings = settings, health = online, draft = Fixtures.dustSpendHex))
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi", fontScale = 2.0f)
+    @Test fun s24_small360_font2_settings() = shoot("24-small360-font2-settings", ProverUiState(settings = settings, health = online), Tab.SETTINGS)
+    @Config(qualifiers = "w884dp-h841dp-xhdpi")
+    @Test fun s25_unfolded884_server() = shoot("25-unfolded884-server-busy", ProverUiState(settings = settings, health = busy), Tab.SERVER)
+    @Config(qualifiers = "w640dp-h360dp-xhdpi")
+    @Test fun s26_landscape_prove() = shoot("26-landscape-prove-inspected", ProverUiState(settings = settings, health = online, draft = Fixtures.dustSpendHex))
+    @Config(qualifiers = "w640dp-h360dp-xhdpi")
+    @Test fun s27_landscape_onboarding() = shoot("27-landscape-onboarding-welcome", ProverUiState(settings = ProverSettings()), onboardingPage = 0)
+    @Config(qualifiers = "w640dp-h360dp-xhdpi")
+    @Test fun s28_landscape_settings() = shoot("28-landscape-settings-tip", ProverUiState(settings = settings, health = online), Tab.SETTINGS)
 }

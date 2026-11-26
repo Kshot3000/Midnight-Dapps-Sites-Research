@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class HealthKind { UNKNOWN, CHECKING, ONLINE, NOT_READY, WRONG_VERSION, OFFLINE, ERROR }
+enum class HealthKind { UNKNOWN, CHECKING, ONLINE, BUSY, NOT_READY, WRONG_VERSION, TIMEOUT, UNENCRYPTED, OFFLINE, ERROR }
 
 /** What the server card shows. Derived purely from a [ServerStatus]. */
 data class ServerHealth(
@@ -26,21 +26,30 @@ data class ServerHealth(
         HealthKind.UNKNOWN -> "Not checked yet"
         HealthKind.CHECKING -> if (attempt <= 1) "Checking proof server…" else "Retrying ($attempt of $maxAttempts)…"
         HealthKind.ONLINE -> "Proof server online"
-        HealthKind.NOT_READY -> if (status?.readyStatus == "busy") "Server busy" else "Server not ready"
+        HealthKind.BUSY -> "Proof server busy"
+        HealthKind.NOT_READY -> "Server not ready"
         HealthKind.WRONG_VERSION -> "Unexpected server version"
+        HealthKind.TIMEOUT -> "The proof server timed out"
+        HealthKind.UNENCRYPTED -> "Server is not using https"
         HealthKind.OFFLINE -> "Proof server offline"
         HealthKind.ERROR -> status?.failure?.title ?: "Server error"
     }
 
-    val canProve: Boolean get() = kind == HealthKind.ONLINE || kind == HealthKind.WRONG_VERSION || kind == HealthKind.NOT_READY
+    val canProve: Boolean get() = kind == HealthKind.ONLINE || kind == HealthKind.WRONG_VERSION ||
+        kind == HealthKind.NOT_READY || kind == HealthKind.BUSY
 
     companion object {
-        fun from(s: ServerStatus): ServerHealth = ServerHealth(
+        fun from(s: ServerStatus, baseUrl: String = ""): ServerHealth = ServerHealth(
             kind = when {
+                s.failure is ProveException.Timeout -> HealthKind.TIMEOUT
                 !s.reachable -> HealthKind.OFFLINE
                 s.failure != null -> HealthKind.ERROR
+                s.readyStatus == "busy" -> HealthKind.BUSY
                 !s.ready -> HealthKind.NOT_READY
                 !s.versionMatches -> HealthKind.WRONG_VERSION
+                baseUrl.isNotEmpty() && !ProofJobInput.isLocalhost(baseUrl) &&
+                    (runCatching { java.net.URI(baseUrl).scheme }.getOrNull()?.lowercase() != "https") ->
+                    HealthKind.UNENCRYPTED
                 else -> HealthKind.ONLINE
             },
             status = s
@@ -104,6 +113,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     // ---- Draft / import ----
     fun onDraftChange(text: String) {
+        if (engine.session.value.isRunning) return
         local.update { it.copy(draft = text, importMessage = "") }
         // Bundles are size-limited; very large payloads are kept only in memory/engine files.
         saved[KEY_DRAFT] = if (text.length <= MAX_SAVED_DRAFT) text else null
@@ -154,11 +164,12 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
             val status = client.statusWithRetry(policy) { attempt, _ ->
                 local.update { it.copy(health = ServerHealth(HealthKind.CHECKING, it.health.status, attempt, policy.maxAttempts)) }
             }
-            local.update { it.copy(health = ServerHealth.from(status)) }
+            local.update { it.copy(health = ServerHealth.from(status, local.value.settings.baseUrl)) }
         }
     }
 
     fun onUrlDraftChange(text: String) {
+        if (engine.session.value.isRunning) return
         local.update { it.copy(urlDraft = text) }
         saved[KEY_URL_DRAFT] = text
     }
@@ -194,6 +205,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /** P0-5 opt-in. Turning it off snaps the server back to this phone. */
     fun setAllowOffPhone(on: Boolean) {
+        if (engine.session.value.isRunning) return
         updateSettings { it.copy(allowOffPhone = on) }
         if (!on && !ProofJobInput.isLocalhost(local.value.settings.baseUrl)) resetUrl()
     }
@@ -204,7 +216,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
         val client = ProofServerClient(local.value.settings.baseUrl, timeouts())
         healthJob = viewModelScope.launch {
             val status = client.status()
-            local.update { it.copy(health = ServerHealth.from(status)) }
+            local.update { it.copy(health = ServerHealth.from(status, local.value.settings.baseUrl)) }
         }
     }
 

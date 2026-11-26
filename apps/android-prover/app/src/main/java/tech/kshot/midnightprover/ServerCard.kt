@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 fun healthColor(kind: HealthKind): Color = when (kind) {
     HealthKind.ONLINE -> MidnightPalette.ProofGlow
     HealthKind.CHECKING -> MidnightPalette.VioletText
-    HealthKind.NOT_READY, HealthKind.WRONG_VERSION -> MidnightPalette.WarningAmber
+    HealthKind.BUSY, HealthKind.NOT_READY, HealthKind.WRONG_VERSION, HealthKind.UNENCRYPTED, HealthKind.TIMEOUT -> MidnightPalette.WarningAmber
     HealthKind.OFFLINE, HealthKind.ERROR -> MidnightPalette.ErrorRose
     HealthKind.UNKNOWN -> MidnightPalette.DimStar
 }
@@ -36,8 +36,11 @@ fun healthDetail(h: ServerHealth, url: String): String = when (h.kind) {
     HealthKind.UNKNOWN -> Copy.STATUS_NOT_CHECKED
     HealthKind.CHECKING -> if (h.attempt <= 1) url else "No answer yet — retrying with backoff."
     HealthKind.ONLINE -> url
-    HealthKind.NOT_READY -> if (h.status?.readyStatus == "busy") Copy.STATUS_BUSY else Copy.STATUS_NOT_READY
+    HealthKind.BUSY -> Copy.STATUS_BUSY
+    HealthKind.NOT_READY -> Copy.STATUS_NOT_READY
     HealthKind.WRONG_VERSION -> Copy.statusVersionMismatch(h.status?.version ?: "?")
+    HealthKind.TIMEOUT -> Copy.STATUS_TIMEOUT
+    HealthKind.UNENCRYPTED -> Copy.STATUS_UNENCRYPTED
     HealthKind.OFFLINE -> Copy.statusUnreachable(url)
     HealthKind.ERROR -> h.status?.failure?.message ?: ""
 }

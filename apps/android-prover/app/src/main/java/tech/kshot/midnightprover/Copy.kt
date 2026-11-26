@@ -33,6 +33,8 @@ object Copy {
     const val STATUS_BUSY = "Proof server busy. It's working on other jobs; try again in a moment."
     const val STATUS_NOT_READY = "The server answered but isn't ready yet. It may still be loading its proving files; try again in a moment."
     fun statusUnreachable(url: String) = "Can't reach the proof server at $url. Check that it's running and the address is right."
+    const val STATUS_TIMEOUT = "The proof server timed out. It accepted the connection but didn't finish answering in time."
+    const val STATUS_UNENCRYPTED = "This server is not using https. A server off this phone must sit behind a TLS proxy; proof server 9.0.2 only speaks plain http."
     fun statusVersionMismatch(v: String) = "This server reports version $v. The app was tested with 9.0.2, so results may differ."
     fun chipProofs(list: String) = "Proofs $list"
     fun chipJobs(n: Int) = "Up to $n jobs"
@@ -40,12 +42,13 @@ object Copy {
         "Version $v · Proof formats $formats · Ready: ${if (ready) "yes" else "no"}" + (n?.let { " · Up to $it jobs at once" } ?: "")
 
     // Server tab
-    const val SERVER_INTRO = "The app needs Midnight's official proof server running on this phone, inside Termux, at http://127.0.0.1:6300."
+    const val SERVER_INTRO = "The app needs Midnight's official proof server running on this phone, inside Termux, reachable at http://127.0.0.1:6300."
     const val SERVER_URL_HINT = "Default: http://127.0.0.1:6300 (this phone)."
-    const val URL_OFF_PHONE_DISABLED = "Only this phone (127.0.0.1 or localhost) is allowed. To use a server off this phone, turn on \"Allow a server off this phone\" in Settings first."
-    const val URL_OFF_PHONE_NEEDS_HTTPS = "Servers off this phone must use https://. Android only allows plain http to this phone (127.0.0.1)."
+    const val URL_OFF_PHONE_DISABLED = "Only this phone (127.0.0.1, localhost or ::1) is allowed. To use a server off this phone, turn on \"Allow a server off this phone\" in Settings first."
+    const val URL_OFF_PHONE_NEEDS_HTTPS = "Servers off this phone must use https://. Android only allows plain http to this phone (127.0.0.1, localhost or ::1)."
     const val OFF_PHONE_WARNING = "A server off this phone receives your private proof inputs, which can include wallet secret keys. Midnight recommends proving only on your own device. Use only a server you run yourself, over https."
     const val OPEN_PORT_NOTE = "Proof server 9.0.2 has no bind-address option and listens on every network interface, so other devices on the same Wi-Fi can reach port 6300. Use trusted networks and stop the server when you're done."
+    const val TESTNET_CHIP = "Testnet only · Preview / Preprod"
     const val TESTNET_NOTE = "Testnet only for now: use payloads from Preview or Preprod (both testnets) or a local devnet. The proof server itself doesn't connect to any network."
 
     // Prove input

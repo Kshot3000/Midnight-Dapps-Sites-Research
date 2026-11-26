@@ -50,12 +50,12 @@ class ProofServerClientTest {
         assertEquals(HealthKind.ONLINE, ServerHealth.from(s).kind)
     }
 
-    /** GROK-14 fix 4: /ready 503 busy → reachable, not ready, never "unreachable". */
+    /** GROK-14 fix 4: /ready 503 busy → reachable, BUSY, never "unreachable". */
     @Test fun readyBusy503IsReachable() = runBlocking {
         route(MockResponse().setResponseCode(503).setBody("""{"status":"busy","jobsProcessing":10,"jobsPending":0,"jobCapacity":10}"""))
         val s = client().status()
         assertTrue(s.reachable); assertFalse(s.ready); assertEquals("busy", s.readyStatus)
-        assertEquals(HealthKind.NOT_READY, ServerHealth.from(s).kind)
+        assertEquals(HealthKind.BUSY, ServerHealth.from(s).kind)
     }
 
     @Test fun nothingListeningIsOffline() = runBlocking {

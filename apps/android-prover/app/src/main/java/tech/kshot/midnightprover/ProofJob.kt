@@ -31,11 +31,20 @@ object ProofJobInput {
         return null
     }
 
-    /** Normalises a user-entered server base URL: adds http:// when no scheme, no trailing slash. */
+    /**
+     * Normalises a user-entered server base URL: adds http:// when no scheme,
+     * lower-cases the scheme and host (Joe nit 5), drops a trailing slash.
+     */
     fun normaliseBaseUrl(raw: String): String {
         var url = raw.trim()
         if (!url.contains("://")) url = "http://$url"
-        return url.trimEnd('/')
+        url = url.trimEnd('/')
+        val uri = runCatching { URI(url) }.getOrNull() ?: return url
+        val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: return url
+        val host = uri.host?.lowercase(Locale.ROOT)?.removePrefix("[")?.removeSuffix("]") ?: return url
+        val port = if (uri.port != -1) ":${uri.port}" else ""
+        val hostPart = if (host.contains(':')) "[$host]" else host
+        return "$scheme://$hostPart$port"
     }
 
     /**
@@ -61,10 +70,20 @@ object ProofJobInput {
         return null
     }
 
+    /**
+     * Hosts this phone answers on. Must stay in lockstep with the cleartext
+     * exceptions in `res/xml/network_security_config.xml` (Joe nit 1).
+     * `URI.host` returns `::1` without brackets; we strip them just in case.
+     */
+    val LOOPBACK_HOSTS = setOf("127.0.0.1", "localhost", "::1")
+
     /** True when the URL points at this device (Route 3). */
     fun isLocalhost(url: String): Boolean {
-        val host = runCatching { URI(normaliseBaseUrl(url)).host }.getOrNull()?.lowercase(Locale.ROOT)
-        return host == "127.0.0.1" || host == "localhost" || host == "::1" || host == "[::1]"
+        val host = runCatching { URI(normaliseBaseUrl(url)).host }.getOrNull()
+            ?.lowercase(Locale.ROOT)
+            ?.removePrefix("[")
+            ?.removeSuffix("]")
+        return host in LOOPBACK_HOSTS
     }
 
     const val DEFAULT_BASE_URL = "http://127.0.0.1:6300"
@@ -106,9 +125,13 @@ object JobHistoryFormat {
         else -> String.format(Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0))
     }
 
-    fun formatDuration(seconds: Double): String =
-        if (seconds < 60) String.format(Locale.ROOT, "%.1f s", seconds)
-        else String.format(Locale.ROOT, "%d min %02d s", (seconds / 60).toInt(), (seconds % 60).toInt())
+    /** Joe P2-1: round to a tenth first, then split, so 119.7 s never reads "1 min 60 s". */
+    fun formatDuration(seconds: Double): String {
+        val tenths = Math.round(seconds.coerceAtLeast(0.0) * 10) / 10.0
+        if (tenths < 60) return String.format(Locale.ROOT, "%.1f s", tenths)
+        val whole = tenths.toInt()
+        return String.format(Locale.ROOT, "%d min %02d s", whole / 60, whole % 60)
+    }
 
     /** TalkBack-friendly duration: "1 minute 5 seconds". */
     fun spokenDuration(seconds: Double): String {

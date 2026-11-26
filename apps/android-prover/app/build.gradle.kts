@@ -13,8 +13,8 @@ android {
         applicationId = "tech.kshot.midnightprover"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.4.0"
+        versionCode = 6
+        versionName = "0.5.0"
     }
 
     buildTypes {
@@ -73,5 +73,6 @@ dependencies {
     testImplementation("androidx.compose.ui:ui-test-junit4")
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.2")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.2")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Joe nit 6: test-only, so the debug APK has no extra exported activity.
+    testImplementation("androidx.compose.ui:ui-test-manifest")
 }

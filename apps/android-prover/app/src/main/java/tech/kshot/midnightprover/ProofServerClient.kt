@@ -217,8 +217,14 @@ class ProofServerClient(
     }
 
     companion object {
+        /** Joe nit 4: drop non-printable bytes the server sometimes puts in 400 bodies. */
+        fun sanitizeServerMessage(body: String): String =
+            body.filter { it == '\t' || it == '\n' || it == '\r' || it.code in 32..126 }
+                .trim()
+                .take(400)
+
         fun classifyHttp(code: Int, body: String): ProveException = when (code) {
-            400 -> ProveException.Rejected(body.trim().take(400))
+            400 -> ProveException.Rejected(sanitizeServerMessage(body))
             429 -> ProveException.QueueFull()
             503 -> ProveException.Busy()
             else -> ProveException.Http(code, body)

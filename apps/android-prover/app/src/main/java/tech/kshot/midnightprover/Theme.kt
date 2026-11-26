@@ -36,12 +36,12 @@ object MidnightPalette {
     val NebulaHigh = Color(0xFF182050)   // raised surface / variant
     val Starlight = Color(0xFFE9ECFF)    // primary text
     val Moonlight = Color(0xFFA7B0DC)    // secondary text
-    val DimStar = Color(0xFF8590C4)      // tertiary text (AA on Nebula)
-    val Indigo = Color(0xFF4D6BFE)       // brand accent (decoration)
-    val Violet = Color(0xFF8B5CF6)       // brand accent (decoration, borders)
+    val DimStar = Color(0xFF818BBB)      // tertiary text (Bob P1-14: 5.36:1 on card)
+    val Indigo = Color(0xFF4A67F4)       // brand indigo (Bob P1-14)
+    val Violet = Color(0xFF8457EA)       // brand violet (Bob P1-14)
     val VioletText = Color(0xFFA78BFA)   // violet for text (AA on Nebula)
-    val ButtonStart = Color(0xFF3D5AF1)  // gradient button, white text ≥ 5:1
-    val ButtonEnd = Color(0xFF6D4AE0)
+    val ButtonStart = Indigo             // gradient button: 4.63:1 with white
+    val ButtonEnd = Violet               // 4.63:1 with white
     val ProofGlow = Color(0xFF3EE6FF)    // live status / success glow
     val WarningAmber = Color(0xFFFFC24D)
     val ErrorRose = Color(0xFFFF6B81)
