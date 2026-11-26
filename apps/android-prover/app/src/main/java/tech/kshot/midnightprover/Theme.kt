@@ -18,35 +18,36 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.pow
 
 /**
- * Midnight design system.
+ * Midnight design system — monochrome (CLAUDE-AP-8, Kyle's direction
+ * 2026-11-26: black and white, the Midnight token mark, professional).
  *
- * Deep-space navy surfaces, an indigo-to-violet brand gradient, and a
- * single cyan "proof glow" reserved for live status and success. Dark
- * only: a prover that runs at midnight should look like it.
+ * True black surfaces, white primary actions and text, and a grayscale
+ * ramp for everything else. No hue anywhere: state is carried by icon,
+ * label and lightness, never by colour. Dark only.
  *
- * GROK-15 contrast pass: every text colour below meets WCAG AA (4.5:1) on
- * the card surface [Nebula]; `PaletteContrastTest` enforces it. DimStar and
- * the button gradient were darkened/lightened from v0.3.1 (3.99:1 and
- * 4.2:1 before).
+ * Contrast invariants are unchanged and enforced by PaletteContrastTest:
+ * every text colour meets WCAG AA (4.5:1) on the card surface [Nebula]
+ * and on [DeepSpace]; the primary button is white with black text
+ * (16:1+), replacing the old indigo/violet gradient with white text.
  */
 object MidnightPalette {
-    val Abyss = Color(0xFF05070F)        // app background, deepest layer
-    val DeepSpace = Color(0xFF0A0F24)    // screen background
-    val Nebula = Color(0xFF101736)       // card surface
-    val NebulaHigh = Color(0xFF182050)   // raised surface / variant
-    val Starlight = Color(0xFFE9ECFF)    // primary text
-    val Moonlight = Color(0xFFA7B0DC)    // secondary text
-    val DimStar = Color(0xFF818BBB)      // tertiary text (Bob P1-14: 5.36:1 on card)
-    val Indigo = Color(0xFF4A67F4)       // brand indigo (Bob P1-14)
-    val Violet = Color(0xFF8457EA)       // brand violet (Bob P1-14)
-    val VioletText = Color(0xFFA78BFA)   // violet for text (AA on Nebula)
-    val ButtonStart = Indigo             // gradient button: 4.63:1 with white
-    val ButtonEnd = Violet               // 4.63:1 with white
-    val ProofGlow = Color(0xFF3EE6FF)    // live status / success glow
-    val WarningAmber = Color(0xFFFFC24D)
-    val ErrorRose = Color(0xFFFF6B81)
-    val Hairline = Color(0xFF232C5E)     // decorative card borders on navy
-    val FieldBorder = Color(0xFF5A6393)  // input borders, ≥ 3:1 (WCAG 1.4.11; Bob P1-14)
+    val Abyss = Color(0xFF000000)        // app background, deepest layer
+    val DeepSpace = Color(0xFF000000)    // screen background
+    val Nebula = Color(0xFF101010)       // card surface
+    val NebulaHigh = Color(0xFF1C1C1C)   // raised surface / variant
+    val Starlight = Color(0xFFFFFFFF)    // primary text
+    val Moonlight = Color(0xFFC9C9C9)    // secondary text
+    val DimStar = Color(0xFFA3A3A3)      // tertiary text (AA on Nebula)
+    val Indigo = Color(0xFFEDEDED)       // accent ramp (was brand indigo)
+    val Violet = Color(0xFFCFCFCF)       // accent ramp (was brand violet)
+    val VioletText = Color(0xFFFFFFFF)   // accent text = white
+    val ButtonStart = Color(0xFFFFFFFF)  // primary button: white
+    val ButtonEnd = Color(0xFFE8E8E8)    // primary button gradient foot
+    val ProofGlow = Color(0xFFFFFFFF)    // live status / success = white
+    val WarningAmber = Color(0xFFD6D6D6) // warning = light gray + icon/label
+    val ErrorRose = Color(0xFFF5F5F5)    // error = near-white + icon/label
+    val Hairline = Color(0xFF262626)     // decorative card borders
+    val FieldBorder = Color(0xFF8A8A8A)  // input borders, >= 3:1 (WCAG 1.4.11)
 
     val BrandGradient = Brush.linearGradient(listOf(ButtonStart, ButtonEnd))
     val GlowGradient = Brush.linearGradient(listOf(ProofGlow, Indigo))
@@ -67,11 +68,11 @@ object Contrast {
 
 private val MidnightScheme = darkColorScheme(
     primary = MidnightPalette.VioletText,
-    onPrimary = Color(0xFF12082E),
+    onPrimary = Color.Black,
     primaryContainer = MidnightPalette.ButtonEnd,
-    onPrimaryContainer = Color.White,
+    onPrimaryContainer = Color.Black,
     secondary = MidnightPalette.ProofGlow,
-    onSecondary = Color(0xFF00222A),
+    onSecondary = Color.Black,
     tertiary = MidnightPalette.WarningAmber,
     background = MidnightPalette.DeepSpace,
     onBackground = MidnightPalette.Starlight,
@@ -84,7 +85,7 @@ private val MidnightScheme = darkColorScheme(
     outline = MidnightPalette.FieldBorder,
     outlineVariant = MidnightPalette.Hairline,
     error = MidnightPalette.ErrorRose,
-    onError = Color(0xFF2B0710)
+    onError = Color.Black
 )
 
 private val base = Typography()

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,9 +98,13 @@ fun OnboardingScreen(state: ProverUiState, vm: ProverViewModel, startPage: Int =
                 ) {
                     val pg = pages[p]
                     Box(
-                        Modifier.size(64.dp).clip(CircleShape).background(MidnightPalette.BrandGradient),
+                        Modifier.size(64.dp).clip(CircleShape).background(MidnightPalette.NebulaHigh)
+                            .border(1.dp, MidnightPalette.Hairline, CircleShape),
                         contentAlignment = Alignment.Center
-                    ) { Icon(pg.icon, contentDescription = null, tint = MidnightPalette.Starlight, modifier = Modifier.size(32.dp)) }
+                    ) {
+                        if (p == 0) MidnightTokenMark(Modifier.size(34.dp))
+                        else Icon(pg.icon, contentDescription = null, tint = MidnightPalette.Starlight, modifier = Modifier.size(32.dp))
+                    }
                     Text(pg.title, style = MaterialTheme.typography.headlineMedium, color = MidnightPalette.Starlight)
                     when (p) {
                         3 -> {
