@@ -24,7 +24,7 @@
 Top issues:
 1. The app README still says "v0.2 carries the full Midnight-themed design" and calls history "session" history, which v0.3 made persistent.
 2. A busy server (`/ready` answering 503) is shown as **"Proof server unreachable"**, because `getText()` throws on any non-2xx before the busy body is parsed.
-3. The in-app tip line says "donation addresses" and doesn't show either address.
+3. The in-app tip line (pre-0.4.0 string) said "donation addresses" and didn't show either address.
 4. The header and main button say "Prove Midnight transactions on this device", but the app proves one per-circuit payload, and the server may be on a LAN or in the cloud.
 5. `server-setup/README.md` step 3 sends users to the Server tab to see the cyan status hero, but the hero only exists on the Prove tab.
 
@@ -101,7 +101,7 @@ Top issues:
 | C18 | Server result "Version … · proof versions … · ready=true · job capacity …" | MainActivity.kt:378-379 | Issue (minor) | `ready=true` is developer notation. Fix 18. |
 | C19 | "Unreachable: {detail}" and "Server unreachable: {detail}" | MainActivity.kt:381; ProverViewModel.kt:114 | Issue | Shows raw Java exception text (for example a `ConnectException` message) with no advice. Fix 19. |
 | C20 | Setup text "Run the server on this phone…" | MainActivity.kt:387-394 | Issue | The content matches the setup README and its honesty is good ("No phone install has been measured yet"). But "~35 MB" is unsourced (S7), and "apps/android-prover/server-setup in the repo" gives no URL a user could open. Fix 7, Fix 28. |
-| C21 | Tip line "Independent builder — … · @kshot9000 / Tips: see the project README for the Cardano and Midnight donation addresses." | MainActivity.kt:400-401 | Issue | The independence line and @kshot9000 are exact. "donation" breaks the repo's tip wording rule ("Tip" / "Support the dev"), and neither address is shown in the app, so a user can't tip without leaving it. Fix 20. |
+| C21 | Tip line (pre-0.4.0 string) "Independent builder — … · @kshot9000 / Tips: see the project README for the Cardano and Midnight donation addresses." | MainActivity.kt:400-401 | Issue | The independence line and @kshot9000 are exact. The pre-0.4.0 string used "donation" and broke the repo's tip wording rule ("Tip" / "Support the dev"), and neither address is shown in the app, so a user can't tip without leaving it. Fix 20. |
 | C22 | Result "Proven in {duration}" | MainActivity.kt:423 | Issue (minor) | This is wall-clock time measured by the app, including network time. It's fine as the user's own measurement, but it reads like a benchmark. Fix 22. |
 | C23 | Result note "The server returned a proof. Copy it back to the wallet or tool that issued the payload." | ProverViewModel.kt:164 | Issue | No wallet in the repo's evidence takes a pasted proof. Midnight.js and the wallet SDK talk to a proof server directly (GROK-12). The string promises an integration nobody has shown. Fix 21. |
 | C24 | "Copy proof (hex)" | MainActivity.kt:444 | Matches | Copies the full proof hex. |
@@ -135,7 +135,7 @@ Top issues:
 | V5 | Background proving not promised | AndroidManifest.xml | Matches | No service is declared; the copy says "keep the app open". This matches `android-prover-landscape.md:28`. When GROK-15 adds a foreground service, the progress copy in section 6 is written for that. |
 | V6 | Testnet labels for Preview / Preprod | whole app | Issue | The app never names a network. That's fine for a network-agnostic prover, but the repo's testnet-only rule is never told to users, and R10 doesn't label its payload's network. Fix 26, Fix 3. |
 | V7 | No Ledger 8-era versions presented as current | whole app + READMEs | Matches | Only proof server 9.0.2 and proof versions V2/V3 appear (ledger 9 line). |
-| V8 | Tip wording: "Tip" / "Support the dev", never donation wording | READMEs + app | Issue | READMEs say "Tips welcome" (good); the app says "donation addresses" (C21). Fix 20. |
+| V8 | Tip wording: "Tip" / "Support the dev", never donation wording | READMEs + app | Issue | READMEs say "Tips welcome" (good); the pre-0.4.0 app string said "donation addresses" (C21). Fix 20. |
 | V9 | Strings localisable / font-scalable | whole app | Issue | No `strings.xml`, so nothing is translatable or easy to review. Text uses `MaterialTheme.typography` (sp-based), so system font scaling should apply; I didn't verify it on a device. Fix 25. |
 | V10 | Cleartext HTTP allowed | AndroidManifest.xml:6 | Matches | `usesCleartextTraffic="true"` is needed for `http://127.0.0.1:6300` and LAN URLs. Noted, no fix: narrowing it is a GROK-15 design choice. |
 | V11 | Hub lists the app | `sites/hub/index.html` | Flag only | See section 7. Sol's hub page, not edited here. |
@@ -221,7 +221,7 @@ All proposals only. Nothing below is applied in this PR. Victor applies them in 
     **Proposed:** Catch `SocketTimeoutException` separately as a new `TimedOut` class, and use the plain messages in section 6 (Unreachable, Timed out, Other HTTP). Keep the raw detail behind a "Details" expander.
     **Evidence:** `IOException` catch at `:108` covers timeouts; `readTimeout = 600_000` at `:95`.
 20. **File:** `MainActivity.kt` · **Line:** 400-401
-    **Current:** "Tips: see the project README for the Cardano and Midnight donation addresses."
+    **Current (pre-0.4.0 string):** "Tips: see the project README for the Cardano and Midnight donation addresses."
     **Proposed:** A "Support the dev" block with both addresses in full and a copy button for each:
     "Support the dev — tips are welcome:
     Cardano (ADA): addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
@@ -308,7 +308,7 @@ For Victor to wire into GROK-15 (in `strings.xml`, Fix 25). `{…}` are placehol
 | Activity — outcome chips | `MainActivity.kt:322` "PROVEN" / "FAILED" | "PROVEN" / "FAILED" / "CANCELLED" | C14, Fix 15. |
 | Honesty note | `MainActivity.kt:464-468` | "How it works: the app sends one proving payload to the server's /prove endpoint, the same per-circuit call Midnight.js uses today (the older /prove-tx is deprecated). No phone proving times are claimed yet. The first measurements will come from a supervised test on the developer's own phone." | "Owner" is internal (C25, Fix 23). |
 | Footer — independence | `MainActivity.kt:400` | "Independent builder — not affiliated with the Midnight Foundation or IOG. · @kshot9000" (keep exactly) | Required line. |
-| Footer — tip copy | `MainActivity.kt:401` "Tips: see the project README for the Cardano and Midnight donation addresses." | "Support the dev — tips are welcome:" followed by both full addresses, each with a Copy button (exact strings in Fix 20) | Tip wording rule; addresses shown in-app (C21, Fix 20). |
+| Footer — tip copy | `MainActivity.kt:401` (pre-0.4.0 string) "Tips: see the project README for the Cardano and Midnight donation addresses." | "Support the dev — tips are welcome:" followed by both full addresses, each with a Copy button (exact strings in Fix 20) | Tip wording rule; addresses shown in-app (C21, Fix 20). |
 
 ## 7. Hub gap (flag only)
 

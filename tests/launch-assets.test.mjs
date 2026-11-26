@@ -123,12 +123,13 @@ test("Preview and Preprod are labelled testnet wherever the drafts name them", (
   );
 });
 
-test("key verified figures and [CONFIRM AFTER GROK-17] notes are present", () => {
+test("key verified figures and [CONFIRM AFTER Fold7 run + Kshot okay] notes are present", () => {
   const content = brief();
-  for (const figure of ["1.168 s", "0.766 s", "1,509-byte", "2,940-byte", "2.56 s", "v0.3.1", "v0.2.0"]) {
+  for (const figure of ["1.168 s", "0.766 s", "1,509-byte", "2,940-byte", "2.56 s", "v0.4.0", "v0.2.0"]) {
     assert.ok(content.includes(figure), briefPath + " must include " + figure);
   }
-  assert.match(content, /\[CONFIRM AFTER GROK-17/);
+  assert.match(content, /\[CONFIRM AFTER Fold7 run \+ Kshot okay\]/);
+  assert.doesNotMatch(content, /v0\.3\.1/);
   assert.match(content, /no implied endorsement/i);
   assert.doesNotMatch(content, /\bAthena\b/);
 });
@@ -153,6 +154,14 @@ test("pasteable drafts say first device run coming soon and do not pitch LAN, cl
     assert.doesNotMatch(draft, /\bcloud\b/i, "pasteable draft " + (i + 1) + " must not pitch cloud proving");
     assert.doesNotMatch(draft, /\bremote\b/i, "pasteable draft " + (i + 1) + " must not pitch remote proving");
   }
+});
+
+test("P0-5 guidance uses the shipped https / TLS-proxy rule, not LAN opt-in", () => {
+  const content = brief();
+  const guidance = content.replace(/```text\n[\s\S]*?```/g, "");
+  assert.doesNotMatch(content, /LAN server needs an explicit opt-in/);
+  assert.match(guidance, /https/);
+  assert.match(guidance, /TLS proxy/);
 });
 
 test("the research reading guide lists the launch assets brief", () => {

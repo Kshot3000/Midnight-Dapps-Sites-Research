@@ -106,6 +106,21 @@ test("the ten projects appear in backlog order with status and primitive descrip
   }
 });
 
+test("the hub shows Proof Station v0.2.0 and a short Android prover v0.4.0 mention", () => {
+  assert.match(hub, /Windows x64 · v0\.2\.0/);
+  assert.doesNotMatch(hub, /v0\.1\.2/);
+  const android = hub.match(/<section\b[^>]*\bid="android-prover"[^>]*>([\s\S]*?)<\/section>/);
+  assert.ok(android, "hub needs an #android-prover section");
+  const card = android[1];
+  assert.match(card, /v0\.4\.0/);
+  assert.match(card, /built to prove on your phone, first device run coming soon/);
+  assert.match(card, /localhost by default/);
+  assert.match(card, /testnet/i);
+  assert.match(card, /unaudited/i);
+  assert.match(card, /\bfree\b/i);
+  assert.match(card, /apps\/android-prover\//);
+});
+
 test("hub links and assets resolve from a GitHub Pages project path", () => {
   const deployment = new URL("https://example.invalid/Midnight-Dapps-Sites-Research/");
   const ids = [...hub.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);

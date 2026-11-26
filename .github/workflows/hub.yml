@@ -3,6 +3,7 @@ name: Hub checks and Pages
 on:
   push:
     branches:
+      - main
       - 'sol/**'
     paths:
       - 'sites/hub/**'
@@ -60,7 +61,7 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
     needs: check
     runs-on: ubuntu-latest
     permissions:
