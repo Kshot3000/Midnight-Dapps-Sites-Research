@@ -144,7 +144,7 @@ Our briefs use these words without stopping to define them. Each entry below giv
 - **In plain words:** public parameters are large shared files that every prover needs, one set per circuit size `k`, plus the keys for the built-in shielded and DUST circuits. The proof server downloads them from Midnight's parameter host at startup and the first time it proves a new size. They are public and the same for everyone, and your proof requests are not part of that download.
 - **Official source:** [Run the proof server](https://docs.midnight.network/guides/run-proof-server) ("It contacts one outside host, https://srs.midnight.network/")
 - **Repo briefs:** [`wallet-prover-e2e.md`](wallet-prover-e2e.md) · [`local-stack-verification.md`](local-stack-verification.md) · [`android-prover-feasibility.md`](android-prover-feasibility.md)
-- **Disagreement:** two briefs name the host `srs.midnight.net`, but the docs say `srs.midnight.network`. See [disagreement 1](#1-the-parameter-host-is-srsmidnightnetwork-not-srsmidnightnet).
+- **Corrected disagreement:** two briefs once named the host `srs.midnight.net`; both now say `srs.midnight.network`, as the docs do. See [disagreement 1](#1-the-parameter-host-is-srsmidnightnetwork-not-srsmidnightnet).
 
 ### Shielded vs unshielded
 
@@ -170,14 +170,14 @@ Our briefs use these words without stopping to define them. Each entry below giv
 - **In plain words:** `undeployed` is the network ID of the local development chain: a node, indexer and proof server running in Docker on your own computer, with a pre-funded genesis wallet. It is not a public chain, so nothing on it is testnet or mainnet.
 - **Official source:** [Networks and environments](https://docs.midnight.network/guides/networks-and-environments) ("`undeployed` is the local development network") · [midnightntwrk/midnight-examples](https://github.com/midnightntwrk/midnight-examples) (`yarn env:up` starts it) · [midnightntwrk/midnight-local-dev](https://github.com/midnightntwrk/midnight-local-dev) (archived; points to midnight-examples)
 - **Repo briefs:** [`local-stack-verification.md`](local-stack-verification.md) · [`wallet-prover-e2e.md`](wallet-prover-e2e.md) · [`stack-versions.md`](stack-versions.md)
-- **Disagreement:** `stack-versions.md` still recommends `midnight-local-dev`, but that repo is archived. See [disagreement 3](#3-midnight-local-dev-is-archived-but-stack-versionsmd-still-recommends-it).
+- **Corrected disagreement:** `stack-versions.md` used to recommend the archived `midnight-local-dev`; it now points at `midnight-examples`. See [disagreement 3](#3-midnight-local-dev-is-archived-but-stack-versionsmd-still-recommends-it).
 
 ### Wallet SDK
 
 - **In plain words:** the Wallet SDK is the official TypeScript library for building wallet features. It derives keys and addresses from a seed, builds, balances and submits transactions, syncs with the indexer and registers NIGHT for DUST. Pin **2.0.1** (npm `@midnightntwrk/wallet-sdk`). Wallet SDK 1.x can't transact on ledger 9.
 - **Official source:** [midnightntwrk/midnight-wallet](https://github.com/midnightntwrk/midnight-wallet) (README and [specification](https://github.com/midnightntwrk/midnight-wallet/blob/main/docs/spec/Specification.md)) · [Compatibility matrix](https://docs.midnight.network/relnotes/support-matrix) (2.0.1) · [Keys and addresses](https://docs.midnight.network/concepts/keys-and-addresses) ("match Wallet SDK 2.0.1")
 - **Repo briefs:** [`stack-versions.md`](stack-versions.md) · [`dust-registration.md`](dust-registration.md) (§7.2 and the HD-path roles) · [`wallet-prover-e2e.md`](wallet-prover-e2e.md)
-- **Disagreement:** the key-derivation role numbers in `dust-registration.md` come from an archived spec. See [disagreement 2](#2-hd-wallet-role-4-is-ecdsa-not-metadata).
+- **Corrected disagreement:** `dust-registration.md` took role 4 ("Metadata") from an archived spec; it now gives role 4 as the unshielded ECDSA key. See [disagreement 2](#2-hd-wallet-role-4-is-ecdsa-not-metadata).
 
 ### Witness
 
@@ -200,7 +200,7 @@ Our briefs use these words without stopping to define them. Each entry below giv
 
 ## Docs vs briefs disagreements
 
-These are flags only. I did not edit any other brief: each one belongs to its author's seat, and HERMES-* work is outside the Grok lane. Fixing any of them would be a separate task.
+These started as flags only: when this glossary merged (#66), each brief belonged to its author's seat. After Kshot widened edit permission on 2026-11-25, Kyle assigned items 1 to 3 to a follow-up PR, GROK-13-fixup, which corrected them in the briefs with dated correction notes. Items 4 and 5 stay as flags. The text of each item below is kept as the original record.
 
 ### 1. The parameter host is `srs.midnight.network`, not `srs.midnight.net`
 
@@ -208,21 +208,24 @@ These are flags only. I did not edit any other brief: each one belongs to its au
 - **Official docs:** [Run the proof server](https://docs.midnight.network/guides/run-proof-server) says "It contacts one outside host, https://srs.midnight.network/". [Proving transactions locally](https://docs.midnight.network/guides/local-proving) lists the default `MIDNIGHT_PARAM_SOURCE` as `https://srs.midnight.network/`.
 - **Other briefs agree with the docs:** [`wallet-prover-e2e.md`](wallet-prover-e2e.md), [`android-prover-feasibility.md`](android-prover-feasibility.md) and GROK-12's captured logs in `research/evidence/grok-12/` all show `srs.midnight.network`.
 - **What I checked today:** from the box, `https://srs.midnight.network/` answered (HTTP 403 on its bare root, so the host is up), and `https://srs.midnight.net/` gave no HTTP response within 20 s. I did not run a proof server, so I can't say which host HERMES-3's run actually contacted. The `.net` spelling looks like a slip, but that is not proven.
-- **Suggested fix (not applied):** change `srs.midnight.net` to `srs.midnight.network` in both briefs, and in GROK-10's proposed fix 10 wording before anyone applies it to the Proof Station README.
+- **Suggested fix:** change `srs.midnight.net` to `srs.midnight.network` in both briefs, and in GROK-10's proposed fix 10 wording before anyone applies it to the Proof Station README.
+- **Resolved 2026-11-25 by GROK-13-fixup (Bob Research):** GROK-10-srs-host (#67) had already corrected `proof-station-qa.md`. GROK-13-fixup corrected all three HERMES-3 mentions in `local-stack-verification.md` (§1, the line-90 excerpt and §7 item 8) and added a dated correction note there. Before editing the excerpt, it looked for the raw log: none is in the repo (`research/evidence/` holds only GROK-12 files, and the brief arrived whole in commit `32ab0b2` with no log), the excerpt is hand-condensed, and the host sat in the author's parenthetical, not a log field. On 2026-11-25 `srs.midnight.network` completed TLS (HTTP 403 at the root) and `srs.midnight.net` failed the TLS handshake.
 
 ### 2. HD-wallet role 4 is ECDSA, not "Metadata"
 
 - **Brief:** [`dust-registration.md`](dust-registration.md) (HERMES-5, §7) gives the key-derivation role table "per the spec" as "… **3** = Shielded (Zswap), **4** = Metadata". It cites the WalletEngine specification in `midnightntwrk/midnight-architecture`.
 - **Official docs and current spec:** [Keys and addresses](https://docs.midnight.network/concepts/keys-and-addresses), written against Wallet SDK 2.0.1, lists role `4` as `Roles.EcdsaUnshielded`, "The unshielded signing key when the wallet signs with ECDSA instead of Schnorr". The Wallet SDK's own [specification](https://github.com/midnightntwrk/midnight-wallet/blob/main/docs/spec/Specification.md) says "Unshielded (and Night) ECDSA | 4", and `packages/hd/src/HDWallet.ts` defines `EcdsaUnshielded: 4`.
 - **Why they differ:** the `midnight-architecture` repo is archived on GitHub (last push 2026-10-25), and its WalletEngine spec still shows "Metadata | 4". So the brief quoted the spec accurately, but that spec is out of date. Roles 0, 2 and 3 match in every source.
-- **Suggested fix (not applied):** update the role-4 entry and cite the Wallet SDK spec or the Keys and addresses page.
+- **Suggested fix:** update the role-4 entry and cite the Wallet SDK spec or the Keys and addresses page.
+- **Resolved 2026-11-25 by GROK-13-fixup (Bob Research):** `dust-registration.md` §10 now gives role 4 as the unshielded ECDSA key (`Roles.EcdsaUnshielded`), cites the Keys and addresses page, the Wallet SDK spec and `packages/hd/src/HDWallet.ts` at tag `@midnightntwrk/wallet-sdk@2.0.1`, and keeps a note that the archived spec said Metadata. The §7.2 currency note was corrected the same way.
 
 ### 3. `midnight-local-dev` is archived, but `stack-versions.md` still recommends it
 
 - **Brief:** [`stack-versions.md`](stack-versions.md) (HERMES-1, note 4 and "For Sol") says "Local network: `midnight-local-dev` (`undeployed`)".
 - **Official repo:** [midnightntwrk/midnight-local-dev](https://github.com/midnightntwrk/midnight-local-dev) is archived on GitHub, and its README says: "This repository is archived and no longer maintained … midnight-examples now does both: `yarn env:up` starts a local network for any example, and `yarn fund:wallet` funds a browser wallet such as Lace with DUST."
 - **Another brief already has this right:** [`ecosystem-directory.md`](ecosystem-directory.md) marks it archived, and HERMES-3 and GROK-12 used `midnight-examples`. The official [Networks and environments](https://docs.midnight.network/guides/networks-and-environments) guide still links midnight-local-dev as "the local network tool", so the docs disagree with themselves as well.
-- **Suggested fix (not applied):** point the `stack-versions.md` local-network line at `midnight-examples` (`yarn env:up`).
+- **Suggested fix:** point the `stack-versions.md` local-network line at `midnight-examples` (`yarn env:up`).
+- **Resolved 2026-11-25 by GROK-13-fixup (Bob Research):** `stack-versions.md` note 4 and "For Sol" now point at [`midnight-examples`](https://github.com/midnightntwrk/midnight-examples), with a dated note that `midnight-local-dev` is archived. They use `npm run env:up`, not `yarn env:up`: midnight-examples ships `package-lock.json` and no `yarn.lock`, and its own README and every example's `package.json` use npm.
 
 ### 4. Is DUST a token? (docs disagree with each other)
 
@@ -255,7 +258,7 @@ These are flagged and not copied into any definition above. The pins stay Compac
 **Not verified:**
 
 - No chain, faucet, wallet, proof server or indexer was used. No transaction was signed, no tokens were requested, and no account or API key (such as a Blockfrost project token) was created.
-- I did not check whether `srs.midnight.net` ever served parameters (disagreement 1). I only know it didn't answer from the box today.
+- I did not check whether `srs.midnight.net` ever served parameters (disagreement 1, since corrected in the briefs by GROK-13-fixup). I only know it didn't answer from the box today.
 - The midnight.network homepage also returned HTTP 429 to `curl`, so it is not cited.
 - Definitions are paraphrases of the cited pages. If a page changes after 2026-11-25, its entry may go stale. Recheck against the [compatibility matrix](https://docs.midnight.network/relnotes/support-matrix) first.
 - Terms the official glossary defines but no brief uses (for example Kachina, ZKIR and Bech32m on their own) are left out on purpose, as the packet asks.
