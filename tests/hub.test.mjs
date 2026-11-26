@@ -9,7 +9,9 @@ const hubDirectory = join(root, "sites/hub");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const projectFiles = (patterns) => globSync(patterns, {
   cwd: root,
-  exclude: ["**/node_modules", "apps/**/managed"],
+  // Held upstream-issue drafts are meant to be pasted into another repo and must not
+  // carry this project's tip addresses. Guarded separately in tests/grok-16-fixup.test.mjs.
+  exclude: ["**/node_modules", "apps/**/managed", "research/upstream-drafts/**"],
 })
   .map((path) => path.replaceAll("\\", "/"));
 const hub = read("sites/hub/index.html");

@@ -40,6 +40,12 @@ This folder holds sixteen sourced research briefs and a plain-language glossary 
 
 `tests/research-readme.test.mjs` fails if a `research/*.md` brief is missing from this table or if either address below is changed. Add a row here in the same PR as any new brief.
 
+## Upstream drafts
+
+Held drafts for Kshot's weekly upstream-issue batch. These are not research briefs, are not counted in the sixteen above, and must not be filed until he okays them.
+
+- [proof-server-host-option.md](upstream-drafts/proof-server-host-option.md) — DRAFT, not filed. Request for a configurable bind host on the official proof server.
+
 ---
 
 Support — both addresses, character for character, alongside @kshot9000:

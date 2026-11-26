@@ -97,7 +97,9 @@ Holding NIGHT alone does nothing — "the registration transaction is what start
 
 ### 7.2 Wallet SDK (scriptable; current SDK set)
 
-Verified live 2026-11-24: the current funding guide targets the ledger-9 SDK set — **`@midnightntwrk/wallet-sdk` 1.2.0** (single barrel package; note the scope has no hyphen) with `@midnight-ntwrk/midnight-js-network-id` / `midnight-js-protocol` / `midnight-js-utils` **4.1.1**, Node.js 22+, a local proof server on port 6300, and for Preprod a Blockfrost **Midnight Preprod** project token in `BLOCKFROST_PROJECT_ID` (Blockfrost now serves the Preprod indexer + node RPC).
+Verified live 2026-11-25 against the official [funding / DUST guide](https://docs.midnight.network/guides/acquire-tokens) and npm: the current funding guide's install block pins the ledger-9 SDK set — **`@midnightntwrk/wallet-sdk` 2.0.1** (single barrel package; note the scope has no hyphen) with `@midnight-ntwrk/midnight-js-protocol` **5.0.1**, Node.js 22+, a local proof server on port 6300, and for Preprod a Blockfrost **Midnight Preprod** project token in `BLOCKFROST_PROJECT_ID` (Blockfrost now serves the Preprod indexer + node RPC). npm latest matches those pins: [`@midnightntwrk/wallet-sdk`](https://www.npmjs.com/package/@midnightntwrk/wallet-sdk) 2.0.1 and [`@midnight-ntwrk/midnight-js-protocol`](https://www.npmjs.com/package/@midnight-ntwrk/midnight-js-protocol) 5.0.1 (the matrix Midnight.js pin is also [`@midnight-ntwrk/midnight-js`](https://www.npmjs.com/package/@midnight-ntwrk/midnight-js) 5.0.1). The same install block no longer lists `midnight-js-network-id` or `midnight-js-utils`; `midnight-js-network-id` remains published at 4.1.1, which is the matrix subpackage pin, not a current 4.x SDK set.
+
+**Pins corrected 2026-11-25 (GROK-16-fixup, Bob Research):** this section first called the funding guide's set "current" as Wallet SDK **1.2.0** and Midnight.js packages **4.1.1**, from a 2026-11-24 reading. Those versions are stale. The live guide and npm today pin Wallet SDK **2.0.1** and Midnight.js **5.0.1**, as cited above. The registration API in the guide (`waitForSyncedState`, `estimateRegistration`, `waitForGeneratedDust`, `registerNightUtxosForDustGeneration`, `finalizeRecipe`, `submitTransaction`) is unchanged; the excerpt below follows today's guide, including the empty-list guard.
 
 The registration core (acquire-tokens, "Registering NIGHT for DUST generation with the wallet SDK"):
 
@@ -108,17 +110,25 @@ const unregistered = state.unshielded.availableCoins.filter(
   (coin) => coin.meta?.registeredForDustGeneration !== true,
 );
 
-const { fee } = await wallet.estimateRegistration(unregistered);
-await wallet.waitForGeneratedDust(unregistered, fee); // wait until the NIGHT has generated the fee
+if (unregistered.length === 0) {
+  console.log("All NIGHT is already registered for DUST generation.");
+} else {
+  // Send the DUST elsewhere by replacing this with another wallet's address.
+  const target = String(DustAddress.encodePublicKey(networkId, state.dust.publicKey));
+  const dustReceiver = MidnightBech32m.parse(target).decode(DustAddress, networkId);
 
-const recipe = await wallet.registerNightUtxosForDustGeneration(
-  unregistered,
-  unshieldedKeystore.getPublicKey(),
-  (payload) => unshieldedKeystore.signData(payload),
-  dustReceiver, // optional 4th arg: direct the DUST to another wallet's DUST address
-);
-const finalized = await wallet.finalizeRecipe(recipe);
-await wallet.submitTransaction(finalized);
+  const { fee } = await wallet.estimateRegistration(unregistered);
+  await wallet.waitForGeneratedDust(unregistered, fee); // wait until the NIGHT has generated the fee
+
+  const recipe = await wallet.registerNightUtxosForDustGeneration(
+    unregistered,
+    unshieldedKeystore.getPublicKey(),
+    async (payload) => unshieldedKeystore.signData(payload),
+    dustReceiver,
+  );
+  const finalized = await wallet.finalizeRecipe(recipe);
+  await wallet.submitTransaction(finalized);
+}
 ```
 
 - `MidnightBech32m.parse(target).decode(DustAddress, networkId)` is also the **validation step**: it throws on anything that is not a DUST address for the current network, so a shielded/unshielded address pasted by mistake fails here (the docs' troubleshooting table lists the resulting `Invalid dust address` symptom).
@@ -196,7 +206,7 @@ From HERMES-3 (`research/local-stack-verification.md`, merged PR #24, 2026-11-24
 
 ## 14. For Muse
 
-1. The **wallet-developer-guide page is ledger-8-era** (ledger-v8 install, DUST role = 4, hyphenated package scope) while the current funding guide uses `@midnightntwrk/wallet-sdk` 1.2.0 + `midnight-js-*` 4.1.1 and the WalletEngine spec assigns DUST role 2. Should this be added to the HERMES-1 stale-page inventory in `research/stack-versions.md`, or is it part of the upcoming upstream docs issue?
+1. The **wallet-developer-guide page is ledger-8-era** (ledger-v8 install, DUST role = 4, hyphenated package scope) while the current funding guide uses `@midnightntwrk/wallet-sdk` 2.0.1 + `midnight-js-protocol` 5.0.1 (re-checked 2026-11-25; this brief previously quoted the stale 1.2.0 / 4.1.1 set as current — see the §7.2 correction note) and the WalletEngine spec assigns DUST role 2. Should this be added to the HERMES-1 stale-page inventory in `research/stack-versions.md`, or is it part of the upcoming upstream docs issue?
 2. The **Preview reset-date discrepancy** on manage-dust (6 Nov vs 7 Nov, same page) — include in the upstream docs issue or file separately?
 3. The promised **upstream docs issue** (0.27-pragma finding from HERMES-4 + status of HERMES-3 friction items 1–3, now largely resolved by the quickstart rewrite) is queued immediately after this PR lands, per your answer #5 on PR #29. The wallet-developer-guide staleness (item 1) can join it if you prefer one batch.
 
@@ -208,7 +218,7 @@ All fetched live 2026-11-24 (this session) unless noted:
 | --- | --- |
 | https://docs.midnight.network/concepts/dust-architecture | DUST model, registration/fee mechanics, cNIGHT implementation, non-persistence, grace period (full page) |
 | https://docs.midnight.network/guides/manage-dust | How DUST behaves, parameter tables + Mainnet sample values, Registration rules, fee payment, redirect/stop, cNIGHT on Cardano, Mainnet cNIGHT registration, ledger-9 DUST section, troubleshooting (full page) |
-| https://docs.midnight.network/guides/acquire-tokens | Faucet (5,000 tNIGHT/request), Lace Generate tDUST procedure, current SDK set + registration procedure + error strings (full page) |
+| https://docs.midnight.network/guides/acquire-tokens | Faucet (5,000 tNIGHT/request), Lace Generate tDUST procedure, current SDK set + registration procedure + error strings (full page). Install pins re-checked 2026-11-25: `@midnightntwrk/wallet-sdk` 2.0.1, `@midnight-ntwrk/midnight-js-protocol` 5.0.1 (also confirmed on npm). |
 | https://docs.midnight.network/sdks/official/wallet-developer-guide | Package table, derivation roles (as stale ledger-8-era reference), address table |
 | https://docs.midnight.network/nodes/node-toolkit | Toolkit 1.0.300, `register-dust-address`, replay timing, `Insufficient DUST` error |
 | https://docs.midnight.network/tokens/overview | NIGHT/DUST units (STAR/SPECK), "resource not a token" |
@@ -227,6 +237,9 @@ All fetched live 2026-11-24 (this session) unless noted:
 
 ---
 
-Attribution on ALL work: both donation addresses, character-for-character, plus @kshot9000 —
-ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
-Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q
+Support — both addresses, character for character, alongside @kshot9000:
+
+- **Cardano (ADA):** addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+- **Midnight (shielded):** mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q
+
+*Independent builder — not affiliated with the Midnight Foundation or IOG.*
