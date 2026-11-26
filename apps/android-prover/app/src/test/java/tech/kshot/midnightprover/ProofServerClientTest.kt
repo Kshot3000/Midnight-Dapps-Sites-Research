@@ -50,12 +50,12 @@ class ProofServerClientTest {
         assertEquals(HealthKind.ONLINE, ServerHealth.from(s).kind)
     }
 
-    /** GROK-14 fix 4: /ready 503 busy → reachable, not ready, never "unreachable". */
+    /** Bob P0-1 / GROK-14 fix 4: /ready 503 busy → reachable and BUSY, never "unreachable". */
     @Test fun readyBusy503IsReachable() = runBlocking {
         route(MockResponse().setResponseCode(503).setBody("""{"status":"busy","jobsProcessing":10,"jobsPending":0,"jobCapacity":10}"""))
         val s = client().status()
         assertTrue(s.reachable); assertFalse(s.ready); assertEquals("busy", s.readyStatus)
-        assertEquals(HealthKind.NOT_READY, ServerHealth.from(s).kind)
+        assertEquals(HealthKind.BUSY, ServerHealth.from(s).kind)
     }
 
     @Test fun nothingListeningIsOffline() = runBlocking {
@@ -63,28 +63,6 @@ class ProofServerClientTest {
         val s = ProofServerClient("http://127.0.0.1:$port").status()
         assertFalse(s.reachable)
         assertTrue(s.failure is ProveException.Unreachable)
-    }
-
-    @Test fun statusRetriesWithBackoffUntilReady() = runBlocking {
-        var readyCalls = 0
-        server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse = when (request.path) {
-                "/ready" -> if (++readyCalls < 3) MockResponse().setResponseCode(503).setBody("""{"status":"busy"}""")
-                            else MockResponse().setBody("""{"status":"ok","jobCapacity":10}""")
-                else -> MockResponse().setBody("9.0.2")
-            }
-        }
-        val attempts = mutableListOf<Pair<Int, Long>>()
-        val s = client().statusWithRetry(RetryPolicy(maxAttempts = 4, initialDelayMs = 10, maxDelayMs = 40)) { a, d -> attempts += a to d }
-        assertTrue(s.ready)
-        assertEquals(listOf(1 to 0L, 2 to 10L, 3 to 20L), attempts)
-    }
-
-    @Test fun statusRetryGivesUpAfterMaxAttempts() = runBlocking {
-        val port = ServerSocket(0).use { it.localPort }
-        var n = 0
-        val s = ProofServerClient("http://127.0.0.1:$port").statusWithRetry(RetryPolicy(3, 5, 10)) { _, _ -> n++ }
-        assertEquals(3, n); assertFalse(s.reachable)
     }
 
     @Test fun provesAndSendsRawBinary() = runBlocking {

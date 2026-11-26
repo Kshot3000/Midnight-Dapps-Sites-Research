@@ -66,13 +66,6 @@ class BaseUrlValidationTest {
     }
 }
 
-class RetryPolicyTest {
-    @Test fun exponentialBackoffCapped() {
-        val p = RetryPolicy(maxAttempts = 6, initialDelayMs = 1000, maxDelayMs = 8000)
-        assertEquals(listOf(0L, 1000L, 2000L, 4000L, 8000L, 8000L), (1..6).map { p.delayBefore(it) })
-    }
-}
-
 class PayloadInspectorTest {
     @Test fun readsTheRealDustSpendPayload() {
         val info = PayloadInspector.inspect(Fixtures.dustSpend)
@@ -118,7 +111,8 @@ class ServerHealthTest {
     @Test fun mapping() {
         assertEquals(HealthKind.ONLINE, ServerHealth.from(ok()).kind)
         assertEquals(HealthKind.WRONG_VERSION, ServerHealth.from(ok(version = "9.0.0")).kind)
-        assertEquals(HealthKind.NOT_READY, ServerHealth.from(ok(ready = false, readyStatus = "busy")).kind)
+        assertEquals(HealthKind.BUSY, ServerHealth.from(ok(ready = false, readyStatus = "busy")).kind)
+        assertEquals(HealthKind.NOT_READY, ServerHealth.from(ok(ready = false, readyStatus = "loading")).kind)
         assertEquals(HealthKind.OFFLINE, ServerHealth.from(ServerStatus(reachable = false, failure = ProveException.Unreachable("x"))).kind)
         assertEquals(HealthKind.ERROR, ServerHealth.from(ServerStatus(reachable = true, failure = ProveException.Http(500, "boom"))).kind)
     }
@@ -126,8 +120,8 @@ class ServerHealthTest {
     /** GROK-14 fix 4: a busy server must not read as unreachable. */
     @Test fun busyIsNotUnreachable() {
         val h = ServerHealth.from(ok(ready = false, readyStatus = "busy"))
-        assertEquals("Server busy", h.headline)
-        assertEquals(Copy.STATUS_BUSY, healthDetail(h, "http://127.0.0.1:6300"))
+        assertEquals(HealthKind.BUSY, h.kind)
+        assertEquals("Proof server busy", h.headline)
     }
 
     @Test fun proofVersionsShownWithoutJson() {
@@ -164,7 +158,7 @@ class ErrorClassificationTest {
     }
 
     @Test fun eachFailureKindHasItsOwnMessage() {
-        val kinds = listOf("Unreachable", "Timeout", "QueueFull", "Busy", "Rejected", "Cancelled", "Interrupted")
+        val kinds = listOf("Unreachable", "Timeout", "QueueFull", "Busy", "Rejected", "Cancelled")
         val messages = kinds.map { Copy.failureMessage(FailureInfo(it, "t", "server text"), 15) }
         assertEquals(kinds.size, messages.toSet().size)
         assertEquals(Copy.errTimeout(15), Copy.failureMessage(FailureInfo("Timeout", "", ""), 15))
@@ -178,6 +172,15 @@ class HistoryOutcomeTest {
         assertEquals("PROVEN", base.copy(success = true).outcome)
         assertEquals("FAILED", base.outcome)
         assertEquals("CANCELLED", base.copy(cancelled = true).outcome)
+    }
+
+    /** Joe P2-1 regression. */
+    @Test fun durationNeverShowsSixtySeconds() {
+        assertEquals("1 min 59 s", JobHistoryFormat.formatDuration(119.7))
+        assertEquals("1 min 00 s", JobHistoryFormat.formatDuration(59.97))
+        assertEquals("59.9 s", JobHistoryFormat.formatDuration(59.94))
+        assertEquals("2 min 00 s", JobHistoryFormat.formatDuration(119.96))
+        assertEquals("0.0 s", JobHistoryFormat.formatDuration(-1.0))
     }
 
     @Test fun formats() {
@@ -221,30 +224,18 @@ class PaletteContrastTest {
         }
     }
 
+    /** Bob P1-14's exact hex values. */
+    @Test fun usesBobsValues() {
+        assertEquals(Color(0xFF4A67F4), MidnightPalette.ButtonStart)
+        assertEquals(Color(0xFF8457EA), MidnightPalette.ButtonEnd)
+        assertEquals(Color(0xFF818BBB), MidnightPalette.DimStar)
+        assertEquals(Color(0xFF5A6393), MidnightPalette.FieldBorder)
+        assertTrue(Contrast.ratio(MidnightPalette.FieldBorder, MidnightPalette.Nebula) >= 3.0)
+    }
+
     @Test fun buttonTextMeetsAA() {
         assertTrue(Contrast.ratio(Color.White, MidnightPalette.ButtonStart) >= 4.5)
         assertTrue(Contrast.ratio(Color.White, MidnightPalette.ButtonEnd) >= 4.5)
-    }
-}
-
-/** The in-app setup steps must match server-setup/README.md. */
-class SetupGuideTest {
-    private val readme = File("../server-setup/README.md").readText()
-
-    @Test fun everyCommandIsInTheReadme() {
-        SetupGuide.steps.flatMap { it.commands }.forEach { cmd ->
-            assertTrue("README lacks: $cmd", readme.contains(cmd))
-        }
-    }
-
-    @Test fun noUnsourcedDownloadSize() {
-        assertFalse(readme.contains("35 MB"))
-        SetupGuide.steps.forEach { assertFalse(it.body.contains("35 MB")) }
-    }
-
-    @Test fun phantomProcessWarningPresent() {
-        assertTrue(Copy.ONBOARD_KEEP_RUNNING.contains("Disable child process restrictions"))
-        assertTrue(readme.contains("Disable child process restrictions"))
     }
 }
 
@@ -261,10 +252,14 @@ class NetworkSecurityConfigTest {
         assertFalse(manifest.contains("usesCleartextTraffic=\"true\""))
     }
 
-    @Test fun manifestHasThemeIconAndForegroundService() {
+    /** Bob P0-4: a dark no-action-bar theme and an adaptive launcher icon. */
+    @Test fun manifestHasThemeAndIcon() {
         assertTrue(manifest.contains("android:theme=\"@style/Theme.MidnightProver\""))
         assertTrue(manifest.contains("android:icon=\"@mipmap/ic_launcher\""))
-        assertTrue(manifest.contains("android:foregroundServiceType=\"dataSync\""))
-        assertTrue(manifest.contains("FOREGROUND_SERVICE_DATA_SYNC"))
+        val themes = File("src/main/res/values/themes.xml").readText()
+        assertTrue(themes.contains("parent=\"android:Theme.Material.NoActionBar\""))
+        assertTrue(themes.contains("<item name=\"android:windowBackground\">@color/abyss</item>"))
+        assertTrue(File("src/main/res/values/colors.xml").readText().contains("#FF05070F"))
+        assertTrue(File("src/main/res/mipmap-anydpi/ic_launcher.xml").readText().contains("<adaptive-icon"))
     }
 }

@@ -5,8 +5,6 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -24,10 +22,9 @@ import kotlin.math.pow
  * single cyan "proof glow" reserved for live status and success. Dark
  * only: a prover that runs at midnight should look like it.
  *
- * GROK-15 contrast pass: every text colour below meets WCAG AA (4.5:1) on
- * the card surface [Nebula]; `PaletteContrastTest` enforces it. DimStar and
- * the button gradient were darkened/lightened from v0.3.1 (3.99:1 and
- * 4.2:1 before).
+ * GROK-17 contrast pass, using the hex values from Bob's UX review
+ * (P1-14): text colours meet WCAG AA (4.5:1) and input borders 3:1;
+ * `PaletteContrastTest` enforces it.
  */
 object MidnightPalette {
     val Abyss = Color(0xFF05070F)        // app background, deepest layer
@@ -36,17 +33,17 @@ object MidnightPalette {
     val NebulaHigh = Color(0xFF182050)   // raised surface / variant
     val Starlight = Color(0xFFE9ECFF)    // primary text
     val Moonlight = Color(0xFFA7B0DC)    // secondary text
-    val DimStar = Color(0xFF8590C4)      // tertiary text (AA on Nebula)
-    val Indigo = Color(0xFF4D6BFE)       // brand accent (decoration)
-    val Violet = Color(0xFF8B5CF6)       // brand accent (decoration, borders)
+    val DimStar = Color(0xFF818BBB)      // tertiary text (Bob P1-14: 5.36:1 on card)
+    val Indigo = Color(0xFF4A67F4)       // brand indigo (Bob P1-14)
+    val Violet = Color(0xFF8457EA)       // brand violet (Bob P1-14)
     val VioletText = Color(0xFFA78BFA)   // violet for text (AA on Nebula)
-    val ButtonStart = Color(0xFF3D5AF1)  // gradient button, white text ≥ 5:1
-    val ButtonEnd = Color(0xFF6D4AE0)
+    val ButtonStart = Indigo             // gradient button: 4.63:1 with white
+    val ButtonEnd = Violet               // 4.63:1 with white
     val ProofGlow = Color(0xFF3EE6FF)    // live status / success glow
     val WarningAmber = Color(0xFFFFC24D)
     val ErrorRose = Color(0xFFFF6B81)
     val Hairline = Color(0xFF232C5E)     // decorative card borders on navy
-    val FieldBorder = Color(0xFF5A6393)  // input borders, ≥ 3:1 (WCAG 1.4.11; Bob P1-14)
+    val FieldBorder = Color(0xFF5A6393)  // input borders (Bob P1-14: 3.07:1 on card, WCAG 1.4.11)
 
     val BrandGradient = Brush.linearGradient(listOf(ButtonStart, ButtonEnd))
     val GlowGradient = Brush.linearGradient(listOf(ProofGlow, Indigo))
@@ -102,12 +99,9 @@ private val MidnightTypography = Typography(
 /** Monospace style for hex, addresses and URLs. */
 val MonoStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 18.sp)
 
-/** True when animations should be reduced (system "remove animations" or the in-app switch). */
-val LocalReduceMotion = staticCompositionLocalOf { false }
-
 @Composable
-fun MidnightProverTheme(reduceMotion: Boolean = false, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalReduceMotion provides reduceMotion) {
+fun MidnightProverTheme(content: @Composable () -> Unit) {
+    run {
         MaterialTheme(
             colorScheme = MidnightScheme,
             typography = MidnightTypography,

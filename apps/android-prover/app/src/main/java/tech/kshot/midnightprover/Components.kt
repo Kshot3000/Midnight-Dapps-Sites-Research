@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -93,9 +94,9 @@ fun StarfieldBackground(modifier: Modifier = Modifier) {
     }
 }
 
-/** Pulsing status orb: cyan glow when live, dim when idle, rose on failure. */
+/** Pulsing status orb: cyan when live, amber when busy, dim when unknown, rose on failure. */
 @Composable
-fun StatusOrb(live: Boolean, failed: Boolean, modifier: Modifier = Modifier) {
+fun StatusOrb(core: Color, modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "orb")
     val pulse by transition.animateFloat(
         initialValue = 0.75f,
@@ -103,11 +104,6 @@ fun StatusOrb(live: Boolean, failed: Boolean, modifier: Modifier = Modifier) {
         animationSpec = infiniteRepeatable(tween(1400), RepeatMode.Reverse),
         label = "pulse"
     )
-    val core = when {
-        failed -> MidnightPalette.ErrorRose
-        live -> MidnightPalette.ProofGlow
-        else -> MidnightPalette.DimStar
-    }
     Box(modifier = modifier.size(46.dp)) {
         Box(
             modifier = Modifier
@@ -148,6 +144,7 @@ fun GradientButton(
             disabledContentColor = MidnightPalette.DimStar
         ),
         modifier = modifier
+            .heightIn(min = 52.dp) // Bob P2 / Joe P2-8: 52–56dp primary action
             .clip(RoundedCornerShape(14.dp))
             .background(
                 if (enabled) MidnightPalette.BrandGradient
@@ -156,15 +153,15 @@ fun GradientButton(
                 )
             )
     ) {
-        Text(text)
+        Text(text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
     }
 }
 
 /** Small rounded label chip. */
 @Composable
-fun MidnightChip(text: String, accent: Color = MidnightPalette.ProofGlow) {
+fun MidnightChip(text: String, accent: Color = MidnightPalette.ProofGlow, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(50))
             .border(1.dp, accent.copy(alpha = 0.55f), RoundedCornerShape(50))
             .background(MidnightPalette.NebulaHigh.copy(alpha = 0.6f))

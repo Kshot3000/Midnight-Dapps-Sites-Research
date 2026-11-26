@@ -3,7 +3,7 @@
   P0-5 (Bob's UX review, confirmed by Kyle): proving payloads carry private
   witness data. Plain http is allowed ONLY to this phone, where the Route 3
   proof server runs. Any server off the phone must use https (and the user
-  must opt in under Settings).
+  must opt in on the Server tab).
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false" />
