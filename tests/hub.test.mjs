@@ -9,7 +9,8 @@ const hubDirectory = join(root, "sites/hub");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const projectFiles = (patterns) => globSync(patterns, {
   cwd: root,
-  exclude: ["**/node_modules", "apps/**/managed"],
+  // Gradle output (test reports, Roborazzi HTML) is generated, not authored.
+  exclude: ["**/node_modules", "apps/**/managed", "apps/android-prover/**/build", "apps/android-prover/**/.gradle"],
 })
   .map((path) => path.replaceAll("\\", "/"));
 const hub = read("sites/hub/index.html");

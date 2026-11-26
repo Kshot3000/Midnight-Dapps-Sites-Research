@@ -1,473 +1,258 @@
 package tech.kshot.midnightprover
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
+import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 /**
- * Midnight Prover — the on-device client for Midnight's official proof
- * server 9.0.2 (Route 3, CLAUDE-AP-1 verdict: the arm64 server runs in a
- * Linux environment on this phone, reached at localhost:6300; the engine
- * behind that interface is swappable).
- *
- * Design: Midnight theme — deep-space navy, indigo-to-violet brand
- * gradient, cyan proof glow, starfield with a crescent moon. It makes NO
- * on-device performance claims: proving on phone hardware has not been
- * benchmarked yet; first measurements come from a supervised run on the
- * owner's phone.
+ * Midnight Prover — a client for Midnight's official proof server 9.0.2
+ * (Route 3, CLAUDE-AP-1 verdict: the arm64 server runs in a Linux
+ * environment on this phone at localhost:6300; LAN/cloud servers work too).
+ * It makes NO on-device performance claims: proving on phone hardware has
+ * not been benchmarked yet.
  */
 class MainActivity : ComponentActivity() {
+    private val vm: ProverViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) handleIntent(intent)
         setContent {
-            MidnightProverTheme {
-                ProverApp()
+            val state by vm.state.collectAsStateWithLifecycle()
+            val systemReduce = remember {
+                runCatching { Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
+                    .getOrDefault(false)
+            }
+            MidnightProverTheme(reduceMotion = systemReduce || state.settings.reduceMotion) {
+                ProverApp(vm, state)
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    /** Receives a job from another app: shared text, a shared file, or an opened file. */
+    private fun handleIntent(intent: Intent?) {
+        intent ?: return
+        when (intent.action) {
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) { vm.importPayload(text.toByteArray(), "a shared text"); return }
+                @Suppress("DEPRECATION")
+                val uri: Uri? = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                else intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                uri?.let { readUri(it, "a shared file") }
+            }
+            Intent.ACTION_VIEW -> intent.data?.let { readUri(it, "an opened file") }
+        }
+    }
+
+    private fun readUri(uri: Uri, source: String) {
+        runCatching {
+            contentResolver.openInputStream(uri)?.use { input ->
+                val bytes = input.readNBytesCompat(MAX_IMPORT_BYTES + 1)
+                if (bytes.size > MAX_IMPORT_BYTES) error("too large")
+                vm.importPayload(bytes, source)
+            }
+        }
+    }
+
+    companion object { const val MAX_IMPORT_BYTES = 32 * 1024 * 1024 }
 }
 
-private enum class Tab(val label: String, val glyph: String) {
-    PROVE("Prove", "◆"),
-    ACTIVITY("Activity", "☰"),
-    SERVER("Server", "◉")
+internal fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
+    val out = java.io.ByteArrayOutputStream()
+    val buf = ByteArray(64 * 1024)
+    while (out.size() < limit) {
+        val n = read(buf, 0, minOf(buf.size, limit - out.size()))
+        if (n < 0) break
+        out.write(buf, 0, n)
+    }
+    return out.toByteArray()
 }
+
+enum class Tab(val label: String, val icon: ImageVector, val description: String) {
+    PROVE("Prove", Icons.Filled.PlayArrow, "Prove a payload"),
+    ACTIVITY("Activity", Icons.Filled.List, "Job history"),
+    SERVER("Server", Icons.Filled.Build, "Proof server status and setup"),
+    SETTINGS("Settings", Icons.Filled.Settings, "Settings and about")
+}
+
+/** Window width class, from the Material 3 breakpoints (600 / 840 dp). */
+enum class WidthClass { COMPACT, MEDIUM, EXPANDED }
+
+fun widthClassOf(width: Dp): WidthClass = when {
+    width < 600.dp -> WidthClass.COMPACT
+    width < 840.dp -> WidthClass.MEDIUM
+    else -> WidthClass.EXPANDED
+}
+
+val LocalWidthClass = staticCompositionLocalOf { WidthClass.COMPACT }
+val LocalSnackbar = staticCompositionLocalOf<(String) -> Unit> { {} }
 
 @Composable
-fun ProverApp(vm: ProverViewModel = viewModel()) {
-    var tab by remember { mutableStateOf(Tab.PROVE) }
-    val state by vm.state.collectAsState()
-    Box(modifier = Modifier.fillMaxSize()) {
-        StarfieldBackground()
-        Scaffold(
-            containerColor = Color.Transparent,
-            bottomBar = {
-                NavigationBar(containerColor = MidnightPalette.Nebula.copy(alpha = 0.92f)) {
-                    Tab.entries.forEach { t ->
-                        NavigationBarItem(
-                            selected = tab == t,
-                            onClick = { tab = t },
-                            icon = { Text(t.glyph) },
-                            label = { Text(t.label) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MidnightPalette.ProofGlow,
-                                selectedTextColor = MidnightPalette.ProofGlow,
-                                indicatorColor = MidnightPalette.NebulaHigh,
-                                unselectedIconColor = MidnightPalette.Moonlight,
-                                unselectedTextColor = MidnightPalette.Moonlight
-                            )
-                        )
+fun ProverApp(vm: ProverViewModel, state: ProverUiState, initialTab: Tab = Tab.PROVE) {
+    var tab by rememberSaveable { mutableStateOf(initialTab) }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val showSnack: (String) -> Unit = { msg -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(msg) } }
+
+    // Keep the screen on while proving, if the user wants it.
+    val view = LocalView.current
+    val keepOn = state.session.isRunning && state.settings.keepScreenOn
+    DisposableEffect(keepOn) {
+        view.keepScreenOn = keepOn
+        onDispose { view.keepScreenOn = false }
+    }
+
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val widthClass = widthClassOf(maxWidth)
+        CompositionLocalProvider(LocalWidthClass provides widthClass, LocalSnackbar provides showSnack) {
+            // Starfield pauses while a proof runs (and under reduced motion) — Bob P1-16.
+            StarfieldBackground(animate = !state.session.isRunning)
+            if (!state.settings.onboardingDone) {
+                OnboardingScreen(state, vm)
+                return@CompositionLocalProvider
+            }
+            val useRail = widthClass != WidthClass.COMPACT
+            // Back from another tab returns to Prove before leaving the app (Bob P1-15).
+            BackHandler(enabled = tab != Tab.PROVE) { tab = Tab.PROVE }
+            Scaffold(
+                containerColor = Color.Transparent,
+                contentWindowInsets = WindowInsets.safeDrawing,
+                snackbarHost = { SnackbarHost(snackbar) },
+                bottomBar = {
+                    if (!useRail) {
+                        NavigationBar(containerColor = MidnightPalette.Nebula.copy(alpha = 0.94f)) {
+                            Tab.entries.forEach { t ->
+                                NavigationBarItem(
+                                    selected = tab == t,
+                                    onClick = { tab = t },
+                                    icon = { Icon(t.icon, contentDescription = null) },
+                                    label = { Text(t.label) },
+                                    modifier = Modifier.testTag("tab-${t.name}"),
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MidnightPalette.ProofGlow,
+                                        selectedTextColor = MidnightPalette.ProofGlow,
+                                        indicatorColor = MidnightPalette.NebulaHigh,
+                                        unselectedIconColor = MidnightPalette.Moonlight,
+                                        unselectedTextColor = MidnightPalette.Moonlight
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            ) { padding ->
+                Row(Modifier.fillMaxSize().padding(padding)) {
+                    if (useRail) {
+                        NavigationRail(
+                            containerColor = MidnightPalette.Nebula.copy(alpha = 0.9f),
+                            modifier = Modifier.fillMaxHeight()
+                        ) {
+                            Tab.entries.forEach { t ->
+                                NavigationRailItem(
+                                    selected = tab == t,
+                                    onClick = { tab = t },
+                                    icon = { Icon(t.icon, contentDescription = null) },
+                                    label = { Text(t.label) },
+                                    modifier = Modifier.testTag("tab-${t.name}"),
+                                    colors = NavigationRailItemDefaults.colors(
+                                        selectedIconColor = MidnightPalette.ProofGlow,
+                                        selectedTextColor = MidnightPalette.ProofGlow,
+                                        indicatorColor = MidnightPalette.NebulaHigh,
+                                        unselectedIconColor = MidnightPalette.Moonlight,
+                                        unselectedTextColor = MidnightPalette.Moonlight
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        val reduce = LocalReduceMotion.current
+                        AnimatedContent(
+                            targetState = tab,
+                            transitionSpec = {
+                                if (reduce) fadeIn(androidx.compose.animation.core.snap()) togetherWith fadeOut(androidx.compose.animation.core.snap())
+                                else fadeIn() togetherWith fadeOut()
+                            },
+                            label = "tab"
+                        ) { t ->
+                            when (t) {
+                                Tab.PROVE -> ProveScreen(state, vm, onOpenServer = { tab = Tab.SERVER })
+                                Tab.ACTIVITY -> ActivityScreen(state, vm)
+                                Tab.SERVER -> ServerScreen(state, vm)
+                                Tab.SETTINGS -> SettingsScreen(state, vm)
+                            }
+                        }
                     }
                 }
             }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-                when (tab) {
-                    Tab.PROVE -> ProveScreen(state, vm)
-                    Tab.ACTIVITY -> ActivityScreen(state)
-                    Tab.SERVER -> ServerScreen(state, vm)
-                }
-            }
         }
-    }
-}
-
-@Composable
-private fun Header() {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            "MIDNIGHT",
-            style = MaterialTheme.typography.labelLarge,
-            color = MidnightPalette.ProofGlow
-        )
-        Text(
-            "Prover",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MidnightPalette.Starlight
-        )
-        Text(
-            "Prove Midnight transactions on this device, against the official proof server.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MidnightPalette.Moonlight
-        )
-    }
-}
-
-@Composable
-private fun ServerStatusCard(state: ProverUiState, vm: ProverViewModel) {
-    val server = state.server
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MidnightPalette.Nebula.copy(alpha = 0.88f)),
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MidnightPalette.Hairline, RoundedCornerShape(20.dp))
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            StatusOrb(
-                live = server?.reachable == true,
-                failed = server != null && !server.reachable
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    when {
-                        state.jobState == JobState.CHECKING -> "Contacting server…"
-                        server == null -> "Proof server not checked yet"
-                        server.reachable -> "Proof server online"
-                        else -> "Proof server unreachable"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MidnightPalette.Starlight
-                )
-                Text(
-                    text = state.baseUrl,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MidnightPalette.Moonlight
-                )
-                if (server?.reachable == true) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MidnightChip("v${server.version ?: "?"}")
-                        MidnightChip("proofs ${server.proofVersions ?: "?"}")
-                        MidnightChip("capacity ${server.jobCapacity ?: "?"}")
-                    }
-                    if (server.version != null && server.version != ProofJobInput.EXPECTED_SERVER_VERSION) {
-                        Text(
-                            "Expected ${ProofJobInput.EXPECTED_SERVER_VERSION} — this server reports a different version.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MidnightPalette.WarningAmber
-                        )
-                    }
-                }
-            }
-        }
-        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-            GradientButton(
-                text = "Check server",
-                enabled = state.jobState != JobState.CHECKING && state.jobState != JobState.PROVING,
-                onClick = vm::checkServer,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProveScreen(state: ProverUiState, vm: ProverViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Header()
-        ServerStatusCard(state, vm)
-
-        Text("New proof job", style = MaterialTheme.typography.titleMedium, color = MidnightPalette.Starlight)
-        OutlinedTextField(
-            value = state.txHex,
-            onValueChange = vm::onTxHexChange,
-            label = { Text("Proving payload (hex)") },
-            placeholder = { Text("Paste the serialized proving payload a wallet or SDK would send the proof server…") },
-            minLines = 4,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MidnightPalette.Violet,
-                unfocusedBorderColor = MidnightPalette.Hairline,
-                focusedContainerColor = MidnightPalette.Nebula.copy(alpha = 0.85f),
-                unfocusedContainerColor = MidnightPalette.Nebula.copy(alpha = 0.85f)
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        GradientButton(
-            text = "Prove transaction",
-            enabled = state.jobState != JobState.PROVING && state.jobState != JobState.CHECKING,
-            onClick = vm::prove,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (state.warning.isNotEmpty()) {
-            Text(state.warning, color = MidnightPalette.WarningAmber, style = MaterialTheme.typography.bodyMedium)
-        }
-        when (state.jobState) {
-            JobState.PROVING -> {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CircularProgressIndicator(color = MidnightPalette.ProofGlow)
-                    Text(
-                        "Proving… ${JobHistoryFormat.formatDuration(state.elapsedSeconds)} elapsed. " +
-                            "Mobile proving can take a while — keep the app open.",
-                        color = MidnightPalette.Moonlight,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                GradientButton(
-                    text = "Cancel proof",
-                    enabled = true,
-                    onClick = vm::cancelProve,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            JobState.DONE -> {
-                ProofResultCard(state)
-            }
-            JobState.FAILED -> {
-                ResultCard(title = "Job failed", body = state.error, accent = MidnightPalette.ErrorRose)
-            }
-            else -> {}
-        }
-        if (state.error.isNotEmpty() && state.jobState != JobState.FAILED) {
-            Text(state.error, color = MidnightPalette.ErrorRose, style = MaterialTheme.typography.bodyMedium)
-        }
-        HonestyNote()
-    }
-}
-
-@Composable
-private fun ResultCard(title: String, body: String, accent: Color) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MidnightPalette.Nebula.copy(alpha = 0.9f)),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, accent.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(title, color = accent, style = MaterialTheme.typography.titleMedium)
-            if (body.isNotEmpty()) {
-                Text(body, color = MidnightPalette.Moonlight, style = MaterialTheme.typography.bodySmall)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ActivityScreen(state: ProverUiState) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Activity", style = MaterialTheme.typography.headlineMedium, color = MidnightPalette.Starlight)
-        if (state.history.isEmpty()) {
-            Text(
-                "No proof jobs yet this session. Jobs you run appear here with their server, duration and outcome.",
-                color = MidnightPalette.Moonlight,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        val fmt = remember { SimpleDateFormat("HH:mm:ss", Locale.US) }
-        state.history.forEach { job ->
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MidnightPalette.Nebula.copy(alpha = 0.88f)),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        MidnightChip(
-                            if (job.success) "PROVEN" else "FAILED",
-                            if (job.success) MidnightPalette.ProofGlow else MidnightPalette.ErrorRose
-                        )
-                        Text(
-                            "${fmt.format(Date(job.finishedAtMillis))} · ${JobHistoryFormat.formatDuration(job.durationSeconds)}",
-                            color = MidnightPalette.Moonlight,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    Text(job.txPreview, color = MidnightPalette.Starlight, style = MaterialTheme.typography.bodyMedium)
-                    Text(job.detail, color = MidnightPalette.DimStar, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ServerScreen(state: ProverUiState, vm: ProverViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Text("Server", style = MaterialTheme.typography.headlineMedium, color = MidnightPalette.Starlight)
-        Text(
-            "Route 3 (CLAUDE-AP-1 verdict): the official arm64 proof server runs in a Linux " +
-                "environment on this phone and is reached locally. Point the app anywhere else " +
-                "to use a LAN or cloud server instead.",
-            color = MidnightPalette.Moonlight,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OutlinedTextField(
-            value = state.baseUrl,
-            onValueChange = vm::onBaseUrlChange,
-            label = { Text("Proof server URL") },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MidnightPalette.Violet,
-                unfocusedBorderColor = MidnightPalette.Hairline,
-                focusedContainerColor = MidnightPalette.Nebula.copy(alpha = 0.85f),
-                unfocusedContainerColor = MidnightPalette.Nebula.copy(alpha = 0.85f)
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        GradientButton(
-            text = "Check server",
-            enabled = state.jobState != JobState.CHECKING && state.jobState != JobState.PROVING,
-            onClick = vm::checkServer,
-            modifier = Modifier.fillMaxWidth()
-        )
-        state.server?.let { server ->
-            Text(
-                if (server.reachable) {
-                    "Version ${server.version} · proof versions ${server.proofVersions} · " +
-                        "ready=${server.ready} · job capacity ${server.jobCapacity}"
-                } else {
-                    "Unreachable: ${server.detail}"
-                },
-                color = MidnightPalette.Moonlight,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Text("Run the server on this phone", style = MaterialTheme.typography.titleMedium, color = MidnightPalette.Starlight)
-        Text(
-            "Route 3 setup, in Termux with a proot Debian environment: install the official " +
-                "arm64 proof server with the project's setup script (apps/android-prover/server-setup " +
-                "in the repo — it pulls the official 9.0.2 image, no Docker needed), start it, " +
-                "then check the server here. First boot downloads ~35 MB of public parameters " +
-                "from srs.midnight.network. No phone install has been measured yet — the first " +
-                "supervised run sets the real numbers.",
-            color = MidnightPalette.Moonlight,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        HonestyNote()
-        Text(
-            "Independent builder — not affiliated with the Midnight Foundation or IOG. · @kshot9000\n" +
-                "Tips: see the project README for the Cardano and Midnight donation addresses.",
-            color = MidnightPalette.DimStar,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-@Composable
-private fun ProofResultCard(state: ProverUiState) {
-    val clipboard = LocalClipboardManager.current
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MidnightPalette.Nebula.copy(alpha = 0.9f)),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MidnightPalette.ProofGlow.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                "Proven in ${JobHistoryFormat.formatDuration(state.elapsedSeconds)}",
-                color = MidnightPalette.ProofGlow,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(state.proofSummary, color = MidnightPalette.Starlight, style = MaterialTheme.typography.bodyMedium)
-            Text(state.result, color = MidnightPalette.Moonlight, style = MaterialTheme.typography.bodySmall)
-            if (state.proofHex.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MidnightPalette.Abyss.copy(alpha = 0.6f))
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        state.proofHex.take(240) + if (state.proofHex.length > 240) "…" else "",
-                        color = MidnightPalette.DimStar,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                GradientButton(
-                    text = "Copy proof (hex)",
-                    enabled = true,
-                    onClick = { clipboard.setText(AnnotatedString(state.proofHex)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HonestyNote() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MidnightPalette.NebulaHigh.copy(alpha = 0.45f))
-            .padding(12.dp)
-    ) {
-        Text(
-            "How proving works here: the app sends one serialized proving payload to the " +
-                "server's /prove endpoint — the per-circuit protocol Midnight.js and the wallet " +
-                "SDK use today (the older /prove-tx endpoint is deprecated). On-device proving " +
-                "has not been benchmarked yet and this app claims no phone proving times; the " +
-                "first device measurements come from a supervised run on the owner's phone.",
-            color = MidnightPalette.Moonlight,
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }

@@ -14,7 +14,7 @@ its own image.
    outdated), then inside Termux:
 
    ```sh
-   pkg update && pkg install proot-distro curl python3
+   pkg update && pkg install proot-distro
    proot-distro install debian
    proot-distro login debian
    ```
@@ -30,22 +30,54 @@ its own image.
 
    The script defaults to the image's **arm64** variant (the phone's
    architecture). First boot downloads the public proving parameters
-   from `srs.midnight.network` (~35 MB) — do it on Wi-Fi. When it prints
+   from `srs.midnight.network` (the k=10–15 parameter files alone are
+   about 12.4 MB; the full download, with keys, has not been measured) —
+   do it on Wi-Fi. When it prints
    `proof server is LIVE: /version = 9.0.2`, leave that Termux session
    running.
 
-3. Open **Midnight Prover**, go to the **Server** tab (the URL should
-   already read `http://127.0.0.1:6300`), and tap **Check server**. The
-   status hero should light up cyan: *Proof server online · v9.0.2*.
+3. Open **Midnight Prover**. The first-run walkthrough repeats these
+   steps and ends on a **Connect** page. Afterwards, the **Server** tab
+   (and the summary card on the **Prove** tab) shows the server status:
+   tap **Check server** — the URL should already read
+   `http://127.0.0.1:6300`. When the server answers, the card turns cyan
+   and reads *Proof server online*, with a `v9.0.2` chip.
 
-## On a desktop or server (for LAN/cloud proving)
+4. **Keep it running.** Android can stop the server while it runs.
+   Since Android 12 the *phantom process killer* stops child processes
+   like this one, and battery optimisation can too. Before a long
+   session, exempt Termux from battery optimisation and, on Android 14
+   and later, turn on
+   **Developer options → Disable child process restrictions**. Samsung phones may also slow Termux down; that is
+   unverified on the Fold7.
+
+## Network exposure: port 6300 is open on your Wi-Fi
+
+Proof server 9.0.2 has **no option to listen only on 127.0.0.1**. Its
+`--help` lists only `--port`, `--verbose`, `--job-capacity`,
+`--num-workers`, `--job-timeout` and `--no-fetch-params`, and no
+environment variable or doc covers a bind address. On the GROK-17 test
+box it listened on `0.0.0.0` (every interface, checked with `ss -ltn`).
+
+So while the server runs, **anyone on the same Wi-Fi can reach it and send it
+jobs, using your phone's CPU.** The launcher prints this warning every time
+it starts. Run it on trusted networks only (not café, hotel or office
+Wi-Fi), and stop it (Ctrl-C in Termux) when you are done. The app itself
+only ever talks to it over `127.0.0.1` on this phone.
+
+## On a desktop or server (advanced, off this phone)
 
 ```sh
 ./setup-proof-server.sh --arch amd64 --start
 ```
 
-Same flow, amd64 image. Point the app's Server URL at that machine's
-address instead (e.g. `http://192.168.1.20:6300`).
+Same flow, amd64 image. The app does **not** use a server off this phone
+by default, because the proving payload contains your private proof
+inputs. To use one anyway: in the app, **Settings → Allow a server off
+this phone** (read the warning), then enter an **https://** URL — the app
+refuses plain http to anything except 127.0.0.1/localhost. Put the server
+behind a TLS reverse proxy you control; the proof server itself serves
+plain http only.
 
 ## Verified status
 
@@ -53,12 +85,24 @@ address instead (e.g. `http://192.168.1.20:6300`).
   script, server live (`/version` 9.0.2, `/ready` ok), and a real
   1,509-byte DUST-spend proving payload proven via `/prove`
   (2,940-byte proof returned, ~3 s on a shared sandbox CPU).
+  Re-run for GROK-17 as a non-root user: install exit 0, launcher up on
+  a custom port, `/version` 9.0.2, `/ready` ok, and the app's own client
+  proved the fixture twice (722 ms and 449 ms, box CPU). That run found
+  and fixed an extraction bug: the image's read-only `nix/store`
+  directories made a non-root `tar -x` fail, and the old `|| tar -xf`
+  fallback hid the error. The script now extracts with
+  `--delay-directory-restore`, makes the tree writable, and stops on a
+  real failure.
 - arm64/phone: the script's steps are identical and the official image
   ships the arm64 variant, but **no phone run has happened yet** — the
-  first on-device install + measurements come from the owner's
-  supervised run. Android may also kill background Termux processes
-  under battery pressure; exempt Termux from battery optimisation
-  before long proving sessions.
+  first on-device install + measurements will come from a supervised
+  test on the developer's own phone. See step 4 for keeping the server
+  alive (phantom process killer, battery optimisation).
+
+## Follow-ups
+
+- Pin the `curl` URL in step 2 to a release tag instead of `main`
+  (GROK-14 fix 9).
 
 ## Files
 

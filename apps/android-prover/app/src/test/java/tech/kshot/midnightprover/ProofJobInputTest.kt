@@ -48,7 +48,7 @@ class JobHistoryFormatTest {
 
     @Test fun durationFormatting() {
         assertEquals("3.3 s", JobHistoryFormat.formatDuration(3.277))
-        assertEquals("2 min 5 s", JobHistoryFormat.formatDuration(125.0))
+        assertEquals("2 min 05 s", JobHistoryFormat.formatDuration(125.0))
     }
 }
 
