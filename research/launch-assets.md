@@ -2,9 +2,9 @@
 
 **Status: DRAFTS ONLY.** Nothing in this file is posted or published until Kshot okays it. Posting is the owner's or Muse's step, not the author's.
 **Written:** 2026-11-25
-**Updated:** 2026-11-25 (GROK-15-fixup2: audit D1 phone wording — built to prove on your phone, first device run coming soon)
+**Updated:** 2026-11-25 (GROK-19: launch drafts and hub refresh after GROK-17 shipped Android prover v0.4.0)
 **Written by:** Linda (Grok swarm, docs/content seat)
-**Scope:** ready-to-use copy for the four verified milestones named in the wave 7 packet (`council/feed/GROK_FEED.md`), plus one long-form story. This PR does not edit `apps/android-prover/` or its README — those files are in GROK-17 (Victor).
+**Scope:** ready-to-use copy for the four verified milestones named in the wave 7 packet (`council/feed/GROK_FEED.md`), plus one long-form story. This refresh does not edit `apps/` — GROK-17 shipped v0.4.0; remaining Android app work is Victor's GROK-18.
 **Networks:** no chain was touched while writing these drafts. Where a network is named, Preview (testnet) and Preprod (testnet) are public testnets.
 
 ## How to use these drafts
@@ -18,8 +18,8 @@
 - Tip copy says "Tip" or "Support the dev" only. Tips unlock nothing.
 - Apps mentioned here are free during launch, unaudited, and not a Play Store listing.
 - The four short posts cannot hold both tip addresses. After a post, or at the end of a thread, paste the attribution reply in section 3.
-- These drafts present the Android prover as **built to prove on your phone, first device run coming soon** (localhost by default). Do not add a LAN, cloud or remote proving pitch, and do not imply a phone run has already happened. Kyle's P0-5 for the app (plain HTTP only to `127.0.0.1` or `localhost` by default; a LAN server needs an explicit opt-in with a warning; remote servers need https) is for Victor to wire in GROK-17.
-- **[CONFIRM AFTER GROK-17 + Fold7 run]:** Post 1 and the long-form name Android prover **v0.3.1**, which is the version on `main` today (`apps/android-prover/app/build.gradle.kts`). If GROK-17 ships a new version, update the string before posting. These drafts also do not claim that current in-app copy, `/ready` 503 handling, or tip wording is launch-ready — those are open GROK-14 findings for Victor to fold into GROK-17. Do not post the "built to prove on your phone" copy until P0-5 is in the app, so the copy matches shipped behavior. The first device run on the owner's Fold7 is still ahead.
+- These drafts present the Android prover as **built to prove on your phone, first device run coming soon** (localhost by default). Do not add a LAN, cloud or remote proving pitch, and do not imply a phone run has already happened. Kyle's P0-5 (plain HTTP only to `127.0.0.1` or `localhost` by default; a LAN server needs an explicit opt-in with a warning; remote servers need https) shipped in GROK-17 / v0.4.0, along with a Testnet label, a busy-server state, localhost-only http with https for any off-phone server, and a Wi-Fi exposure warning.
+- **[CONFIRM AFTER Fold7 run + Kshot okay]:** Post 1 and the long-form name Android prover **v0.4.0**, the version on `main` today (`apps/android-prover/app/build.gradle.kts`, versionCode 5). The version half of the old GROK-17 confirm is resolved. Do not post until the first device run on the owner's Fold7 has happened and Kshot okays the copy. That first device run is still ahead.
 
 ## Sources for every number
 
@@ -27,9 +27,9 @@ Every figure in the drafts traces to a merged brief or a board entry. Muse's san
 
 | Figure | Where it appears | Source |
 | --- | --- | --- |
-| Android prover v0.3.1 / versionCode 4 | Post 1, long-form | `apps/android-prover/app/build.gradle.kts`; board row CLAUDE-AP-5; [`android-prover-qa.md`](android-prover-qa.md) (GROK-14) |
+| Android prover v0.4.0 / versionCode 5 | Post 1, long-form | `apps/android-prover/app/build.gradle.kts`; board row GROK-17 (PR #82, merge 8fbd150) |
 | Official proof-server 9.0.2; live per-circuit `POST /prove` | Post 1, long-form | Board row CLAUDE-AP-4 (PR #69); [`stack-versions.md`](stack-versions.md) |
-| Built to prove on your phone, first device run coming soon (localhost by default; no LAN, cloud or remote pitch) | Post 1, long-form | Kyle's wording, 2026-11-25. P0-5 (plain HTTP only to `127.0.0.1` or `localhost` by default). The Route 3 design already targets a server on the phone at `http://127.0.0.1:6300` ([`android-prover-feasibility.md`](android-prover-feasibility.md), CLAUDE-AP-1). P0-5 itself is for GROK-17 to implement. No phone run has been done yet. |
+| Built to prove on your phone, first device run coming soon (localhost by default; no LAN, cloud or remote pitch) | Post 1, long-form | Kyle's wording, 2026-11-25. P0-5 (plain HTTP only to `127.0.0.1` or `localhost` by default). The Route 3 design already targets a server on the phone at `http://127.0.0.1:6300` ([`android-prover-feasibility.md`](android-prover-feasibility.md), CLAUDE-AP-1). P0-5 shipped in GROK-17 / v0.4.0. No phone run has been done yet. |
 | Real 1,509-byte DUST-spend payload to 2,940-byte proof in 2.56 s on sandbox CPU, not a phone measurement | Long-form | Board row CLAUDE-AP-4; Muse's run on 2026-11-25, not reproduced here. Labelled as Muse's. |
 | No-Docker official-server installer verified on amd64; arm64 phone run still the owner's supervised step | Long-form | Board row CLAUDE-AP-5 (PR #71). Muse's amd64 run, not reproduced here. |
 | Proof Station v0.2.0 | Post 2, long-form | Board row SOL-GPU-2 (PR #47); `apps/proof-station/README.md` |
@@ -40,7 +40,7 @@ Every figure in the drafts traces to a merged brief or a board entry. Muse's san
 | Glossary, DUST registration, bridges status | Post 3, long-form | [`glossary.md`](glossary.md) (GROK-13), [`dust-registration.md`](dust-registration.md) (HERMES-5), [`bridges-status.md`](bridges-status.md) (GROK-6) |
 | NightAttest first slice: Compact 0.36.1 contract + local simulator; role UI and live testnet run still ahead | Post 4, long-form | Board row SOL-2 (PR #40); `apps/nightattest/README.md` |
 | Compact 0.36.1, Midnight.js 5.0.1, proof server 9.0.2, DApp Connector 4.1.0, indexer 4.4.101, Wallet SDK 2.0.1 | Long-form | [`stack-versions.md`](stack-versions.md). Ledger 8-era pins are not current and are not used here. |
-| Hub URL | Long-form | Live GitHub Pages hub for this repo. The hub does not yet mention the Android prover; that gap is Sol's lane and is not claimed here. |
+| Hub URL | Long-form | Live GitHub Pages hub for this repo. GROK-19 adds a short Android prover v0.4.0 mention and bumps Proof Station to v0.2.0; Sol may refine the hub later. |
 
 ## 1. Four X post drafts
 
@@ -51,10 +51,10 @@ Paste the text inside each `text` block as-is, after Kshot okays posting. Do not
 - **X length:** 280 characters (URL weighted at 23; no `→`). Raw length 315.
 - **Repo link:** yes (1 of 2).
 - **@IOHK_Charles:** yes (the one post this week that may carry it, because it links merged work).
-- **[CONFIRM AFTER GROK-17 + Fold7 run]:** the `v0.3.1` version string, and P0-5 localhost-default behavior.
+- **[CONFIRM AFTER Fold7 run + Kshot okay]:** version is now `v0.4.0` (GROK-17 shipped). Still hold for the Fold7 device run and Kshot's okay before posting.
 
 ```text
-Android prover v0.3.1, built to prove on your phone, first device run coming soon (localhost by default). Muse (AI seat on Kshot's multi-AI team; reviews and merges) verified official proof-server 9.0.2 per-circuit POST /prove.
+Android prover v0.4.0, built to prove on your phone, first device run coming soon (localhost by default). Muse (AI seat on Kshot's multi-AI team; reviews and merges) verified official proof-server 9.0.2 per-circuit POST /prove.
 @MidnightNtwrk @IOHK_Charles
 https://github.com/Kshot3000/Midnight-Dapps-Sites-Research
 ```
@@ -95,7 +95,7 @@ NightAttest, first slice: a Compact 0.36.1 workshop-pass contract that proves "I
 
 ## 2. Long-form story draft
 
-A thread or community post. **2,500 characters**, in the requested 1,500–2,500 range, including the tip addresses and the independence line. **[CONFIRM AFTER GROK-17 + Fold7 run]:** the `v0.3.1` version string, P0-5 localhost-default behavior, and do not treat current in-app copy as final.
+A thread or community post. **2,500 characters**, in the requested 1,500–2,500 range, including the tip addresses and the independence line. **[CONFIRM AFTER Fold7 run + Kshot okay]:** version is now `v0.4.0` (GROK-17 shipped Testnet label, busy-server state, localhost-only http with https for any off-phone server, and the Wi-Fi exposure warning). Still hold for the Fold7 device run and Kshot's okay before posting.
 
 ```text
 Independent builder — not affiliated with the Midnight Foundation or IOG. I publish Midnight apps, a hub, and sourced research at @kshot9000.
@@ -104,7 +104,7 @@ The hub records what I can verify: https://kshot3000.github.io/Midnight-Dapps-Si
 
 Proof Station v0.2.0 is a Windows console for a Midnight Preview (testnet) full node, indexer, and local proving, plus a CPU and experimental CUDA Proof Lab. Hermes (a local AI seat on Kshot's multi-AI team) measured a k=16 circuit on an RTX 3090 at 1.168 s cold and 0.766 s warm, with 0 CUDA fallbacks; both proofs passed the stock CPU verifier (SOL-GPU-1 / SOL-GPU-2).
 
-The Android prover is at v0.3.1, built to prove on your phone, first device run coming soon (localhost by default), against official proof-server 9.0.2 over the per-circuit POST /prove protocol. Muse (an AI seat on Kshot's multi-AI team that reviews and merges) verified that path on 2026-11-25: a 1,509-byte DUST-spend payload returned a 2,940-byte proof in 2.56 s on sandbox CPU — not a phone measurement (CLAUDE-AP-4, PR #69). A no-Docker official-server installer was verified on amd64 the same day (CLAUDE-AP-5, PR #71). The app claims no phone timings. Free during launch, unaudited, not a Play Store listing.
+The Android prover is at v0.4.0, built to prove on your phone, first device run coming soon (localhost by default), against official proof-server 9.0.2 over the per-circuit POST /prove protocol. Muse (an AI seat on Kshot's multi-AI team that reviews and merges) verified that path on 2026-11-25: a 1,509-byte DUST-spend payload returned a 2,940-byte proof in 2.56 s on sandbox CPU — not a phone measurement (CLAUDE-AP-4, PR #69). A no-Docker official-server installer was verified on amd64 the same day (CLAUDE-AP-5, PR #71). The app claims no phone timings. Free during launch, unaudited, not a Play Store listing.
 
 The research library includes a glossary, a DUST registration explainer, and a bridges status brief. DUST is the shielded fee resource generated by registered NIGHT, not a transferable token. VIA's USDM route is the only mainnet-evidenced way to move value onto Midnight today. Official Cardano-to-Midnight NIGHT bridge stays off pending governance.
 
@@ -147,7 +147,7 @@ Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn
 - I did not run a phone, emulator, proof server, GPU, Windows box, or NightAttest compile.
 - I did not reproduce Muse's 1,509-byte to 2,940-byte / 2.56 s run, Muse's amd64 installer run, or Hermes's RTX 3090 timings. Those numbers are cited from the board and the merged briefs, and they are labelled as their authors'.
 - I did not re-fetch VIA Scan, the official bridge governance pages, or the live hub in this task. Those claims rest on the merged GROK-6 brief (checked 2026-11-24) and on the already-published hub URL.
-- I did not change app code. P0-5 is a copy constraint here and an app-behavior task for GROK-17.
+- I did not change app code. P0-5 shipped in GROK-17 / v0.4.0; this file only updates the copy to match.
 
 ---
 
