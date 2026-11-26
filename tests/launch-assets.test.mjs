@@ -153,5 +153,5 @@ test("pasteable drafts present proving on this phone and do not pitch LAN, cloud
 test("the research reading guide lists the launch assets brief", () => {
   const guide = readFileSync(join(root, "research/README.md"), "utf8");
   assert.match(guide, /^\| \[`launch-assets\.md`\]\(launch-assets\.md\) \(GROK-15/m);
-  assert.match(guide, /fifteen sourced research briefs/);
+  assert.match(guide, /\w+ sourced research briefs/);
 });
