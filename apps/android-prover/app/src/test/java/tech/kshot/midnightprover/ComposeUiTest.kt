@@ -1,5 +1,6 @@
 package tech.kshot.midnightprover
 
+import android.net.Uri
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertHeightIsAtLeast
@@ -21,12 +22,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
+import java.io.RandomAccessFile
 
 /** Robolectric Compose UI tests: real ViewModel, real engine, real composables. */
 @RunWith(AndroidJUnit4::class)
@@ -71,7 +77,10 @@ class ComposeUiTest {
     @Test fun proveButtonNeedsAValidPayload() {
         launch(onboarded())
         rule.onNodeWithTag("prove").performScrollTo().assertIsNotEnabled()
-        rule.onNodeWithTag("payload-field").performTextInput("abc")
+        rule.onNodeWithTag("payload-field").assertDoesNotExist()
+        rule.onNodeWithTag("hex-toggle").performScrollTo().performClick()
+        rule.onNodeWithTag("payload-field").performScrollTo().performTextInput("abc")
+        rule.onNodeWithText(Copy.INPUT_ODD).performScrollTo()
         rule.onNodeWithText(Copy.INPUT_ODD).assertIsDisplayed()
         rule.onNodeWithTag("prove").assertIsNotEnabled()
         rule.onNodeWithTag("payload-field").performTextReplacement("0x00ff")
@@ -81,10 +90,68 @@ class ComposeUiTest {
     @Test fun sampleLoadsAndShowsCircuit() {
         launch(onboarded())
         rule.onNodeWithTag("sample").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        rule.onNodeWithTag("payload-field").assertDoesNotExist()
         rule.onNodeWithText("dust/spend").assertExists()
+        rule.onNodeWithTag("circuit-details").performScrollTo().performClick()
         rule.onNodeWithText("midnight/dust/spend").assertExists()
         rule.onNodeWithText("Not in payload — set by the circuit's key").assertExists()
         rule.onNodeWithTag("prove").performScrollTo().assertIsEnabled()
+    }
+
+    @Test fun proofServerStatusOpensConfiguration() {
+        launch(onboarded())
+        rule.onNodeWithTag("open-proof-server").performScrollTo().performClick()
+        rule.onNodeWithTag("url-field").assertExists()
+    }
+
+    @Test fun proofResultCanHideItsPreviewAndStartACleanJob() {
+        MockWebServer().use { server ->
+            server.start()
+            val proof = ProofFormat.PROOF_HEADER_TEXT.toByteArray() + ByteArray(40)
+            server.enqueue(MockResponse().setBody(Buffer().write(proof)))
+            val vm = onboarded()
+            launch(vm)
+            rule.runOnIdle {
+                vm.loadSample()
+                assertTrue(app.engine.start(Fixtures.dustSpendHex, server.url("/").toString().trimEnd('/'), ClientTimeouts()))
+            }
+            rule.waitUntil(20_000) {
+                org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+                vm.state.value.session.state == JobState.DONE
+            }
+            rule.onNodeWithTag("copy-proof").performScrollTo().assertIsDisplayed()
+            rule.onNodeWithTag("result-cloak").performScrollTo().performClick()
+            rule.waitForIdle()
+            assertTrue(vm.state.value.settings.privacyCloak)
+            rule.onNodeWithText(HexCloak.preview(HexCodec.bytesToHex(proof), true)).assertExists()
+            rule.onNodeWithText("Start a new job").performScrollTo().performClick()
+            rule.waitForIdle()
+            assertEquals("", vm.state.value.draft)
+            assertEquals(JobState.IDLE, vm.state.value.session.state)
+            assertEquals(1, vm.state.value.history.size)
+            rule.onNodeWithTag("result-card").assertDoesNotExist()
+            rule.onNodeWithTag("prove").assertIsNotEnabled()
+        }
+    }
+
+    @Test fun oversizedDocumentLeavesExistingDraftIntact() {
+        val vm = onboarded()
+        launch(vm)
+        val file = File.createTempFile("oversized-payload", ".bin", app.cacheDir)
+        try {
+            RandomAccessFile(file, "rw").use { it.setLength(MainActivity.MAX_IMPORT_BYTES.toLong() + 1L) }
+            rule.runOnIdle {
+                vm.onDraftChange("0x00ff")
+                vm.importDocument(Uri.fromFile(file), "a file")
+            }
+            rule.waitUntil(10_000) {
+                org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+                vm.state.value.importMessage.contains("larger than 2 MB")
+            }
+            assertEquals("0x00ff", vm.state.value.draft)
+        } finally {
+            file.delete()
+        }
     }
 
     @Test fun provingAgainstNothingShowsUnreachableStateWithRetry() {
@@ -168,8 +235,8 @@ class ComposeUiTest {
     @Config(qualifiers = "+w900dp-h800dp")
     @Test fun expandedWidthUsesRailAndTwoPanes() {
         launch(onboarded())
-        // Both panes visible at once: editor and server card without scrolling.
-        rule.onNodeWithTag("payload-field").assertIsDisplayed()
+        // Both panes visible at once: input controls and server card without scrolling.
+        rule.onNodeWithTag("sample").assertIsDisplayed()
         rule.onNodeWithTag("server-card").assertIsDisplayed()
         rule.onNodeWithTag("tab-SETTINGS").assertIsDisplayed()
     }

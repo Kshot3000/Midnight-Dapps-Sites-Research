@@ -52,6 +52,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.sin
@@ -227,6 +228,7 @@ fun LinkButton(
 fun MidnightCard(
     modifier: Modifier = Modifier,
     borderColor: Color = MidnightPalette.Hairline,
+    contentPadding: Dp = 20.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -235,7 +237,7 @@ fun MidnightCard(
             .clip(RoundedCornerShape(24.dp))
             .background(MidnightPalette.Nebula.copy(alpha = 0.9f))
             .border(1.dp, borderColor, RoundedCornerShape(24.dp))
-            .padding(20.dp),
+            .padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         content = content
     )

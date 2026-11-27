@@ -62,9 +62,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * Midnight Prover — a client for Midnight's official proof server 9.0.2
@@ -111,30 +108,9 @@ class MainActivity : ComponentActivity() {
                 @Suppress("DEPRECATION")
                 val uri: Uri? = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
                 else intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                uri?.let { readUri(it, "a shared file") }
+                uri?.let { vm.importDocument(it, "a shared file") }
             }
-            Intent.ACTION_VIEW -> intent.data?.let { readUri(it, "an opened file") }
-        }
-    }
-
-    private fun readUri(uri: Uri, source: String) {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    contentResolver.openInputStream(uri)?.use { input ->
-                        input.readNBytesCompat(MAX_IMPORT_BYTES + 1)
-                    }
-                }
-            }
-            val bytes = result.getOrNull()
-            when {
-                result.isFailure -> vm.importFailed("Couldn't read $source.")
-                bytes == null -> vm.importFailed("Couldn't open $source.")
-                bytes.size > MAX_IMPORT_BYTES -> vm.importFailed(
-                    "That file from $source is larger than ${MAX_IMPORT_BYTES / (1024 * 1024)} MB, so it wasn't imported."
-                )
-                else -> vm.importPayload(bytes, source)
-            }
+            Intent.ACTION_VIEW -> intent.data?.let { vm.importDocument(it, "an opened file") }
         }
     }
 

@@ -31,8 +31,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - run: gradle testDebugUnitTest assembleDebug --console=plain
+      - name: Test, render native previews and assemble the debug APK
+        env:
+          PROVER_SCREENSHOT_DIR: ${{ runner.temp }}/android-prover-screenshots
+        run: |
+          mkdir -p "$PROVER_SCREENSHOT_DIR"
+          gradle testDebugUnitTest assembleDebug --console=plain -Proborazzi.test.record=true
       - uses: actions/upload-artifact@v4
         with:
           name: midnight-prover-debug-apk
           path: apps/android-prover/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: midnight-prover-screenshots
+          path: ${{ runner.temp }}/android-prover-screenshots
+          if-no-files-found: error
