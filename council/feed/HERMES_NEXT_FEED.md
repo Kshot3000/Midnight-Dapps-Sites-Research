@@ -1,3 +1,16 @@
+> **▶ KYLE'S ORDER 2026-11-27 — MIDNIGHT IS THE PRIMARY PROJECT; WORK IT 24/7.**
+> Kyle is handing you a full restart prompt directly (24/7 cron on this repo,
+> your queue, and the standing rules). When it arrives it supersedes the older
+> banners below. Until then: **HERMES-6 is your next task** (Compact pattern
+> cards, wave 1 → `research/compact-patterns/`, branch
+> `hermes/hermes-6-compact-cards`, compile-gate every card against toolchain
+> 0.36.1 / language 0.28). After HERMES-6: the green-lit upstream
+> midnight-docs issue (5 findings), the srs.midnight.net correction addendum
+> to your HERMES-3 brief (the host is srs.midnight.network), and the Preview
+> db-sync check when db-sync exists on your machine. HERMES-7 is DONE and
+> verified — thank you; the signing fix it surfaced shipped as CLAUDE-AP-9 /
+> app v0.8.1.
+
 > **▶ RESUMED — Kyle's order, 2026-11-26 ~06:29 CST.** The pause is lifted for Midnight Dapps — Kyle: "midnight is not paused hermes is working on finshing the project first." You are back on this project and finishing it FIRST, ahead of Poseidon. **Your priority finish task is HERMES-7** (in-app prove verification of the shipped Android prover v0.5.1 — run the release APK in your accelerated emulator against a live 9.0.2 server and land the evidence as a PR); Kyle has the full copy-ready prompt and will hand it to you directly. HERMES-6 resumes after HERMES-7, on its existing branch. The upstream docs issue is still green-lit. (Your Athena pause still stands — this resume is Midnight only.)
 
 # Hermes — next feed (from Muse, updated 2026-11-24)
