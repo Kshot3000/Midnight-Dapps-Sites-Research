@@ -1,9 +1,11 @@
 package tech.kshot.midnightprover
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class HealthKind { UNKNOWN, CHECKING, ONLINE, BUSY, NOT_READY, WRONG_VERSION, TIMEOUT, UNENCRYPTED, OFFLINE, ERROR }
 
@@ -96,6 +99,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ProverUiState())
 
     private var healthJob: Job? = null
+    private var documentImport: Job? = null
 
     init {
         if (local.value.settings.onboardingDone) checkServer()
@@ -114,6 +118,8 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
     // ---- Draft / import ----
     fun onDraftChange(text: String) {
         if (engine.session.value.isRunning) return
+        documentImport?.cancel()
+        documentImport = null
         local.update { it.copy(draft = text, importMessage = "") }
         // Bundles are size-limited; very large payloads are kept only in memory/engine files.
         saved[KEY_DRAFT] = if (text.length <= MAX_SAVED_DRAFT) text else null
@@ -121,6 +127,7 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /** Imports bytes from a file/share: raw proving payloads become hex; hex text is kept. */
     fun importPayload(bytes: ByteArray, source: String) {
+        if (engine.session.value.isRunning) return
         val asText = runCatching { String(bytes, Charsets.US_ASCII) }.getOrDefault("")
         val hex = if (ProofJobInput.validationError(asText) == null) ProofJobInput.cleanHex(asText) else HexCodec.bytesToHex(bytes)
         onDraftChange(hex)
@@ -138,6 +145,31 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
         local.update { it.copy(importMessage = message) }
     }
 
+    fun importDocument(uri: Uri, source: String) {
+        if (engine.session.value.isRunning) return
+        documentImport?.cancel()
+        local.update { it.copy(importMessage = "Reading $source…") }
+        documentImport = viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    graph.contentResolver.openInputStream(uri)?.use {
+                        it.readNBytesCompat(MainActivity.MAX_IMPORT_BYTES + 1)
+                    }
+                }
+            }
+            documentImport = null
+            val bytes = result.getOrNull()
+            when {
+                result.isFailure -> importFailed("Couldn't read $source.")
+                bytes == null -> importFailed("Couldn't open $source.")
+                bytes.size > MainActivity.MAX_IMPORT_BYTES -> importFailed(
+                    "That file from $source is larger than ${MainActivity.MAX_IMPORT_BYTES / (1024 * 1024)} MB, so it wasn't imported."
+                )
+                else -> importPayload(bytes, source)
+            }
+        }
+    }
+
     fun loadSample() {
         val bytes = getApplication<Application>().assets.open(SAMPLE_ASSET).use { it.readBytes() }
         importPayload(bytes, "the bundled sample")
@@ -152,11 +184,24 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
         val last = engine.session.value.payloadHex
         if (local.value.draft.isBlank() && last.isNotEmpty()) onDraftChange(last)
         val started = engine.start(local.value.draft, local.value.settings.baseUrl, timeouts())
-        if (started) ProveService.start(getApplication())
+        if (started) {
+            documentImport?.let {
+                it.cancel()
+                documentImport = null
+                local.update { state -> state.copy(importMessage = "") }
+            }
+            ProveService.start(getApplication())
+        }
     }
 
     fun cancelProve() = engine.cancel()
     fun dismissResult() = engine.dismiss()
+    fun startNewJob() {
+        if (engine.session.value.isRunning) return
+        clearDraft()
+        engine.dismiss()
+    }
+
     fun clearHistory() = engine.clearHistory()
 
     // ---- Server ----

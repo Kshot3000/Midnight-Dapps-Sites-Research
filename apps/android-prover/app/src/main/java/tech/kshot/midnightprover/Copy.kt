@@ -23,8 +23,7 @@ object Copy {
     const val ONBOARD_OTHER = "Skip for now"
 
     // Header
-    const val HEADER_SUBTITLE = "Make Midnight zero-knowledge proofs on this phone, with the official proof server."
-    fun headerSubtitleRemote(host: String) = "Make Midnight zero-knowledge proofs with the official proof server on $host — a server off this phone."
+    const val HEADER_SUBTITLE = "Import a payload, review its circuit, and generate a proof."
 
     // Status
     const val STATUS_NOT_CHECKED = "Server not checked yet. Tap Check server."
@@ -65,7 +64,7 @@ object Copy {
     // Done
     fun doneTitle(d: String) = "Proof returned in $d"
     const val DONE_CAPTION = "Timed by this app, network included. Not a benchmark."
-    const val DONE_NOTE = "Proof ready. Copy the hex and give it to the tool that made the payload. This app doesn't send anything to a Midnight network."
+    const val DONE_NOTE = "Return the proof to the wallet or tool that created the payload."
     const val COPY_PROOF = "Copy proof (hex)"
     const val PROOF_COPIED = "Proof copied"
 

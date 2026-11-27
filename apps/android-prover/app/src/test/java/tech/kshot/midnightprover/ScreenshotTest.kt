@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * Renders every screen and state to docs/screenshots/ (record with
+ * Renders every screen and state to docs/screenshots/ or PROVER_SCREENSHOT_DIR (record with
  * `gradle testDebugUnitTest -Proborazzi.test.record=true`). States are
  * built explicitly; the "online" server card uses the field values the real
  * 9.0.2 server returned in GROK-17's live run, and the proof result uses the
@@ -54,7 +54,8 @@ class ScreenshotTest {
             }
         }
         if (scrollToTag != null) rule.onNodeWithTag(scrollToTag).performScrollTo()
-        rule.onRoot().captureRoboImage("../docs/screenshots/$name.png")
+        val directory = System.getenv("PROVER_SCREENSHOT_DIR") ?: "../docs/screenshots"
+        rule.onRoot().captureRoboImage("$directory/$name.png")
     }
 
     private fun history() = listOf(
