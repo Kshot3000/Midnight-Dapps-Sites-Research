@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Try the NightAttest workshop pass with the local Compact contract simulator.">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>NightAttest · Workshop pass</title>
+  <link rel="stylesheet" href="./src/nightattest.css">
+  <script type="module" src="./src/nightattest.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="wordmark" href="https://kshot3000.github.io/Midnight-Dapps-Sites-Research/">
+        <span class="moon" aria-hidden="true"></span>
+        Midnight Dapps
+      </a>
+      <a href="https://github.com/Kshot3000/Midnight-Dapps-Sites-Research/tree/main/apps/nightattest">Source &amp; setup</a>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <p class="mode"><span aria-hidden="true"></span> Local simulation</p>
+        <h1 id="title">NightAttest</h1>
+        <p class="intro">Prove you hold an active workshop pass while keeping the pass secret private.</p>
+        <p class="mode-note">This browser runs a simulated contract. All results stay in this tab. Reload to start a new session.</p>
+      </div>
+      <div class="eclipse" aria-hidden="true"></div>
+    </section>
+
+    <noscript><p class="boot-status">Enable JavaScript to run the local Compact simulator.</p></noscript>
+    <p id="boot-status" class="boot-status" role="status" hidden></p>
+    <div class="workspace">
+      <div class="workbench">
+        <nav class="role-nav" aria-label="Workshop roles">
+          <button type="button" data-role="issuer" aria-controls="issuer" aria-pressed="true">Issuer</button>
+          <button type="button" data-role="holder" aria-controls="holder" aria-pressed="false">Holder</button>
+          <button type="button" data-role="verifier" aria-controls="verifier" aria-pressed="false">Verifier</button>
+        </nav>
+
+        <section id="issuer" class="role-panel" aria-labelledby="issuer-title">
+          <h2 id="issuer-title">Manage workshop passes</h2>
+          <p class="role-intro">Register a holder’s opaque commitment after checking eligibility outside the app. Revoke it to remove the pass from the active set.</p>
+          <form id="issuer-form">
+            <fieldset disabled>
+              <label for="issuer-commitment">Credential commitment</label>
+              <input id="issuer-commitment" name="commitment" type="text" required pattern="[0-9A-Fa-f]{64}"
+                maxlength="64" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="64 hexadecimal characters"
+                aria-describedby="issuer-help">
+              <p id="issuer-help" class="hint">Create a simulated pass in Holder first, then load its commitment here.</p>
+              <button id="load-commitment" class="text-button" type="button" disabled>Use holder commitment</button>
+              <div class="actions">
+                <button class="button primary" type="submit" value="register">Register commitment</button>
+                <button class="button" type="submit" value="revoke">Revoke commitment</button>
+              </div>
+            </fieldset>
+          </form>
+          <p id="issuer-status" class="feedback" role="status"></p>
+        </section>
+
+        <section id="holder" class="role-panel" aria-labelledby="holder-title" hidden>
+          <h2 id="holder-title">Present a workshop pass</h2>
+          <p class="role-intro">Create an opaque commitment for Issuer to register. Once it’s active, answer a fresh challenge from Verifier.</p>
+          <fieldset id="holder-pass" disabled>
+            <button id="create-pass" class="button" type="button">Create simulated pass</button>
+            <div id="holder-output" class="value-box" hidden>
+              <label for="holder-commitment">Commitment to share with issuer</label>
+              <input id="holder-commitment" type="text" readonly spellcheck="false">
+              <p class="hint">The pass secret stays in this tab’s memory and is lost when the session ends.</p>
+            </div>
+          </fieldset>
+          <form id="holder-form">
+            <fieldset disabled>
+              <label for="holder-challenge">Verifier challenge</label>
+              <input id="holder-challenge" name="challenge" type="text" required pattern="[0-9A-Fa-f]{64}"
+                maxlength="64" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="64 hexadecimal characters"
+                aria-describedby="holder-help">
+              <p id="holder-help" class="hint">Use the current challenge from Verifier. The simulator evaluates the circuit without generating proof bytes.</p>
+              <button id="load-challenge" class="text-button" type="button" disabled>Use verifier challenge</button>
+              <div class="actions">
+                <button class="button primary" type="submit">Simulate presentation</button>
+              </div>
+            </fieldset>
+          </form>
+          <p id="holder-status" class="feedback" role="status"></p>
+        </section>
+
+        <section id="verifier" class="role-panel" aria-labelledby="verifier-title" hidden>
+          <h2 id="verifier-title">Check a presentation</h2>
+          <p class="role-intro">Issue a fresh challenge for this session, then check whether the simulated contract accepted it.</p>
+          <fieldset id="verifier-controls" disabled>
+            <button id="issue-challenge" class="button" type="button">Issue fresh challenge</button>
+            <div id="verifier-output" class="value-box" hidden>
+              <label for="verifier-challenge">Current simulated challenge</label>
+              <input id="verifier-challenge" type="text" readonly spellcheck="false">
+            </div>
+            <div class="actions">
+              <button id="check-challenge" class="button primary" type="button" disabled>Check simulated result</button>
+            </div>
+          </fieldset>
+          <p id="verifier-status" class="feedback" role="status"></p>
+          <p class="hint">An acceptance reflects eligibility when the pass was presented. Issue a fresh challenge to check eligibility again.</p>
+        </section>
+      </div>
+
+      <aside class="context" aria-label="Simulation and privacy">
+        <section class="context-card" aria-labelledby="ledger-title">
+          <h2 id="ledger-title">Simulated ledger</h2>
+          <dl class="ledger">
+            <div><dt>Commitments issued</dt><dd id="issued">—</dd></div>
+            <div><dt>Active passes</dt><dd id="active">—</dd></div>
+            <div><dt>Challenges accepted</dt><dd id="accepted">—</dd></div>
+          </dl>
+        </section>
+        <section class="context-card privacy" aria-labelledby="privacy-title">
+          <h2 id="privacy-title">What the circuit reveals</h2>
+          <dl>
+            <dt>Private during presentation</dt>
+            <dd>The holder secret, selected commitment and Merkle path. The circuit checks membership against the current active root.</dd>
+            <dt>Public on a deployed contract</dt>
+            <dd>Issuance and revocation expose commitments, slots and status. A presentation reveals its challenge, the root checked and acceptance. Transaction timing and metadata can still reveal patterns.</dd>
+          </dl>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Cardano (ADA): addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</p>
+      <p>Midnight (shielded): mn_shield-addr1k5vrk8kh4cj9l6cetlumrjy3w0l9p5tt9mux4mnn2pxn6ck70hlrxasc88v202l8w0c4ne5r03du7s4pxawd6r54a2sw0rgnq253lgsdksa2q</p>
+      <p>@kshot9000 · Independent builder — not affiliated with the Midnight Foundation or IOG.</p>
+    </div>
+  </footer>
+</body>
+</html>

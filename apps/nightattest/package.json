@@ -4,12 +4,21 @@
   "type": "module",
   "scripts": {
     "compile": "compact compile +0.36.1 contract/nightattest.compact managed/nightattest",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:browser": "node --test tests/roles.browser.mjs"
   },
   "engines": {
     "node": ">=24"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.21.0"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1",
+    "vite": "8.4.0",
+    "vite-plugin-wasm": "3.6.0"
   }
 }
