@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.7.1)
+# Midnight Prover — Android app (v0.8.0)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -8,7 +8,7 @@ Mission context: help take the Midnight ZK prover mobile, building on the
 same proof-server line this team verified on Windows (Proof Station) and
 in the cloud.
 
-This is the Fold7 sideload build (versionCode 10). Sideloading and the
+This is the Fold7 sideload build (versionCode 11). Sideloading and the
 first on-device run stay the owner's supervised step.
 
 ## Design — Route 3 (CLAUDE-AP-1 verdict)
@@ -81,6 +81,29 @@ The app stores no cloud backup (`android:allowBackup="false"`, with
 - TalkBack labels on the tab icons, live announcements, a starfield that
   pauses during proofs, and "Check server" no longer hiding the proof.
 - Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
+
+## What v0.8.0 changes (SOL-AP-1)
+
+Sol's native GUI refinement of the shipped app, against the UI v2
+mobile reference and the black-and-white Midnight direction:
+
+- A compact server status card brings the current connection,
+  refresh, and server settings onto the Prove screen.
+- The proof job opens with Paste, Import file, and Try sample. A
+  loaded payload shows its circuit, size, and format before the
+  primary Prove action; detailed metadata and raw hex are on demand.
+  Replace payload restores the import choices without clearing the
+  current draft.
+- Copy, Share, and Save sit near the top of the result; the result
+  keeps the privacy cloak, and Start a new job clears the draft
+  while preserving activity history.
+- In-app and shared file imports share one asynchronous size check
+  with error feedback; a rejected file leaves the current draft
+  intact. At larger font scales the step indicator gives the active
+  stage its own full-width label, and an off-phone destination stays
+  visible before proving.
+
+The proof-server client and circuit protocol are unchanged.
 
 ## What v0.7.1 fixes (CLAUDE-AP-8 fixup)
 
