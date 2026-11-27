@@ -96,6 +96,9 @@ class ComposeUiTest {
         rule.onNodeWithText("midnight/dust/spend").assertExists()
         rule.onNodeWithText("Not in payload — set by the circuit's key").assertExists()
         rule.onNodeWithTag("prove").performScrollTo().assertIsEnabled()
+        rule.onNodeWithTag("replace-payload").performScrollTo().performClick()
+        rule.onNodeWithTag("import-file").assertExists()
+        rule.onNodeWithText("dust/spend").assertExists()
     }
 
     @Test fun proofServerStatusOpensConfiguration() {
@@ -244,6 +247,7 @@ class ComposeUiTest {
     @Config(fontScale = 2.0f)
     @Test fun largeFontStillUsable() {
         launch(onboarded())
+        rule.onNodeWithContentDescription("Step 1 of 4: Load").assertExists()
         rule.onNodeWithTag("prove").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("tab-SETTINGS").performClick()
         rule.onNodeWithText(Attribution.MIDNIGHT_ADDRESS).performScrollTo().assertIsDisplayed()

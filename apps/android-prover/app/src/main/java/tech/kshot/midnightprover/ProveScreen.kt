@@ -55,9 +55,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -104,23 +106,35 @@ fun AdaptivePanes(
 @Composable
 fun FlowSteps(current: Int) {
     val steps = listOf("Load", "Review", "Prove", "Result")
-    Row(
-        Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
-            contentDescription = "Step ${current + 1} of 4: ${steps[current]}"
+    val showAllLabels = LocalDensity.current.fontScale <= 1.5f
+    Column(
+        Modifier.fillMaxWidth().clearAndSetSemantics {
+            contentDescription = "Step ${current + 1} of ${steps.size}: ${steps[current]}"
         },
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        steps.forEachIndexed { i, label ->
-            val active = i == current
-            val done = i < current
-            val color = when { active -> MidnightPalette.ProofGlow; done -> MidnightPalette.VioletText; else -> MidnightPalette.DimStar }
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(
-                    Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
-                        .background(if (active || done) color else MidnightPalette.Hairline)
-                )
-                Text(label, style = MaterialTheme.typography.labelMedium, color = color, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+        if (!showAllLabels) {
+            Text("${steps[current]} · ${current + 1} of ${steps.size}", style = MaterialTheme.typography.labelLarge,
+                color = MidnightPalette.Starlight)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            steps.forEachIndexed { i, label ->
+                val color = when {
+                    i == current -> MidnightPalette.ProofGlow
+                    i < current -> MidnightPalette.VioletText
+                    else -> MidnightPalette.DimStar
+                }
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(
+                        Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
+                            .background(if (i <= current) color else MidnightPalette.Hairline)
+                    )
+                    if (showAllLabels) {
+                        Text(label, style = MaterialTheme.typography.labelMedium, color = color,
+                            maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                    }
+                }
             }
         }
     }
@@ -228,8 +242,13 @@ private fun JobEditor(
     val clipboard = LocalClipboardManager.current
     var editHex by rememberSaveable { mutableStateOf(false) }
     var showDetails by rememberSaveable { mutableStateOf(false) }
+    var showSources by rememberSaveable { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let { vm.importDocument(it, "a file") }
+        if (uri != null) {
+            editHex = false
+            showSources = false
+            vm.importDocument(uri, "a file")
+        }
     }
     MidnightCard {
         SectionLabel(if (info == null) "New proof job" else "Review payload")
@@ -237,17 +256,27 @@ private fun JobEditor(
             Text("Load a proving payload", style = MaterialTheme.typography.titleLarge, color = MidnightPalette.Starlight)
             Text("Import a file, paste hex, or try the bundled sample.",
                 style = MaterialTheme.typography.bodyMedium, color = MidnightPalette.Moonlight)
+        } else if (showCircuit) {
+            PayloadSummary(info)
+        }
+        if (info == null || showSources) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 GhostButton("Paste", onClick = {
                     val text = clipboard.getText()?.text
                     if (text.isNullOrBlank()) vm.importFailed("The clipboard has no hex text.")
-                    else vm.importPayload(text.toByteArray(), "the clipboard")
+                    else {
+                        editHex = false
+                        showSources = false
+                        vm.importPayload(text.toByteArray(), "the clipboard")
+                    }
                 }, icon = Icons.Filled.Create, modifier = Modifier.testTag("paste"))
                 GhostButton("Import file", onClick = { picker.launch(arrayOf("*/*")) }, modifier = Modifier.testTag("import-file"))
-                GhostButton("Try sample", onClick = vm::loadSample, icon = Icons.Filled.PlayArrow, modifier = Modifier.testTag("sample"))
+                GhostButton("Try sample", onClick = {
+                    editHex = false
+                    showSources = false
+                    vm.loadSample()
+                }, icon = Icons.Filled.PlayArrow, modifier = Modifier.testTag("sample"))
             }
-        } else if (showCircuit) {
-            PayloadSummary(info)
         }
         if (editHex) {
             OutlinedTextField(
@@ -285,12 +314,20 @@ private fun JobEditor(
                 LinkButton(if (showDetails) "Hide circuit details" else "Circuit details",
                     onClick = { showDetails = !showDetails }, modifier = Modifier.testTag("circuit-details"))
             }
+            if (info != null) {
+                LinkButton(if (showSources) "Hide sources" else "Replace payload",
+                    onClick = { showSources = !showSources }, modifier = Modifier.testTag("replace-payload"))
+            }
         }
         if (info != null && showCircuit && showDetails) PayloadDetails(info)
         val serverQueueFull = state.health.status?.queueFull == true
         if (serverQueueFull) Text(Copy.QUEUE_FULL_PRECHECK, color = MidnightPalette.WarningAmber, style = MaterialTheme.typography.bodySmall)
-        if (state.health.kind == HealthKind.OFFLINE && state.draftInfo != null) {
+        if (state.health.kind == HealthKind.OFFLINE && info != null) {
             Text(Copy.statusUnreachable(state.settings.baseUrl), color = MidnightPalette.WarningAmber, style = MaterialTheme.typography.bodySmall)
+        }
+        if (state.offPhone && info != null) {
+            Text("This payload will be sent to ${state.settings.baseUrl}.",
+                color = MidnightPalette.WarningAmber, style = MaterialTheme.typography.bodySmall)
         }
         GradientButton(
             text = Copy.PROVE_BUTTON,

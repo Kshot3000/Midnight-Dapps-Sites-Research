@@ -185,8 +185,11 @@ class ProverViewModel(app: Application, private val saved: SavedStateHandle) : A
         if (local.value.draft.isBlank() && last.isNotEmpty()) onDraftChange(last)
         val started = engine.start(local.value.draft, local.value.settings.baseUrl, timeouts())
         if (started) {
-            documentImport?.cancel()
-            documentImport = null
+            documentImport?.let {
+                it.cancel()
+                documentImport = null
+                local.update { state -> state.copy(importMessage = "") }
+            }
             ProveService.start(getApplication())
         }
     }
