@@ -1,4 +1,4 @@
-# Midnight Prover — Android app (v0.8.0)
+# Midnight Prover — Android app (v0.8.1)
 
 An Android client for Midnight's official proof server: it sends one
 proving payload to the server and gets the proof back. The goal is to run
@@ -8,7 +8,7 @@ Mission context: help take the Midnight ZK prover mobile, building on the
 same proof-server line this team verified on Windows (Proof Station) and
 in the cloud.
 
-This is the Fold7 sideload build (versionCode 11). Sideloading and the
+This is the Fold7 sideload build (versionCode 12). Sideloading and the
 first on-device run stay the owner's supervised step.
 
 ## Design — Route 3 (CLAUDE-AP-1 verdict)
@@ -81,6 +81,24 @@ The app stores no cloud backup (`android:allowBackup="false"`, with
 - TalkBack labels on the tab icons, live announcements, a starfield that
   pauses during proofs, and "Check server" no longer hiding the proof.
 - Android Gradle Plugin 8.7.3 (Gradle 8.9, compileSdk 35).
+
+## What v0.8.1 fixes (CLAUDE-AP-9)
+
+Stable signing. Every build now signs with the project's own
+sideload key (`keystore/midnight-prover.jks`, certificate SHA-256
+42:14:91:9A:8F:64:B1:99:E2:EC:50:D0:8F:40:F1:AA:0D:1F:B2:2D:41:57:
+3D:71:AC:F7:B8:27:4C:53:9A:F0), so from v0.8.1 onward new releases
+install over the old one in place — settings and history survive.
+Before this fix, CI builds used each runner's auto-generated debug
+key, which changed between builds (HERMES-7 finding F1: v0.7.0 and
+v0.7.1 carried different keys), so updating meant uninstalling
+first and losing the saved server URL and activity history.
+
+One last uninstall is needed to move from any pre-0.8.1 build to
+v0.8.1, because the key changes one final time. The key is a public
+sideload key for this free, open-source app — see
+`keystore/README.md`. It is not a Play Store key; store distribution
+would use a separate, private key.
 
 ## What v0.8.0 changes (SOL-AP-1)
 

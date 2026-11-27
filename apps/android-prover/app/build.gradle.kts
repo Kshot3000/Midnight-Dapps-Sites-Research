@@ -13,13 +13,33 @@ android {
         applicationId = "tech.kshot.midnightprover"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.8.0"
+        versionCode = 12
+        versionName = "0.8.1"
+    }
+
+    // CLAUDE-AP-9: every build signs with the project's committed
+    // sideload key (apps/android-prover/keystore/) so release APKs
+    // always carry the same certificate and update in place. Before
+    // this, CI debug builds used each runner's auto-generated debug
+    // key, which drifted between builds (v0.7.0 vs v0.7.1) and forced
+    // uninstall-first updates. The key is a public sideload key (see
+    // keystore/README.md) — it is NOT a Play Store key.
+    signingConfigs {
+        create("sideload") {
+            storeFile = rootProject.file("keystore/midnight-prover.jks")
+            storePassword = "android"
+            keyAlias = "midnight-prover"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("sideload")
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("sideload")
         }
     }
     buildFeatures {
