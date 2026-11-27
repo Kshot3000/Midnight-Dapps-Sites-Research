@@ -235,9 +235,9 @@ fun SettingsScreen(state: ProverUiState, vm: ProverViewModel) {
                     }
                 }
                 HorizontalDivider(color = MidnightPalette.Hairline)
-                SwitchRow("Keep screen on while proving", "Stops the screen from sleeping during a proof.", state.settings.keepScreenOn, vm::setKeepScreenOn)
-                SwitchRow("Reduce motion", "Freezes the starfield and pulsing animations. The system's \"Remove animations\" setting also does this.", state.settings.reduceMotion, vm::setReduceMotion)
-                SwitchRow("Privacy cloak", "Masks proof and payload hex on screen — for screenshots and screen sharing. Copy, share and save still use the real proof.", state.settings.privacyCloak, vm::setPrivacyCloak)
+                SwitchRow("Keep screen on while proving", "Stops the screen from sleeping during a proof.", state.settings.keepScreenOn, onChange = vm::setKeepScreenOn)
+                SwitchRow("Reduce motion", "Freezes the starfield and pulsing animations. The system's \"Remove animations\" setting also does this.", state.settings.reduceMotion, onChange = vm::setReduceMotion)
+                SwitchRow("Privacy cloak", "Masks proof and payload hex on screen — for screenshots and screen sharing. Copy, share and save still use the real proof.", state.settings.privacyCloak, onChange = vm::setPrivacyCloak)
             }
             OffPhoneCard(state, vm)
         },
@@ -250,8 +250,8 @@ internal fun SwitchRow(
     title: String,
     body: String,
     checked: Boolean,
-    onChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChange: (Boolean) -> Unit
 ) {
     Row(
         modifier.fillMaxWidth().heightIn(min = 56.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange),

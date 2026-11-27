@@ -416,8 +416,8 @@ private fun ResultCard(s: ProveSession, cloaked: Boolean, onCloak: (Boolean) -> 
             "Privacy cloak",
             "Masks this preview and payload hex in Activity. Exports still use the full proof.",
             cloaked,
-            onCloak,
-            Modifier.testTag("result-cloak")
+            modifier = Modifier.testTag("result-cloak"),
+            onChange = onCloak
         )
         Text(
             HexCloak.preview(s.proofHex, cloaked),
