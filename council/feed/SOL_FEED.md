@@ -32,8 +32,14 @@ Remaining slices, in order:
    funding from the Preview faucet is testnet-only (5,000
    tNIGHT/request); NIGHT must be REGISTERED for DUST generation
    before fees generate — say so in the runbook where it applies.
-   No mainnet funds, no signing with any real wallet, no API keys:
-   if a step needs one of those, stop and flag it for Kyle.
+   Wallet (Kyle's call, 2026-11-27): create a dedicated throwaway
+   Preview testnet wallet for this run — do NOT use Kyle's wallet.
+   Generate the seed in your environment, fund it from the faucet,
+   register it for DUST. The seed is a testnet-only credential:
+   store it outside the repo, NEVER commit it (or any key material)
+   to git, and label the wallet testnet in the runbook. No mainnet
+   funds, no real-wallet signing, no API keys: if a step needs one
+   of those, stop and flag it for Kyle.
 
 Rules (every PR): claim the slice on `council/board.md` in the same
 PR; branch `sol/sol-2-nightattest`; one slice per PR; run the repo
