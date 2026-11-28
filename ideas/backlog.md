@@ -4,9 +4,9 @@ Maintained by Muse (guide seat). Each idea names the Midnight primitives it actu
 
 | # | Idea | Midnight primitives | Status |
 | --- | --- | --- | --- |
-| 1 | **NightAttest** — selective-disclosure credentials: issuer grants a private credential, only a commitment goes on-ledger; holder proves one fact (over-21, member in good standing); verifier learns only yes/no; revocation enforced in the circuit | Selective disclosure, private state + ZK proof, DUST-shielded fees | Spec — flagship, SOL-2 |
-| 2 | **Private Voting** — private vote, proven eligibility, public auditable result | Selective disclosure, private state + ZK proof | Idea |
-| 3 | **Sealed-Bid Auction** — bids private until close, winner proven without revealing losing bids | Private state + ZK proof, shielded fees | Idea |
+| 1 | **NightPass** (protocol: NightAttest) — selective-disclosure credentials: issuer grants a private credential, only a commitment goes on-ledger; holder proves one fact (over-21, member in good standing); verifier learns only yes/no; revocation enforced in the circuit | Selective disclosure, private state + ZK proof, DUST-shielded fees | Spec — flagship, SOL-2 |
+| 2 | **VeilVote** (private voting) — private vote, proven eligibility, public auditable result | Selective disclosure, private state + ZK proof | Idea |
+| 3 | **Silent Gavel** (sealed-bid auction) — bids private until close, winner proven without revealing losing bids | Private state + ZK proof, shielded fees | Idea |
 | 4 | **Confidential Freelance Escrow** — funds proven locked, delivery proven, rates and history stay private | Private state + ZK proof, selective disclosure | Idea |
 | 5 | **Eligibility-Without-KYC widget** — drop-in boolean proof (age / residency / licence) other sites can embed | Selective disclosure | Idea |
 | 6 | **Private Payroll Proof** — prove employment, tenure, or salary above a threshold without revealing employer or exact pay | Selective disclosure, private state | Idea |
@@ -15,6 +15,10 @@ Maintained by Muse (guide seat). Each idea names the Midnight primitives it actu
 | 9 | **Compact Playground + Snippet Library** — tested Compact patterns for voting, credentials, auctions, escrow | Compact / ZK circuits | Idea |
 | 10 | **DUST Planner Pro** — estimates DUST generation, decay, and fee capacity from registered NIGHT | DUST mechanics | Local tool · [Modelled estimates and setup](../apps/dust-planner/) |
 | 11 | **ROSCA / Rotating Savings Circle** — members contribute privately against a public round counter; each round's receiver is drawn fairly and paid shielded, without revealing who contributed what. Open problems (HERMES-2 gap list #6/#7): no example covers a verifiable multi-party draw or a private contribution ledger — both must be invented | Private state + ZK proof, shielded fees, commit-reveal | Idea — added 2026-11-24 at Hermes' suggestion from the HERMES-2 catalogue |
+
+| 12 | **Eclipse** — private credit & undercollateralized lending: borrower proves creditworthiness (score / income / collateral thresholds) from private financial state; identity stays private during normal repayment and is revealed to lender or arbitrator only on default. Depends on NightPass (the credit credential is a passport credential) and on a credit attester existing | Selective disclosure, private state + ZK proof, conditional disclosure | Idea — added 2026-11-28 from Kyle's six-concept brief; analysis in `research/brief-2026-11-28-analysis.md` |
+| 13 | **MoonManifest** — confidential B2B settlement & regulated RWAs: unit pricing, margins, supplier lists and payroll amounts stay private; ownership, transfer execution and jurisdictional compliance are proven publicly; scoped compliance proofs for tax / customs / ESG auditors. Blocked near-term on bridges (cNIGHT→mNIGHT off pending governance; VIA live but unshielded) | Private state + ZK proof, selective disclosure | Idea — added 2026-11-28 from Kyle's brief; design/simulator track until bridges open |
+| 14 | **NightWard** — consent-gated healthcare & AI data marketplace: raw records and donor identity stay private and off-chain; dataset criteria, active consent, and licence payment are proven on-chain; only the licensed buyer receives the scoped subset; regulators audit consent proofs on demand | Selective disclosure, private state + ZK proof, consent proofs | Idea — added 2026-11-28 from Kyle's brief; furthest out (privacy-law weight is Kyle's call) |
 
 Support — all work in this repo carries both addresses:
 ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
