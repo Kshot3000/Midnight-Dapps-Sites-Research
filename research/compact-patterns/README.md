@@ -34,7 +34,7 @@ One markdown card per outline pattern row (sections A–E, `research/compact-pat
 
 Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 
-### ✅ Done (9 cards, all compile-gated 2026-11-28 UTC, offline --skip-zk)
+### ✅ Done (18 cards, all compile-gated 2026-11-28 UTC, offline --skip-zk)
 
 | ID | Card file | Domains | Gate line |
 |---|---|---|---|
@@ -45,10 +45,21 @@ Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 | B3 | `b3-domain-identity.md` | voting, credentials | `GATE b3-domain-identity exit=0 … 2026-11-28T04:46:48Z` |
 | B4 | `b4-salted-commitments.md` | voting, auctions | `GATE b4-salted-commitments exit=0 … 2026-11-28T04:46:49Z` |
 | B6 | `b6-nullifiers.md` | voting | `GATE b6-nullifiers exit=0 … 2026-11-28T05:26:32Z` (final comments) |
+| C1 | `c1-mint-unshielded.md` | auctions | `GATE c1-mint-unshielded exit=0 … 2026-11-28T06:17:23Z` |
+| C2 | `c2-send-unshielded.md` | auctions | `GATE c2-send-unshielded exit=0 … 2026-11-28T06:17:24Z` |
+| C3 | `c3-native-night.md` | auctions, escrow | `GATE c3-native-night exit=0 … 2026-11-28T06:17:25Z` |
+| C4 | `c4-balance-guards.md` | auctions | `GATE c4-balance-guards exit=0 … 2026-11-28T06:22:16Z` (2nd attempt; uncast uint sum) |
 | D3 | `d3-merkle-membership.md` | voting | `GATE d3-merkle-membership exit=0 … 2026-11-28T04:46:51Z` |
 | D7 | `d7-x25519-ballot.md` | voting | `GATE d7-x25519-ballot exit=0 … 2026-11-28T04:46:51Z` |
+| E1 | `e1-commit-reveal.md` | voting, auctions, credentials | `GATE e1-commit-reveal exit=0 … 2026-11-28T06:17:26Z` |
+| E3 | `e3-inproof-property.md` | auctions | `GATE e3-inproof-property exit=0 … 2026-11-28T06:17:27Z` |
+| E8 | `e8-settlement-deposit.md` | auctions | `GATE e8-settlement-deposit exit=0 … 2026-11-28T06:17:28Z` |
+| GAP-2 | `gap2-sealed-bid-fund.md` | auctions | **invented** · `GATE gap2-sealed-bid-fund exit=0 … 2026-11-28T06:22:18Z` (2nd attempt; `bidderKey` name collision) |
+| GAP-3 | `gap3-multi-round-outbid.md` | auctions | **invented** · `GATE gap3-multi-round-outbid exit=0 … 2026-11-28T06:17:29Z` |
 
-### ⬜ Queued (45 cards)
+**Auctions domain: 12/14 cards done** (C14 and E9 still queued below).
+
+### ⬜ Queued (36 cards)
 
 | ID | Card file (planned) | Domains | Status / notes |
 |---|---|---|---|
@@ -63,10 +74,6 @@ Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 | B7 | `b7-dapp-key-roles.md` | credentials | queued — `getDappPubKey` in 8/12 examples |
 | B8 | `b8-ownpublickey-antipattern.md` | credentials, escrow | queued — anti-pattern card; legitimate use snippet gated |
 | B9 | `b9-identity-private-behavior-public.md` | escrow | queued — roulette source (documented) |
-| C1 | `c1-mint-unshielded.md` | auctions | queued — token-transfers, silent-auction NFT |
-| C2 | `c2-send-unshielded.md` | auctions | queued — token-transfers, private-party entry fee |
-| C3 | `c3-native-night.md` | auctions, escrow | queued — private-party |
-| C4 | `c4-balance-guards.md` | auctions | queued — token-transfers |
 | C5 | `c5-receive-shielded.md` | escrow | queued — tip-jar, token-transfers |
 | C6 | `c6-fresh-nonce-coins.md` | escrow | queued — tip-jar |
 | C7 | `c7-insert-coin-pot.md` | escrow | queued — tip-jar |
@@ -84,18 +91,13 @@ Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 | D6 | `d6-hashing-suite.md` | credentials, escrow | queued — try gate on stdlib `keccak256/sha512/hashToCurve`; reference-only if the gate fails |
 | D8 | `d8-signature-binding.md` | credentials, escrow | queued — zk-loan |
 | D9 | `d9-emit-events.md` | all | **reference-only** — no example uses `emit` (gap note; stdlib lists events) |
-| E1 | `e1-commit-reveal.md` | voting, auctions, credentials | queued — silent-auction, private-party, voting |
 | E2 | `e2-allowlisted-participation.md` | voting | queued — voting composite |
-| E3 | `e3-inproof-property.md` | auctions | queued — private-bid |
 | E5 | `e5-attestation.md` | credentials | queued — zk-loan |
 | E6 | `e6-ownership-proof.md` | credentials | queued — leaderboard |
 | E7 | `e7-role-rotation.md` | credentials | queued — zk-loan `rotateAdmin` |
-| E8 | `e8-settlement-deposit.md` | auctions | queued — silent-auction |
 | E9 | `e9-deadline-gating.md` | voting, auctions, escrow | queued — voting windows + `block_time.compact` ref |
 | E10 | `e10-cross-contract-identity.md` | escrow | queued — chips; C2C protocol gap documented |
 | GAP-1 | `gap1-portable-credentials.md` | credentials | **invented (gap 1)** — issue → repeated private presentation → in-circuit revocation |
-| GAP-2 | `gap2-sealed-bid-fund.md` | auctions | **invented (gap 2)** — private bids + secret reserve + funded settlement |
-| GAP-3 | `gap3-multi-round-outbid.md` | auctions | **invented (gap 3)** — new private bid must beat private high bid |
 | GAP-4 | `gap4-timelock-escrow.md` | escrow | **invented (gap 4)** — timelocked/dispute-capable escrow, partial refunds |
 
 ## How to resume (for future ticks)
