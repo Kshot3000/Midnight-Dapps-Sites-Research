@@ -103,6 +103,7 @@ Columns: **Addr** = both tip addresses byte-exact, with no other `addr1…` stri
 | `research/android-prover-qa.md` (GROK-14) | pass | pass | pass | pass | pass | pass | pass | PASS |
 | `research/launch-assets.md` (GROK-15) | pass | pass | pass | pass | pass | pass | **fail**: post 1 (D1); note D10 | FAIL (D1; note D10) |
 | `research/in-app-prove-verification.md` (HERMES-7) | pass | pass | pass | pass: 9.0.2, v0.7.1 and ledger 1.0.2 all live-verified 2026-11-26 | n/a (no chain interaction; payload labelled devnet-captured) | pass (release URL live-verified) | pass: every timing labelled EMULATOR, no phone figures claimed | PASS |
+| `research/brief-2026-11-28-analysis.md` (CLAUDE-BRIEF-1) | pass | pass | pass | pass: pins named (0.36.1 / 5.0.1 / 9.0.2 / 4.1.0) match the verified matrix | n/a (analysis doc; testnet labelled where flows are described) | n/a (no links to verify beyond the repo itself) | pass: disclosure scoped to holder-mediated, no viewing-key or receipt-freeness overclaim | PASS |
 
 Totals: 28 surfaces audited: **16 PASS, 7 PASS (notes), 5 FAIL**. The five FAILs are the hub (D6, D7), `server-setup/README.md` (D2), the Android app screen `MainActivity.kt` (D3), `dust-registration.md` (D4, D5) and `launch-assets.md` (D1).
 
