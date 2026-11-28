@@ -34,11 +34,15 @@ One markdown card per outline pattern row (sections A–E, `research/compact-pat
 
 Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 
-### ✅ Done (18 cards, all compile-gated 2026-11-28 UTC, offline --skip-zk)
+### ✅ Done (24 cards, all compile-gated 2026-11-28 UTC, offline --skip-zk)
 
 | ID | Card file | Domains | Gate line |
 |---|---|---|---|
 | A2 | `a2-sealed-fields.md` | voting, auctions, escrow | `GATE a2-sealed-fields exit=0 toolchain=0.36.1 (7fa3a117c 2026-11-11) 2026-11-28T04:46:45Z` |
+| A1 | `a1-basic-fields.md` | voting, credentials | `GATE a1-basic-fields exit=0 … 2026-11-28T07:10:46Z` |
+| A4 | `a4-round-counter.md` | voting, escrow | `GATE a4-round-counter exit=0 … 2026-11-28T07:10:47Z` (canonical: writing.md lock example, docs) |
+| A7 | `a7-pure-circuits.md` | voting, credentials | `GATE a7-pure-circuits exit=0 … 2026-11-28T07:10:48Z` |
+| A8 | `a8-constructor-init.md` | all | `GATE a8-constructor-init exit=0 … 2026-11-28T07:10:48Z` |
 | A3 | `a3-state-machine.md` | voting, auctions | `GATE a3-state-machine exit=0 … 2026-11-28T04:46:46Z` |
 | A5 | `a5-collections.md` | voting, escrow | `GATE a5-collections exit=0 … 2026-11-28T04:49:40Z` (2nd attempt; 1st failed: missing stdlib import → `unbound identifier Counter`) |
 | B1 | `b1-disclose.md` | voting, credentials, escrow | `GATE b1-disclose exit=0 … 2026-11-28T04:46:48Z` + negative control `GATE b1-disclose-NEGATIVE exit=255 … 04:46:47Z` (enforcer error quoted in card) |
@@ -52,22 +56,20 @@ Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 | D3 | `d3-merkle-membership.md` | voting | `GATE d3-merkle-membership exit=0 … 2026-11-28T04:46:51Z` |
 | D7 | `d7-x25519-ballot.md` | voting | `GATE d7-x25519-ballot exit=0 … 2026-11-28T04:46:51Z` |
 | E1 | `e1-commit-reveal.md` | voting, auctions, credentials | `GATE e1-commit-reveal exit=0 … 2026-11-28T06:17:26Z` |
+| E2 | `e2-allowlisted-participation.md` | voting | `GATE e2-allowlisted-participation exit=0 … 2026-11-28T07:10:49Z` |
+| E9 | `e9-deadline-gating.md` | voting, auctions, escrow | `GATE e9-deadline-gating exit=0 … 2026-11-28T07:24:39Z` (2nd attempt; 1st failed: `blockTimeGte` needs the stdlib import) |
 | E3 | `e3-inproof-property.md` | auctions | `GATE e3-inproof-property exit=0 … 2026-11-28T06:17:27Z` |
 | E8 | `e8-settlement-deposit.md` | auctions | `GATE e8-settlement-deposit exit=0 … 2026-11-28T06:17:28Z` |
 | GAP-2 | `gap2-sealed-bid-fund.md` | auctions | **invented** · `GATE gap2-sealed-bid-fund exit=0 … 2026-11-28T06:22:18Z` (2nd attempt; `bidderKey` name collision) |
 | GAP-3 | `gap3-multi-round-outbid.md` | auctions | **invented** · `GATE gap3-multi-round-outbid exit=0 … 2026-11-28T06:17:29Z` |
 
-**Auctions domain: 12/14 cards done** (C14 and E9 still queued below).
+**Voting domain: complete** (16/16). **Auctions domain: 13/14 cards done** (C14 still queued below).
 
-### ⬜ Queued (36 cards)
+### ⬜ Queued (30 cards)
 
 | ID | Card file (planned) | Domains | Status / notes |
 |---|---|---|---|
-| A1 | `a1-basic-fields.md` | voting, credentials | queued — hello-world + calculator as canonical |
-| A4 | `a4-round-counter.md` | voting, escrow | queued — anti-linking `round: Counter` (writing.md lock example) |
 | A6 | `a6-struct-nominal.md` | credentials | queued — zk-loan |
-| A7 | `a7-pure-circuits.md` | voting, credentials | queued — tip-jar `ownerKey` et al. |
-| A8 | `a8-constructor-init.md` | all | queued — all 12 examples |
 | A9 | `a9-bounded-execution.md` | credentials, escrow | queued — zk-loan `changePin` (5 loans/tx) |
 | B2 | `b2-witness-callbacks.md` | credentials | queued — calculator, private-party, leaderboard |
 | B5 | `b5-transienthash.md` | credentials, escrow | queued — zk-loan anti-replay |
@@ -91,11 +93,9 @@ Status: ✅ = card written + gate exit 0 this session · ⬜ = queued.
 | D6 | `d6-hashing-suite.md` | credentials, escrow | queued — try gate on stdlib `keccak256/sha512/hashToCurve`; reference-only if the gate fails |
 | D8 | `d8-signature-binding.md` | credentials, escrow | queued — zk-loan |
 | D9 | `d9-emit-events.md` | all | **reference-only** — no example uses `emit` (gap note; stdlib lists events) |
-| E2 | `e2-allowlisted-participation.md` | voting | queued — voting composite |
 | E5 | `e5-attestation.md` | credentials | queued — zk-loan |
 | E6 | `e6-ownership-proof.md` | credentials | queued — leaderboard |
 | E7 | `e7-role-rotation.md` | credentials | queued — zk-loan `rotateAdmin` |
-| E9 | `e9-deadline-gating.md` | voting, auctions, escrow | queued — voting windows + `block_time.compact` ref |
 | E10 | `e10-cross-contract-identity.md` | escrow | queued — chips; C2C protocol gap documented |
 | GAP-1 | `gap1-portable-credentials.md` | credentials | **invented (gap 1)** — issue → repeated private presentation → in-circuit revocation |
 | GAP-4 | `gap4-timelock-escrow.md` | escrow | **invented (gap 4)** — timelocked/dispute-capable escrow, partial refunds |
