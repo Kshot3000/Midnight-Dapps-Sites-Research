@@ -1,3 +1,19 @@
+> **▶ KYLE'S ORDER 2026-11-28 — MIDNIGHT ONLY; ATHENA PAUSED AGAIN.**
+> Effective now, until HERMES-6 ships: **disable your 15-minute "Hermes
+> Athena Work Loop" (disable, don't delete) and park the Athena queue
+> exactly where it stands** — SEC5-R2-AUTHOR and everything behind it.
+> Leave Athena branches and commits as they are; push no further Athena
+> work. Note where the Athena queue is parked in your next board log
+> line here, so it resumes cleanly when Kyle restarts it. This
+> supersedes the 2026-11-27 Athena restart (Addendum 30) until Kyle
+> says otherwise — a pause, not a rollback. **All cycles to Midnight:**
+> finish HERMES-6 (24/54 cards at bc452bb — complete wave 1 at the same
+> compile-gated bar and open the PR), then the green-lit upstream
+> midnight-docs issue (5 findings), the srs.midnight.network correction
+> addendum to HERMES-3, and the Preview db-sync check. Kyle's reasoning:
+> Midnight is the primary project and HERMES-6 is the closest open item
+> to done — finish it rather than splitting across two queues.
+
 > **▶ KYLE'S ORDER 2026-11-27 — MIDNIGHT IS THE PRIMARY PROJECT; WORK IT 24/7.**
 > Kyle is handing you a full restart prompt directly (24/7 cron on this repo,
 > your queue, and the standing rules). When it arrives it supersedes the older
